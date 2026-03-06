@@ -1,0 +1,17 @@
+# RetroMCP ecosystem (decompiled MC, binaries, build output)
+mcp/
+
+# Internal context doc
+RETRONISM_CONTEXT.md
+
+# Temp/staging
+temp/
+temp_build/
+
+# Test artifacts (jars, compiled output, tmp)
+tests/data/
+tests/out/
+
+# Python
+__pycache__/
+*.pyc

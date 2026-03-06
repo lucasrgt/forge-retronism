@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(java -jar RetroMCP-Java-CLI.jar)",
+      "Bash(jar tf build/minecraft.zip)",
+      "Bash(bash test.sh)",
+      "Bash(grep -rl \"drawString\" /c/Users/lucas/RetroNism/temp/src/net/minecraft/src/Gui*.java)",
+      "Bash(cp -r test testing/data)",
+      "Bash(rm -rf test)",
+      "Bash(mv test-libs testing/libs)",
+      "Bash(mv test-out testing/out)",
+      "Bash(mv tests testing/src)",
+      "Bash(rm -f test/jartmp*.tmp test/minecraft_run.jar)",
+      "Bash(rm -rf test/tmp)",
+      "Bash(mkdir -p mcp)",
+      "Bash(mv minecraft minecraft_server libraries jars deps conf build RetroMCP-Java-CLI.jar options.cfg mcp/)",
+      "Bash(cp -r minecraft_server mcp/minecraft_server)",
+      "Bash(rm -rf minecraft_server)",
+      "Bash(cp -r libraries mcp/libraries)",
+      "Bash(rm -rf libraries)",
+      "Bash(bash scripts/test_unit.sh)"
+    ]
+  }
+}
