@@ -3,7 +3,7 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class RetroNism_TileGenerator extends TileEntity implements IInventory {
+public class RetroNism_TileGenerator extends TileEntity implements IInventory, RetroNism_ISideConfigurable {
 	private ItemStack[] generatorItems = new ItemStack[1]; // fuel slot only
 	public int burnTime = 0;
 	public int currentItemBurnTime = 0;
@@ -12,6 +12,22 @@ public class RetroNism_TileGenerator extends TileEntity implements IInventory {
 	private static final int ENERGY_PER_TICK = 32;
 	private static final int PUSH_RATE = 200;
 	public int lastOutput = 0;
+	private int[] sideConfig = new int[24];
+
+	{
+		for (int s = 0; s < 6; s++) {
+			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ENERGY, RetroNism_SideConfig.MODE_OUTPUT);
+			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ITEM, RetroNism_SideConfig.MODE_INPUT);
+		}
+	}
+
+	public int[] getSideConfig() { return sideConfig; }
+	public void setSideMode(int side, int type, int mode) {
+		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+	}
+	public boolean supportsType(int type) {
+		return type == RetroNism_SideConfig.TYPE_ENERGY || type == RetroNism_SideConfig.TYPE_ITEM;
+	}
 
 	public int getSizeInventory() {
 		return this.generatorItems.length;
@@ -104,11 +120,19 @@ public class RetroNism_TileGenerator extends TileEntity implements IInventory {
 		// Push energy to adjacent blocks
 		int totalPushed = 0;
 		if (storedEnergy > 0) {
-			int[][] dirs = {{-1,0,0},{1,0,0},{0,-1,0},{0,1,0},{0,0,-1},{0,0,1}};
-			for (int[] d : dirs) {
+			int[][] dirs = {{0,-1,0},{0,1,0},{0,0,-1},{0,0,1},{-1,0,0},{1,0,0}};
+			for (int side = 0; side < 6; side++) {
 				if (storedEnergy <= 0) break;
+				int myMode = RetroNism_SideConfig.get(sideConfig, side, RetroNism_SideConfig.TYPE_ENERGY);
+				if (!RetroNism_SideConfig.canOutput(myMode)) continue;
+				int[] d = dirs[side];
 				TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
 				if (te instanceof RetroNism_IEnergyReceiver) {
+					int oppSide = RetroNism_SideConfig.oppositeSide(side);
+					if (te instanceof RetroNism_ISideConfigurable) {
+						int neighborMode = RetroNism_SideConfig.get(((RetroNism_ISideConfigurable) te).getSideConfig(), oppSide, RetroNism_SideConfig.TYPE_ENERGY);
+						if (!RetroNism_SideConfig.canInput(neighborMode)) continue;
+					}
 					RetroNism_IEnergyReceiver recv = (RetroNism_IEnergyReceiver) te;
 					int toSend = Math.min(PUSH_RATE, storedEnergy);
 					int accepted = recv.receiveEnergy(toSend);
@@ -157,6 +181,9 @@ public class RetroNism_TileGenerator extends TileEntity implements IInventory {
 		this.burnTime = nbt.getShort("BurnTime");
 		this.currentItemBurnTime = nbt.getShort("CurrentBurn");
 		this.storedEnergy = nbt.getInteger("Energy");
+		if (nbt.hasKey("SC0")) {
+			for (int i = 0; i < 24; i++) this.sideConfig[i] = nbt.getInteger("SC" + i);
+		}
 	}
 
 	public void writeToNBT(NBTTagCompound nbt) {
@@ -164,6 +191,7 @@ public class RetroNism_TileGenerator extends TileEntity implements IInventory {
 		nbt.setShort("BurnTime", (short) this.burnTime);
 		nbt.setShort("CurrentBurn", (short) this.currentItemBurnTime);
 		nbt.setInteger("Energy", this.storedEnergy);
+		for (int i = 0; i < 24; i++) nbt.setInteger("SC" + i, this.sideConfig[i]);
 		NBTTagList list = new NBTTagList();
 		for (int i = 0; i < this.generatorItems.length; ++i) {
 			if (this.generatorItems[i] != null) {

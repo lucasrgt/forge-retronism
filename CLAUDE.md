@@ -20,6 +20,7 @@
 - Rewrites `package retronism.xxx;` → `package net.minecraft.src;`
 - Removes `import retronism.*` and `import net.minecraft.src.*` (redundant after flatten)
 - Preserves external imports (org.lwjgl, java.util, etc.)
+- Also copies `src/retronism/assets/` → `temp/merged/` (textures for jar injection)
 
 ## Unit Tests
 - Test source: `testing/src/net/minecraft/src/*Test.java` (never goes into build)
@@ -37,6 +38,7 @@
   - `item/` — Item subclasses
   - `recipe/` — Recipe registries
   - `slot/` — Custom Slot subclasses
+  - `assets/gui/` — GUI textures (*.png), copied to temp/merged/ by transpiler
   - `mod_RetroNism.java` — main mod class (package root)
 - **Transpiled output (don't edit):** `mcp/minecraft/src/net/minecraft/src/`
 - **MCP ecosystem:** `mcp/` (minecraft, minecraft_server, libraries, jars, deps, conf, build, RetroMCP-Java-CLI.jar, options.cfg)
@@ -46,7 +48,7 @@
 - Block IDs start at 200, Item IDs start at 500
 
 ## Agents (on-demand context loading)
-- When generating GUI textures, or the user mentions GUI/textura, READ `.claude/agents/gui_builder.md` FIRST — it has the full API, palette, coordinates and workflow
+- When generating GUI textures, or the user mentions GUI/textura, READ `ai/agents/gui_builder.md` FIRST — it has the full API, palette, coordinates and workflow
 - Always use `tools/gui_builder.py` — never hand-draw pixels
 
 ## Language

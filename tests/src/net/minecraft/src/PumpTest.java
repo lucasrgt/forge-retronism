@@ -67,4 +67,11 @@ public class PumpTest {
 	public void testMaxEnergy() {
 		assertEquals(16000, pump.getMaxEnergy());
 	}
+
+	@Test
+	public void testOnlyPumpsSourceWater() {
+		assertTrue(RetroNism_TilePump.isPumpableWaterBlock(9));  // still water
+		assertFalse(RetroNism_TilePump.isPumpableWaterBlock(8)); // flowing water
+		assertFalse(RetroNism_TilePump.isPumpableWaterBlock(0)); // air
+	}
 }

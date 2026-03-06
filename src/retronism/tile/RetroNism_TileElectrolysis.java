@@ -3,12 +3,29 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_IEnergyReceiver, RetroNism_IFluidHandler, RetroNism_IGasHandler {
+public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_IEnergyReceiver, RetroNism_IFluidHandler, RetroNism_IGasHandler, RetroNism_ISideConfigurable {
 	public int storedEnergy = 0;
 	public int waterStored = 0;
 	public int hydrogenStored = 0;
 	public int oxygenStored = 0;
 	public int processTime = 0;
+	private int[] sideConfig = new int[24];
+
+	{
+		for (int s = 0; s < 6; s++) {
+			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ENERGY, RetroNism_SideConfig.MODE_INPUT);
+			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_FLUID, RetroNism_SideConfig.MODE_INPUT);
+			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_GAS, RetroNism_SideConfig.MODE_OUTPUT);
+		}
+	}
+
+	public int[] getSideConfig() { return sideConfig; }
+	public void setSideMode(int side, int type, int mode) {
+		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+	}
+	public boolean supportsType(int type) {
+		return type == RetroNism_SideConfig.TYPE_ENERGY || type == RetroNism_SideConfig.TYPE_FLUID || type == RetroNism_SideConfig.TYPE_GAS;
+	}
 
 	public static final int MAX_ENERGY = 32000;
 	public static final int MAX_WATER = 8000;
@@ -122,23 +139,27 @@ public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_
 	}
 
 	private void pushGasToNeighbors() {
-		int[][] dirs = {{-1,0,0},{1,0,0},{0,-1,0},{0,1,0},{0,0,-1},{0,0,1}};
+		int[][] dirs = {{0,-1,0},{0,1,0},{0,0,-1},{0,0,1},{-1,0,0},{1,0,0}};
 
-		for (int[] d : dirs) {
+		for (int side = 0; side < 6; side++) {
+			int myMode = RetroNism_SideConfig.get(sideConfig, side, RetroNism_SideConfig.TYPE_GAS);
+			if (!RetroNism_SideConfig.canOutput(myMode)) continue;
+			int[] d = dirs[side];
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
 			if (te instanceof RetroNism_IGasHandler && te != this) {
+				int oppSide = RetroNism_SideConfig.oppositeSide(side);
+				if (te instanceof RetroNism_ISideConfigurable) {
+					int neighborMode = RetroNism_SideConfig.get(((RetroNism_ISideConfigurable) te).getSideConfig(), oppSide, RetroNism_SideConfig.TYPE_GAS);
+					if (!RetroNism_SideConfig.canInput(neighborMode)) continue;
+				}
 				RetroNism_IGasHandler handler = (RetroNism_IGasHandler) te;
-				// Try pushing hydrogen
 				if (hydrogenStored > 0) {
 					int toSend = Math.min(GAS_PUSH_RATE, hydrogenStored);
-					int accepted = handler.receiveGas(RetroNism_GasType.HYDROGEN, toSend);
-					hydrogenStored -= accepted;
+					hydrogenStored -= handler.receiveGas(RetroNism_GasType.HYDROGEN, toSend);
 				}
-				// Try pushing oxygen
 				if (oxygenStored > 0) {
 					int toSend = Math.min(GAS_PUSH_RATE, oxygenStored);
-					int accepted = handler.receiveGas(RetroNism_GasType.OXYGEN, toSend);
-					oxygenStored -= accepted;
+					oxygenStored -= handler.receiveGas(RetroNism_GasType.OXYGEN, toSend);
 				}
 			}
 		}
@@ -156,6 +177,9 @@ public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_
 		hydrogenStored = nbt.getInteger("HydrogenAmount");
 		oxygenStored = nbt.getInteger("OxygenAmount");
 		processTime = nbt.getShort("ProcessTime");
+		if (nbt.hasKey("SC0")) {
+			for (int i = 0; i < 24; i++) this.sideConfig[i] = nbt.getInteger("SC" + i);
+		}
 	}
 
 	public void writeToNBT(NBTTagCompound nbt) {
@@ -165,5 +189,6 @@ public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_
 		nbt.setInteger("HydrogenAmount", hydrogenStored);
 		nbt.setInteger("OxygenAmount", oxygenStored);
 		nbt.setShort("ProcessTime", (short) processTime);
+		for (int i = 0; i < 24; i++) nbt.setInteger("SC" + i, this.sideConfig[i]);
 	}
 }

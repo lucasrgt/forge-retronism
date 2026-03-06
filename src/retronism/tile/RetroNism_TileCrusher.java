@@ -4,12 +4,28 @@ import net.minecraft.src.*;
 import retronism.api.*;
 import retronism.recipe.*;
 
-public class RetroNism_TileCrusher extends TileEntity implements IInventory, RetroNism_IEnergyReceiver {
+public class RetroNism_TileCrusher extends TileEntity implements IInventory, RetroNism_IEnergyReceiver, RetroNism_ISideConfigurable {
 	private ItemStack[] crusherItemStacks = new ItemStack[2]; // 0=input, 1=output
 	public int crusherCookTime = 0;
 	public int storedEnergy = 0;
 	public static final int MAX_ENERGY = 32000;
 	private static final int ENERGY_PER_TICK = 8;
+	private int[] sideConfig = new int[24];
+
+	{
+		for (int s = 0; s < 6; s++) {
+			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ENERGY, RetroNism_SideConfig.MODE_INPUT);
+			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ITEM, RetroNism_SideConfig.MODE_INPUT_OUTPUT);
+		}
+	}
+
+	public int[] getSideConfig() { return sideConfig; }
+	public void setSideMode(int side, int type, int mode) {
+		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+	}
+	public boolean supportsType(int type) {
+		return type == RetroNism_SideConfig.TYPE_ENERGY || type == RetroNism_SideConfig.TYPE_ITEM;
+	}
 
 	public int receiveEnergy(int amount) {
 		int space = MAX_ENERGY - storedEnergy;
@@ -146,12 +162,16 @@ public class RetroNism_TileCrusher extends TileEntity implements IInventory, Ret
 		}
 		this.crusherCookTime = nbt.getShort("CookTime");
 		this.storedEnergy = nbt.getInteger("Energy");
+		if (nbt.hasKey("SC0")) {
+			for (int i = 0; i < 24; i++) this.sideConfig[i] = nbt.getInteger("SC" + i);
+		}
 	}
 
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
 		nbt.setShort("CookTime", (short) this.crusherCookTime);
 		nbt.setInteger("Energy", this.storedEnergy);
+		for (int i = 0; i < 24; i++) nbt.setInteger("SC" + i, this.sideConfig[i]);
 		NBTTagList list = new NBTTagList();
 		for (int i = 0; i < this.crusherItemStacks.length; ++i) {
 			if (this.crusherItemStacks[i] != null) {

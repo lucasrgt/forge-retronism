@@ -9,10 +9,12 @@ public class RetroNism_GuiCrusher extends GuiContainer {
 	private RetroNism_TileCrusher crusherInventory;
 	private int mouseX;
 	private int mouseY;
+	private RetroNism_GuiSideConfigHelper sideConfigHelper;
 
 	public RetroNism_GuiCrusher(InventoryPlayer playerInv, RetroNism_TileCrusher crusher) {
 		super(new RetroNism_ContainerCrusher(playerInv, crusher));
 		this.crusherInventory = crusher;
+		this.sideConfigHelper = new RetroNism_GuiSideConfigHelper(crusher, mod_RetroNism.crusherBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {
@@ -38,6 +40,20 @@ public class RetroNism_GuiCrusher extends GuiContainer {
 		this.mouseX = mouseX;
 		this.mouseY = mouseY;
 		super.drawScreen(mouseX, mouseY, partialTick);
+		int guiLeft = (this.width - this.xSize) / 2;
+		int guiTop = (this.height - this.ySize) / 2;
+		this.sideConfigHelper.drawTabs(guiLeft, guiTop, this.fontRenderer, this.mc.renderEngine);
+		if (this.sideConfigHelper.isConfigMode()) {
+			this.sideConfigHelper.drawConfigOverlay(guiLeft, guiTop, this.xSize, this.ySize, this.fontRenderer, mouseX, mouseY, this.mc.renderEngine);
+		}
+	}
+
+	protected void mouseClicked(int mouseX, int mouseY, int button) {
+		int guiLeft = (this.width - this.xSize) / 2;
+		int guiTop = (this.height - this.ySize) / 2;
+		if (this.sideConfigHelper.handleClick(mouseX, mouseY, guiLeft, guiTop, this.xSize, this.ySize, this.fontRenderer)) return;
+		if (this.sideConfigHelper.isConfigMode()) return;
+		super.mouseClicked(mouseX, mouseY, button);
 	}
 
 	protected void drawGuiContainerBackgroundLayer(float partialTick) {

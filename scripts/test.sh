@@ -8,7 +8,7 @@ bash scripts/transpile.sh
 
 echo "=== Building ==="
 cd "$BASE/mcp"
-echo "build" | java -jar RetroMCP-Java-CLI.jar 2>&1 | tail -3
+echo "build" | java -jar RetroMCP-Java-CLI.jar
 cd "$BASE"
 
 echo "=== Preparing test jar ==="
@@ -24,7 +24,7 @@ echo "Injected mod classes"
 
 # Inject custom textures into run jar
 cd "$BASE/temp/merged"
-jar uf "$BASE/tests/data/minecraft_run.jar" gui/retronism_*.png
+jar uf "$BASE/tests/data/minecraft_run.jar" gui/retronism_*.png anim/retronism_*.png
 echo "Injected custom textures"
 cd "$BASE"
 rm -rf "$TMP"

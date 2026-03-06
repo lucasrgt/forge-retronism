@@ -1,6 +1,7 @@
 package retronism.block;
 
 import net.minecraft.src.*;
+import retronism.*;
 import retronism.api.*;
 import retronism.tile.*;
 import retronism.gui.*;

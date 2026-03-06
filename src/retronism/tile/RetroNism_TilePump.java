@@ -3,7 +3,7 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyReceiver, RetroNism_IFluidHandler, IInventory {
+public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyReceiver, RetroNism_IFluidHandler, IInventory, RetroNism_ISideConfigurable {
 	private ItemStack[] pumpItems = new ItemStack[1]; // bucket slot
 	public int storedEnergy = 0;
 	public int fluidAmount = 0;
@@ -13,6 +13,24 @@ public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyR
 	private static final int FLUID_PER_TICK = 50;
 	private static final int PUSH_RATE = 200;
 	private static final int BUCKET_AMOUNT = 1000;
+	private static final int WATER_SOURCE_BLOCK_ID = 9; // Beta 1.7.3: still water
+	private int[] sideConfig = new int[24];
+
+	{
+		for (int s = 0; s < 6; s++) {
+			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ENERGY, RetroNism_SideConfig.MODE_INPUT);
+			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_FLUID, RetroNism_SideConfig.MODE_OUTPUT);
+			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ITEM, RetroNism_SideConfig.MODE_INPUT_OUTPUT);
+		}
+	}
+
+	public int[] getSideConfig() { return sideConfig; }
+	public void setSideMode(int side, int type, int mode) {
+		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+	}
+	public boolean supportsType(int type) {
+		return type == RetroNism_SideConfig.TYPE_ENERGY || type == RetroNism_SideConfig.TYPE_FLUID || type == RetroNism_SideConfig.TYPE_ITEM;
+	}
 
 	public int receiveEnergy(int amount) {
 		int space = MAX_ENERGY - storedEnergy;
@@ -47,6 +65,10 @@ public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyR
 		return fluidAmount * scale / MAX_FLUID;
 	}
 
+	public static boolean isPumpableWaterBlock(int blockID) {
+		return blockID == WATER_SOURCE_BLOCK_ID;
+	}
+
 	public void updateEntity() {
 		if (this.worldObj.multiplayerWorld) return;
 
@@ -54,7 +76,7 @@ public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyR
 
 		// Pump water from below
 		int belowID = worldObj.getBlockId(xCoord, yCoord - 1, zCoord);
-		boolean aboveWater = belowID == Block.waterStill.blockID || belowID == Block.waterMoving.blockID;
+		boolean aboveWater = isPumpableWaterBlock(belowID);
 
 		if (aboveWater && storedEnergy >= ENERGY_PER_TICK && fluidAmount + FLUID_PER_TICK <= MAX_FLUID) {
 			storedEnergy -= ENERGY_PER_TICK;
@@ -81,12 +103,20 @@ public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyR
 	}
 
 	private void pushFluidToNeighbors() {
-		int[][] dirs = {{-1,0,0},{1,0,0},{0,-1,0},{0,1,0},{0,0,-1},{0,0,1}};
+		int[][] dirs = {{0,-1,0},{0,1,0},{0,0,-1},{0,0,1},{-1,0,0},{1,0,0}};
 
-		for (int[] d : dirs) {
+		for (int side = 0; side < 6; side++) {
 			if (fluidAmount <= 0) break;
+			int myMode = RetroNism_SideConfig.get(sideConfig, side, RetroNism_SideConfig.TYPE_FLUID);
+			if (!RetroNism_SideConfig.canOutput(myMode)) continue;
+			int[] d = dirs[side];
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
 			if (te instanceof RetroNism_IFluidHandler && te != this) {
+				int oppSide = RetroNism_SideConfig.oppositeSide(side);
+				if (te instanceof RetroNism_ISideConfigurable) {
+					int neighborMode = RetroNism_SideConfig.get(((RetroNism_ISideConfigurable) te).getSideConfig(), oppSide, RetroNism_SideConfig.TYPE_FLUID);
+					if (!RetroNism_SideConfig.canInput(neighborMode)) continue;
+				}
 				RetroNism_IFluidHandler handler = (RetroNism_IFluidHandler) te;
 				int toSend = Math.min(PUSH_RATE, fluidAmount);
 				int accepted = handler.receiveFluid(RetroNism_FluidType.WATER, toSend);
@@ -136,6 +166,9 @@ public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyR
 		super.readFromNBT(nbt);
 		storedEnergy = nbt.getInteger("Energy");
 		fluidAmount = nbt.getInteger("FluidAmount");
+		if (nbt.hasKey("SC0")) {
+			for (int i = 0; i < 24; i++) this.sideConfig[i] = nbt.getInteger("SC" + i);
+		}
 		NBTTagList list = nbt.getTagList("Items");
 		this.pumpItems = new ItemStack[this.getSizeInventory()];
 		for (int i = 0; i < list.tagCount(); ++i) {
@@ -151,6 +184,7 @@ public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyR
 		super.writeToNBT(nbt);
 		nbt.setInteger("Energy", storedEnergy);
 		nbt.setInteger("FluidAmount", fluidAmount);
+		for (int i = 0; i < 24; i++) nbt.setInteger("SC" + i, this.sideConfig[i]);
 		NBTTagList list = new NBTTagList();
 		for (int i = 0; i < this.pumpItems.length; ++i) {
 			if (this.pumpItems[i] != null) {

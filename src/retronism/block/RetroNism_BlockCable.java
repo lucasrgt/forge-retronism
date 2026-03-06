@@ -40,7 +40,7 @@ public class RetroNism_BlockCable extends BlockContainer {
 
 	public boolean canConnectTo(IBlockAccess world, int x, int y, int z) {
 		int id = world.getBlockId(x, y, z);
-		if (id == this.blockID) return true;
+		if (id == this.blockID || id == mod_RetroNism.megaPipeBlock.blockID) return true;
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		return te instanceof RetroNism_IEnergyReceiver || te instanceof RetroNism_TileGenerator;
 	}

@@ -9,10 +9,12 @@ public class RetroNism_GuiGenerator extends GuiContainer {
 	private RetroNism_TileGenerator generator;
 	private int mouseX;
 	private int mouseY;
+	private RetroNism_GuiSideConfigHelper sideConfigHelper;
 
 	public RetroNism_GuiGenerator(InventoryPlayer playerInv, RetroNism_TileGenerator generator) {
 		super(new RetroNism_ContainerGenerator(playerInv, generator));
 		this.generator = generator;
+		this.sideConfigHelper = new RetroNism_GuiSideConfigHelper(generator, mod_RetroNism.generatorBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {
@@ -50,6 +52,20 @@ public class RetroNism_GuiGenerator extends GuiContainer {
 		this.mouseX = mouseX;
 		this.mouseY = mouseY;
 		super.drawScreen(mouseX, mouseY, partialTick);
+		int guiLeft = (this.width - this.xSize) / 2;
+		int guiTop = (this.height - this.ySize) / 2;
+		this.sideConfigHelper.drawTabs(guiLeft, guiTop, this.fontRenderer, this.mc.renderEngine);
+		if (this.sideConfigHelper.isConfigMode()) {
+			this.sideConfigHelper.drawConfigOverlay(guiLeft, guiTop, this.xSize, this.ySize, this.fontRenderer, mouseX, mouseY, this.mc.renderEngine);
+		}
+	}
+
+	protected void mouseClicked(int mouseX, int mouseY, int button) {
+		int guiLeft = (this.width - this.xSize) / 2;
+		int guiTop = (this.height - this.ySize) / 2;
+		if (this.sideConfigHelper.handleClick(mouseX, mouseY, guiLeft, guiTop, this.xSize, this.ySize, this.fontRenderer)) return;
+		if (this.sideConfigHelper.isConfigMode()) return;
+		super.mouseClicked(mouseX, mouseY, button);
 	}
 
 	protected void drawGuiContainerBackgroundLayer(float partialTick) {

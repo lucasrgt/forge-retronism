@@ -34,13 +34,17 @@ public class RetroNism_BlockFluidPipe extends BlockContainer {
 		return 1;
 	}
 
+	public int getBlockTextureFromSide(int side) {
+		return Block.blockSteel.blockIndexInTexture;
+	}
+
 	public int idDropped(int metadata, Random random) {
 		return this.blockID;
 	}
 
 	public boolean canConnectTo(IBlockAccess world, int x, int y, int z) {
 		int id = world.getBlockId(x, y, z);
-		if (id == this.blockID) return true;
+		if (id == this.blockID || id == mod_RetroNism.megaPipeBlock.blockID) return true;
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		return te instanceof RetroNism_IFluidHandler;
 	}

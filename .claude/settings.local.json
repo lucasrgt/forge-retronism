@@ -18,7 +18,15 @@
       "Bash(rm -rf minecraft_server)",
       "Bash(cp -r libraries mcp/libraries)",
       "Bash(rm -rf libraries)",
-      "Bash(bash scripts/test_unit.sh)"
+      "Bash(bash scripts/test_unit.sh)",
+      "Bash(echo \"$BASE\")",
+      "Bash(JUNIT=\"c:/Users/lucas/RetroNism/tests/libs/junit-4.13.2.jar\")",
+      "Read(//c/Users/lucas/RetroNism/**)",
+      "Bash(taskkill //F //IM java.exe)",
+      "Bash(rm -f c:/Users/lucas/RetroNism/tests/data/minecraft_run.jar)",
+      "Bash(bash scripts/test.sh)",
+      "Bash(python -c \":*)",
+      "WebSearch"
     ]
   }
 }

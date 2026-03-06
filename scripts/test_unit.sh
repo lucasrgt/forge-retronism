@@ -8,7 +8,7 @@ bash scripts/transpile.sh
 
 echo "=== Recompiling ==="
 cd "$BASE/mcp"
-echo "recompile" | java -jar RetroMCP-Java-CLI.jar 2>&1 | tail -3
+echo "recompile" | java -jar RetroMCP-Java-CLI.jar
 cd "$BASE"
 
 JUNIT="$BASE/tests/libs/junit-4.13.2.jar"
@@ -19,7 +19,7 @@ TEST_OUT="$BASE/tests/out"
 
 # Ensure mod is compiled in bin/
 if [ ! -f "$BIN/net/minecraft/src/RetroNism_TileFluidPipe.class" ]; then
-    echo "ERROR: Mod classes not found in bin/. Run 'echo recompile | java -jar RetroMCP-Java-CLI.jar' first."
+    echo "ERROR: Mod classes not found in bin/. Run recompile first."
     exit 1
 fi
 
@@ -37,8 +37,12 @@ echo "=== Running tests ==="
 java -cp "$TEST_OUT;$BIN;$JUNIT;$HAMCREST" \
     org.junit.runner.JUnitCore \
     net.minecraft.src.FluidTypeTest \
+    net.minecraft.src.FluidTankTest \
     net.minecraft.src.GasTypeTest \
+    net.minecraft.src.GasTankTest \
     net.minecraft.src.FluidPipeTest \
     net.minecraft.src.GasPipeTest \
     net.minecraft.src.ElectrolysisTest \
-    net.minecraft.src.PumpTest
+    net.minecraft.src.PumpTest \
+    net.minecraft.src.PumpSlotTest \
+    net.minecraft.src.SideConfigTest

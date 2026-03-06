@@ -1,5 +1,5 @@
 #!/bin/bash
-# Transpiles organized src/retronism/ → flat mcp/minecraft/src/net/minecraft/src/
+# Transpiles organized src/retronism/ -> flat mcp/minecraft/src/net/minecraft/src/
 # Rewrites packages and removes internal imports so RetroMCP can compile
 set -e
 BASE="c:/Users/lucas/RetroNism"
@@ -10,7 +10,6 @@ DEST="$BASE/mcp/minecraft/src/net/minecraft/src"
 find "$DEST" -maxdepth 1 -name "RetroNism_*.java" -delete 2>/dev/null || true
 find "$DEST" -maxdepth 1 -name "mod_RetroNism.java" -delete 2>/dev/null || true
 
-count=0
 find "$SRC" -name "*.java" | while read -r file; do
     filename=$(basename "$file")
     sed \
@@ -18,7 +17,13 @@ find "$SRC" -name "*.java" | while read -r file; do
         -e '/^import retronism\./d' \
         -e '/^import net\.minecraft\.src\.\*;/d' \
         "$file" > "$DEST/$filename"
-    count=$((count + 1))
 done
 
 echo "Transpiled $(find "$SRC" -name '*.java' | wc -l) files to $DEST"
+
+# Copy assets (textures) to temp/merged for jar injection
+ASSETS="$SRC/assets"
+if [ -d "$ASSETS" ]; then
+    cp -r "$ASSETS"/* "$BASE/temp/merged/"
+    echo "Copied assets to temp/merged/"
+fi

@@ -1,6 +1,7 @@
 package retronism.block;
 
 import net.minecraft.src.*;
+import retronism.*;
 import retronism.api.*;
 import retronism.tile.*;
 import retronism.gui.*;
@@ -24,9 +25,7 @@ public class RetroNism_BlockCrusher extends BlockContainer {
 	}
 
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {
-		if (world.multiplayerWorld) {
-			return true;
-		}
+		if (world.multiplayerWorld) return true;
 		RetroNism_TileCrusher tileEntity = (RetroNism_TileCrusher) world.getBlockTileEntity(x, y, z);
 		ModLoader.OpenGUI(player, new RetroNism_GuiCrusher(player.inventory, tileEntity));
 		return true;

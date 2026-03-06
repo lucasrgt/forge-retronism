@@ -3,6 +3,7 @@ mcp/
 
 # Internal context doc
 RETRONISM_CONTEXT.md
+.claude/
 
 # Temp/staging
 temp/
