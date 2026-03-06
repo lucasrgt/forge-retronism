@@ -5,16 +5,16 @@ import retronism.tile.*;
 import retronism.container.*;
 import org.lwjgl.opengl.GL11;
 
-public class RetroNism_GuiGenerator extends GuiContainer {
-	private RetroNism_TileGenerator generator;
+public class Retronism_GuiGenerator extends GuiContainer {
+	private Retronism_TileGenerator generator;
 	private int mouseX;
 	private int mouseY;
-	private RetroNism_GuiSideConfigHelper sideConfigHelper;
+	private Retronism_GuiSideConfigHelper sideConfigHelper;
 
-	public RetroNism_GuiGenerator(InventoryPlayer playerInv, RetroNism_TileGenerator generator) {
-		super(new RetroNism_ContainerGenerator(playerInv, generator));
+	public Retronism_GuiGenerator(InventoryPlayer playerInv, Retronism_TileGenerator generator) {
+		super(new Retronism_ContainerGenerator(playerInv, generator));
 		this.generator = generator;
-		this.sideConfigHelper = new RetroNism_GuiSideConfigHelper(generator, mod_RetroNism.generatorBlock.blockID);
+		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(generator, mod_Retronism.generatorBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {
@@ -28,7 +28,7 @@ public class RetroNism_GuiGenerator extends GuiContainer {
 		int relMouseY = this.mouseY - guiTop;
 		// Energy bar outer area in GUI coords
 		if (relMouseX >= 161 && relMouseX < 169 && relMouseY >= 16 && relMouseY < 70) {
-			String line1 = "Energy: " + this.generator.storedEnergy + " / " + RetroNism_TileGenerator.MAX_ENERGY + " RN";
+			String line1 = "Energy: " + this.generator.storedEnergy + " / " + Retronism_TileGenerator.MAX_ENERGY + " RN";
 			String line2 = this.generator.isBurning() ? "Generating: 32 RN/t" : null;
 			String line3 = this.generator.lastOutput > 0 ? "Output: " + this.generator.lastOutput + " RN/t" : null;
 

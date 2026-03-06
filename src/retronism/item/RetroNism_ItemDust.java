@@ -2,9 +2,9 @@ package retronism.item;
 
 import net.minecraft.src.*;
 
-public class RetroNism_ItemDust extends Item {
+public class Retronism_ItemDust extends Item {
 
-	public RetroNism_ItemDust(int id) {
+	public Retronism_ItemDust(int id) {
 		super(id);
 		this.maxStackSize = 64;
 	}

@@ -5,8 +5,8 @@ import retronism.api.*;
 import retronism.tile.*;
 import org.lwjgl.opengl.GL11;
 
-public class RetroNism_GuiMegaPipeConfig extends GuiScreen {
-	private RetroNism_TileMegaPipe tile;
+public class Retronism_GuiMegaPipeConfig extends GuiScreen {
+	private Retronism_TileMegaPipe tile;
 	private EntityPlayer player;
 
 	private static final int GUI_WIDTH = 176;
@@ -32,7 +32,7 @@ public class RetroNism_GuiMegaPipeConfig extends GuiScreen {
 	private static final String[] SIDE_LABELS = {"Bottom", "Top", "North", "South", "West", "East"};
 	private static final String[] TYPE_LABELS = {"E", "F", "G", "I"};
 
-	public RetroNism_GuiMegaPipeConfig(EntityPlayer player, RetroNism_TileMegaPipe tile) {
+	public Retronism_GuiMegaPipeConfig(EntityPlayer player, Retronism_TileMegaPipe tile) {
 		this.player = player;
 		this.tile = tile;
 	}
@@ -72,8 +72,8 @@ public class RetroNism_GuiMegaPipeConfig extends GuiScreen {
 			for (int type = 0; type < 4; type++) {
 				int cx = fx + 4 + (type % 2) * (CELL_SIZE + 2);
 				int cy = fy + 14 + (type / 2) * (CELL_SIZE + 2);
-				int mode = RetroNism_SideConfig.get(config, side, type);
-				int color = RetroNism_SideConfig.getColor(type, mode);
+				int mode = Retronism_SideConfig.get(config, side, type);
+				int color = Retronism_SideConfig.getColor(type, mode);
 
 				// Cell background (color)
 				drawRect(cx, cy, cx + CELL_SIZE, cy + CELL_SIZE, 0xFF000000);
@@ -97,9 +97,9 @@ public class RetroNism_GuiMegaPipeConfig extends GuiScreen {
 				int cx = fx + 4 + (type % 2) * (CELL_SIZE + 2);
 				int cy = fy + 14 + (type / 2) * (CELL_SIZE + 2);
 				if (mouseX >= cx && mouseX < cx + CELL_SIZE && mouseY >= cy && mouseY < cy + CELL_SIZE) {
-					int mode = RetroNism_SideConfig.get(config, side, type);
-					String tip = SIDE_LABELS[side] + " " + RetroNism_SideConfig.getTypeName(type)
-						+ ": " + RetroNism_SideConfig.getModeName(mode);
+					int mode = Retronism_SideConfig.get(config, side, type);
+					String tip = SIDE_LABELS[side] + " " + Retronism_SideConfig.getTypeName(type)
+						+ ": " + Retronism_SideConfig.getModeName(mode);
 					int tw = this.fontRenderer.getStringWidth(tip);
 					int tx = mouseX + 8;
 					int ty = mouseY - 12;
@@ -127,8 +127,8 @@ public class RetroNism_GuiMegaPipeConfig extends GuiScreen {
 				int cy = fy + 14 + (type / 2) * (CELL_SIZE + 2);
 				if (mouseX >= cx && mouseX < cx + CELL_SIZE && mouseY >= cy && mouseY < cy + CELL_SIZE) {
 					int[] config = tile.getSideConfig();
-					int oldMode = RetroNism_SideConfig.get(config, side, type);
-					int newMode = RetroNism_SideConfig.cycleMode(oldMode);
+					int oldMode = Retronism_SideConfig.get(config, side, type);
+					int newMode = Retronism_SideConfig.cycleMode(oldMode);
 					tile.setSideMode(side, type, newMode);
 					tile.worldObj.markBlockNeedsUpdate(tile.xCoord, tile.yCoord, tile.zCoord);
 					return;

@@ -3,7 +3,7 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class RetroNism_TileGenerator extends TileEntity implements IInventory, RetroNism_ISideConfigurable {
+public class Retronism_TileGenerator extends TileEntity implements IInventory, Retronism_ISideConfigurable {
 	private ItemStack[] generatorItems = new ItemStack[1]; // fuel slot only
 	public int burnTime = 0;
 	public int currentItemBurnTime = 0;
@@ -16,17 +16,17 @@ public class RetroNism_TileGenerator extends TileEntity implements IInventory, R
 
 	{
 		for (int s = 0; s < 6; s++) {
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ENERGY, RetroNism_SideConfig.MODE_OUTPUT);
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ITEM, RetroNism_SideConfig.MODE_INPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ENERGY, Retronism_SideConfig.MODE_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ITEM, Retronism_SideConfig.MODE_INPUT);
 		}
 	}
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
 	}
 	public boolean supportsType(int type) {
-		return type == RetroNism_SideConfig.TYPE_ENERGY || type == RetroNism_SideConfig.TYPE_ITEM;
+		return type == Retronism_SideConfig.TYPE_ENERGY || type == Retronism_SideConfig.TYPE_ITEM;
 	}
 
 	public int getSizeInventory() {
@@ -123,17 +123,17 @@ public class RetroNism_TileGenerator extends TileEntity implements IInventory, R
 			int[][] dirs = {{0,-1,0},{0,1,0},{0,0,-1},{0,0,1},{-1,0,0},{1,0,0}};
 			for (int side = 0; side < 6; side++) {
 				if (storedEnergy <= 0) break;
-				int myMode = RetroNism_SideConfig.get(sideConfig, side, RetroNism_SideConfig.TYPE_ENERGY);
-				if (!RetroNism_SideConfig.canOutput(myMode)) continue;
+				int myMode = Retronism_SideConfig.get(sideConfig, side, Retronism_SideConfig.TYPE_ENERGY);
+				if (!Retronism_SideConfig.canOutput(myMode)) continue;
 				int[] d = dirs[side];
 				TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
-				if (te instanceof RetroNism_IEnergyReceiver) {
-					int oppSide = RetroNism_SideConfig.oppositeSide(side);
-					if (te instanceof RetroNism_ISideConfigurable) {
-						int neighborMode = RetroNism_SideConfig.get(((RetroNism_ISideConfigurable) te).getSideConfig(), oppSide, RetroNism_SideConfig.TYPE_ENERGY);
-						if (!RetroNism_SideConfig.canInput(neighborMode)) continue;
+				if (te instanceof Retronism_IEnergyReceiver) {
+					int oppSide = Retronism_SideConfig.oppositeSide(side);
+					if (te instanceof Retronism_ISideConfigurable) {
+						int neighborMode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, Retronism_SideConfig.TYPE_ENERGY);
+						if (!Retronism_SideConfig.canInput(neighborMode)) continue;
 					}
-					RetroNism_IEnergyReceiver recv = (RetroNism_IEnergyReceiver) te;
+					Retronism_IEnergyReceiver recv = (Retronism_IEnergyReceiver) te;
 					int toSend = Math.min(PUSH_RATE, storedEnergy);
 					int accepted = recv.receiveEnergy(toSend);
 					if (accepted > 0) {

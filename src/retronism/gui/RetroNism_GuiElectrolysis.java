@@ -6,16 +6,16 @@ import retronism.container.*;
 import retronism.api.*;
 import org.lwjgl.opengl.GL11;
 
-public class RetroNism_GuiElectrolysis extends GuiContainer {
-	private RetroNism_TileElectrolysis tile;
+public class Retronism_GuiElectrolysis extends GuiContainer {
+	private Retronism_TileElectrolysis tile;
 	private int mouseX;
 	private int mouseY;
-	private RetroNism_GuiSideConfigHelper sideConfigHelper;
+	private Retronism_GuiSideConfigHelper sideConfigHelper;
 
-	public RetroNism_GuiElectrolysis(InventoryPlayer playerInv, RetroNism_TileElectrolysis tile) {
-		super(new RetroNism_ContainerElectrolysis(playerInv, tile));
+	public Retronism_GuiElectrolysis(InventoryPlayer playerInv, Retronism_TileElectrolysis tile) {
+		super(new Retronism_ContainerElectrolysis(playerInv, tile));
 		this.tile = tile;
-		this.sideConfigHelper = new RetroNism_GuiSideConfigHelper(tile, mod_RetroNism.electrolysisBlock.blockID);
+		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(tile, mod_Retronism.electrolysisBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {
@@ -30,13 +30,13 @@ public class RetroNism_GuiElectrolysis extends GuiContainer {
 		// Tooltips
 		String tooltip = null;
 		if (relMouseX >= 7 && relMouseX < 15 && relMouseY >= 16 && relMouseY < 70) {
-			tooltip = "Energy: " + tile.storedEnergy + " / " + RetroNism_TileElectrolysis.MAX_ENERGY + " RN";
+			tooltip = "Energy: " + tile.storedEnergy + " / " + Retronism_TileElectrolysis.MAX_ENERGY + " RN";
 		} else if (relMouseX >= 56 && relMouseX < 72 && relMouseY >= 16 && relMouseY < 70) {
-			tooltip = "Water: " + tile.waterStored + " / " + RetroNism_TileElectrolysis.MAX_WATER + " mB";
+			tooltip = "Water: " + tile.waterStored + " / " + Retronism_TileElectrolysis.MAX_WATER + " mB";
 		} else if (relMouseX >= 112 && relMouseX < 128 && relMouseY >= 16 && relMouseY < 70) {
-			tooltip = "Hydrogen: " + tile.hydrogenStored + " / " + RetroNism_TileElectrolysis.MAX_HYDROGEN + " mB";
+			tooltip = "Hydrogen: " + tile.hydrogenStored + " / " + Retronism_TileElectrolysis.MAX_HYDROGEN + " mB";
 		} else if (relMouseX >= 136 && relMouseX < 152 && relMouseY >= 16 && relMouseY < 70) {
-			tooltip = "Oxygen: " + tile.oxygenStored + " / " + RetroNism_TileElectrolysis.MAX_OXYGEN + " mB";
+			tooltip = "Oxygen: " + tile.oxygenStored + " / " + Retronism_TileElectrolysis.MAX_OXYGEN + " mB";
 		}
 
 		if (tooltip != null) {
@@ -103,11 +103,11 @@ public class RetroNism_GuiElectrolysis extends GuiContainer {
 		}
 
 		// Hydrogen tank (water texture tinted with gas color)
-		drawGasTank(x + 113, y + 17, 14, 52, tile.getHydrogenScaled(52), RetroNism_GasType.getColor(RetroNism_GasType.HYDROGEN));
+		drawGasTank(x + 113, y + 17, 14, 52, tile.getHydrogenScaled(52), Retronism_GasType.getColor(Retronism_GasType.HYDROGEN));
 		drawTankGauge(x + 113, y + 17, 14, 52);
 
 		// Oxygen tank (water texture tinted with gas color)
-		drawGasTank(x + 137, y + 17, 14, 52, tile.getOxygenScaled(52), RetroNism_GasType.getColor(RetroNism_GasType.OXYGEN));
+		drawGasTank(x + 137, y + 17, 14, 52, tile.getOxygenScaled(52), Retronism_GasType.getColor(Retronism_GasType.OXYGEN));
 		drawTankGauge(x + 137, y + 17, 14, 52);
 	}
 
@@ -141,7 +141,7 @@ public class RetroNism_GuiElectrolysis extends GuiContainer {
 		float g = ((gasColor >> 8) & 0xFF) / 255.0F;
 		float b = (gasColor & 0xFF) / 255.0F;
 
-		int textureIndex = mod_RetroNism.GAS_OVERLAY_INDEX;
+		int textureIndex = mod_Retronism.GAS_OVERLAY_INDEX;
 		int tx = (textureIndex & 15) << 4;
 		int ty = (textureIndex >> 4) << 4;
 

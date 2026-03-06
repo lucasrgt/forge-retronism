@@ -3,7 +3,7 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class RetroNism_TileCable extends TileEntity implements RetroNism_IEnergyReceiver, RetroNism_ISideConfigurable {
+public class Retronism_TileCable extends TileEntity implements Retronism_IEnergyReceiver, Retronism_ISideConfigurable {
 	private int storedEnergy = 0;
 	private static final int MAX_ENERGY = 800;
 	private static final int TRANSFER_RATE = 200;
@@ -17,16 +17,16 @@ public class RetroNism_TileCable extends TileEntity implements RetroNism_IEnergy
 
 	{
 		for (int s = 0; s < 6; s++) {
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ENERGY, RetroNism_SideConfig.MODE_INPUT_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ENERGY, Retronism_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
 	}
 	public boolean supportsType(int type) {
-		return type == RetroNism_SideConfig.TYPE_ENERGY;
+		return type == Retronism_SideConfig.TYPE_ENERGY;
 	}
 
 	public int receiveEnergy(int amount) {
@@ -48,15 +48,15 @@ public class RetroNism_TileCable extends TileEntity implements RetroNism_IEnergy
 	}
 
 	public int getSideMode(int side) {
-		return RetroNism_SideConfig.get(sideConfig, side, RetroNism_SideConfig.TYPE_ENERGY);
+		return Retronism_SideConfig.get(sideConfig, side, Retronism_SideConfig.TYPE_ENERGY);
 	}
 
 	private boolean canSendTo(int side, TileEntity te) {
-		if (!RetroNism_SideConfig.canOutput(getSideMode(side))) return false;
-		int oppSide = RetroNism_SideConfig.oppositeSide(side);
-		if (te instanceof RetroNism_ISideConfigurable) {
-			int neighborMode = RetroNism_SideConfig.get(((RetroNism_ISideConfigurable) te).getSideConfig(), oppSide, RetroNism_SideConfig.TYPE_ENERGY);
-			if (!RetroNism_SideConfig.canInput(neighborMode)) return false;
+		if (!Retronism_SideConfig.canOutput(getSideMode(side))) return false;
+		int oppSide = Retronism_SideConfig.oppositeSide(side);
+		if (te instanceof Retronism_ISideConfigurable) {
+			int neighborMode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, Retronism_SideConfig.TYPE_ENERGY);
+			if (!Retronism_SideConfig.canInput(neighborMode)) return false;
 		}
 		return true;
 	}
@@ -72,11 +72,11 @@ public class RetroNism_TileCable extends TileEntity implements RetroNism_IEnergy
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
-			if (te instanceof RetroNism_IEnergyReceiver && !(te instanceof RetroNism_TileCable)) {
-				RetroNism_IEnergyReceiver recv = (RetroNism_IEnergyReceiver) te;
+			if (te instanceof Retronism_IEnergyReceiver && !(te instanceof Retronism_TileCable)) {
+				Retronism_IEnergyReceiver recv = (Retronism_IEnergyReceiver) te;
 				if (recv.getStoredEnergy() < recv.getMaxEnergy()) receivers++;
-			} else if (te instanceof RetroNism_TileCable) {
-				if (((RetroNism_TileCable) te).storedEnergy < this.storedEnergy) receivers++;
+			} else if (te instanceof Retronism_TileCable) {
+				if (((Retronism_TileCable) te).storedEnergy < this.storedEnergy) receivers++;
 			}
 		}
 
@@ -91,14 +91,14 @@ public class RetroNism_TileCable extends TileEntity implements RetroNism_IEnergy
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
-			if (te instanceof RetroNism_IEnergyReceiver && !(te instanceof RetroNism_TileCable)) {
-				RetroNism_IEnergyReceiver recv = (RetroNism_IEnergyReceiver) te;
+			if (te instanceof Retronism_IEnergyReceiver && !(te instanceof Retronism_TileCable)) {
+				Retronism_IEnergyReceiver recv = (Retronism_IEnergyReceiver) te;
 				if (recv.getStoredEnergy() < recv.getMaxEnergy()) {
 					int toSend = Math.min(perReceiver, storedEnergy);
 					storedEnergy -= recv.receiveEnergy(toSend);
 				}
-			} else if (te instanceof RetroNism_TileCable) {
-				RetroNism_TileCable otherCable = (RetroNism_TileCable) te;
+			} else if (te instanceof Retronism_TileCable) {
+				Retronism_TileCable otherCable = (Retronism_TileCable) te;
 				if (otherCable.storedEnergy < this.storedEnergy) {
 					int toSend = Math.min(perReceiver, storedEnergy);
 					storedEnergy -= otherCable.receiveEnergy(toSend);

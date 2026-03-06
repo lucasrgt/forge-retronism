@@ -4,17 +4,17 @@ import net.minecraft.src.*;
 import retronism.tile.*;
 import retronism.slot.*;
 
-public class RetroNism_ContainerCrusher extends Container {
-	private RetroNism_TileCrusher crusher;
+public class Retronism_ContainerCrusher extends Container {
+	private Retronism_TileCrusher crusher;
 	private int lastCookTime = 0;
 	private int lastEnergy = 0;
 
-	public RetroNism_ContainerCrusher(InventoryPlayer playerInv, RetroNism_TileCrusher crusher) {
+	public Retronism_ContainerCrusher(InventoryPlayer playerInv, Retronism_TileCrusher crusher) {
 		this.crusher = crusher;
 		// Input slot (left)
 		this.addSlot(new Slot(crusher, 0, 56, 35));
 		// Output slot (right)
-		this.addSlot(new RetroNism_SlotCrusher(playerInv.player, crusher, 1, 116, 35));
+		this.addSlot(new Retronism_SlotCrusher(playerInv.player, crusher, 1, 116, 35));
 
 		// Player inventory
 		int i;

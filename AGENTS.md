@@ -1,8 +1,8 @@
-# RetroNism - Minecraft Beta 1.7.3 Tech Mod
+# Retronism - Minecraft Beta 1.7.3 Tech Mod
 
 ## Workflow
 - Edit mod source ONLY in `src/retronism/` (organized packages)
-- NEVER edit `mcp/minecraft/src/net/minecraft/src/RetroNism_*.java` directly — those are transpiled output
+- NEVER edit `mcp/minecraft/src/net/minecraft/src/Retronism_*.java` directly — those are transpiled output
 - `bash scripts/test.sh` auto-transpiles → builds → injects → launches
 - `bash scripts/test_unit.sh` auto-transpiles → recompiles → runs JUnit tests
 - The "official" build is `mcp/build/minecraft.zip` (clean, no TMI/SPC)
@@ -37,12 +37,12 @@
   - `item/` — Item subclasses
   - `recipe/` — Recipe registries
   - `slot/` — Custom Slot subclasses
-  - `mod_RetroNism.java` — main mod class (package root)
+  - `mod_Retronism.java` — main mod class (package root)
 - **Transpiled output (don't edit):** `mcp/minecraft/src/net/minecraft/src/`
 - **MCP ecosystem:** `mcp/` (minecraft, minecraft_server, libraries, jars, deps, conf, build, RetroMCP-Java-CLI.jar, options.cfg)
 - **Scripts:** `scripts/` (test.sh, test_unit.sh, transpile.sh)
 - **Tests:** `tests/` (data/, libs/, out/, src/)
-- Mod classes use `RetroNism_` prefix (e.g., `RetroNism_BlockCable`, `RetroNism_ItemTest`)
+- Mod classes use `Retronism_` prefix (e.g., `Retronism_BlockCable`, `Retronism_ItemTest`)
 - Block IDs start at 200, Item IDs start at 500
 
 ## Agents (on-demand context loading)

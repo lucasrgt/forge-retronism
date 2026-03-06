@@ -8,16 +8,16 @@ import retronism.gui.*;
 
 import java.util.Random;
 
-public class RetroNism_BlockPump extends BlockContainer {
+public class Retronism_BlockPump extends BlockContainer {
 	private Random pumpRand = new Random();
 
-	public RetroNism_BlockPump(int id, int textureIndex) {
+	public Retronism_BlockPump(int id, int textureIndex) {
 		super(id, Material.iron);
 		this.blockIndexInTexture = textureIndex;
 	}
 
 	protected TileEntity getBlockEntity() {
-		return new RetroNism_TilePump();
+		return new Retronism_TilePump();
 	}
 
 	public int idDropped(int metadata, Random random) {
@@ -32,13 +32,13 @@ public class RetroNism_BlockPump extends BlockContainer {
 
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {
 		if (world.multiplayerWorld) return true;
-		RetroNism_TilePump tileEntity = (RetroNism_TilePump) world.getBlockTileEntity(x, y, z);
-		ModLoader.OpenGUI(player, new RetroNism_GuiPump(player.inventory, tileEntity));
+		Retronism_TilePump tileEntity = (Retronism_TilePump) world.getBlockTileEntity(x, y, z);
+		ModLoader.OpenGUI(player, new Retronism_GuiPump(player.inventory, tileEntity));
 		return true;
 	}
 
 	public void onBlockRemoval(World world, int x, int y, int z) {
-		RetroNism_TilePump pump = (RetroNism_TilePump) world.getBlockTileEntity(x, y, z);
+		Retronism_TilePump pump = (Retronism_TilePump) world.getBlockTileEntity(x, y, z);
 		for (int i = 0; i < pump.getSizeInventory(); ++i) {
 			ItemStack stack = pump.getStackInSlot(i);
 			if (stack != null) {

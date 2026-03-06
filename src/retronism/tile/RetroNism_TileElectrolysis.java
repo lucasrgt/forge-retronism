@@ -3,7 +3,7 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_IEnergyReceiver, RetroNism_IFluidHandler, RetroNism_IGasHandler, RetroNism_ISideConfigurable {
+public class Retronism_TileElectrolysis extends TileEntity implements Retronism_IEnergyReceiver, Retronism_IFluidHandler, Retronism_IGasHandler, Retronism_ISideConfigurable {
 	public int storedEnergy = 0;
 	public int waterStored = 0;
 	public int hydrogenStored = 0;
@@ -13,18 +13,18 @@ public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_
 
 	{
 		for (int s = 0; s < 6; s++) {
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ENERGY, RetroNism_SideConfig.MODE_INPUT);
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_FLUID, RetroNism_SideConfig.MODE_INPUT);
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_GAS, RetroNism_SideConfig.MODE_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ENERGY, Retronism_SideConfig.MODE_INPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_FLUID, Retronism_SideConfig.MODE_INPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_GAS, Retronism_SideConfig.MODE_OUTPUT);
 		}
 	}
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
 	}
 	public boolean supportsType(int type) {
-		return type == RetroNism_SideConfig.TYPE_ENERGY || type == RetroNism_SideConfig.TYPE_FLUID || type == RetroNism_SideConfig.TYPE_GAS;
+		return type == Retronism_SideConfig.TYPE_ENERGY || type == Retronism_SideConfig.TYPE_FLUID || type == Retronism_SideConfig.TYPE_GAS;
 	}
 
 	public static final int MAX_ENERGY = 32000;
@@ -51,7 +51,7 @@ public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_
 
 	// Fluid (accepts water input only)
 	public int receiveFluid(int fluidType, int amountMB) {
-		if (fluidType != RetroNism_FluidType.WATER) return 0;
+		if (fluidType != Retronism_FluidType.WATER) return 0;
 		int space = MAX_WATER - waterStored;
 		int accepted = Math.min(amountMB, space);
 		waterStored += accepted;
@@ -62,7 +62,7 @@ public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_
 		return 0;
 	}
 
-	public int getFluidType() { return waterStored > 0 ? RetroNism_FluidType.WATER : RetroNism_FluidType.NONE; }
+	public int getFluidType() { return waterStored > 0 ? Retronism_FluidType.WATER : Retronism_FluidType.NONE; }
 	public int getFluidAmount() { return waterStored; }
 	public int getFluidCapacity() { return MAX_WATER; }
 
@@ -72,12 +72,12 @@ public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_
 	}
 
 	public int extractGas(int gasType, int amountMB) {
-		if (gasType == RetroNism_GasType.HYDROGEN && hydrogenStored > 0) {
+		if (gasType == Retronism_GasType.HYDROGEN && hydrogenStored > 0) {
 			int extracted = Math.min(amountMB, hydrogenStored);
 			hydrogenStored -= extracted;
 			return extracted;
 		}
-		if (gasType == RetroNism_GasType.OXYGEN && oxygenStored > 0) {
+		if (gasType == Retronism_GasType.OXYGEN && oxygenStored > 0) {
 			int extracted = Math.min(amountMB, oxygenStored);
 			oxygenStored -= extracted;
 			return extracted;
@@ -86,9 +86,9 @@ public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_
 	}
 
 	public int getGasType() {
-		if (hydrogenStored > 0) return RetroNism_GasType.HYDROGEN;
-		if (oxygenStored > 0) return RetroNism_GasType.OXYGEN;
-		return RetroNism_GasType.NONE;
+		if (hydrogenStored > 0) return Retronism_GasType.HYDROGEN;
+		if (oxygenStored > 0) return Retronism_GasType.OXYGEN;
+		return Retronism_GasType.NONE;
 	}
 
 	public int getGasAmount() { return hydrogenStored + oxygenStored; }
@@ -142,24 +142,24 @@ public class RetroNism_TileElectrolysis extends TileEntity implements RetroNism_
 		int[][] dirs = {{0,-1,0},{0,1,0},{0,0,-1},{0,0,1},{-1,0,0},{1,0,0}};
 
 		for (int side = 0; side < 6; side++) {
-			int myMode = RetroNism_SideConfig.get(sideConfig, side, RetroNism_SideConfig.TYPE_GAS);
-			if (!RetroNism_SideConfig.canOutput(myMode)) continue;
+			int myMode = Retronism_SideConfig.get(sideConfig, side, Retronism_SideConfig.TYPE_GAS);
+			if (!Retronism_SideConfig.canOutput(myMode)) continue;
 			int[] d = dirs[side];
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
-			if (te instanceof RetroNism_IGasHandler && te != this) {
-				int oppSide = RetroNism_SideConfig.oppositeSide(side);
-				if (te instanceof RetroNism_ISideConfigurable) {
-					int neighborMode = RetroNism_SideConfig.get(((RetroNism_ISideConfigurable) te).getSideConfig(), oppSide, RetroNism_SideConfig.TYPE_GAS);
-					if (!RetroNism_SideConfig.canInput(neighborMode)) continue;
+			if (te instanceof Retronism_IGasHandler && te != this) {
+				int oppSide = Retronism_SideConfig.oppositeSide(side);
+				if (te instanceof Retronism_ISideConfigurable) {
+					int neighborMode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, Retronism_SideConfig.TYPE_GAS);
+					if (!Retronism_SideConfig.canInput(neighborMode)) continue;
 				}
-				RetroNism_IGasHandler handler = (RetroNism_IGasHandler) te;
+				Retronism_IGasHandler handler = (Retronism_IGasHandler) te;
 				if (hydrogenStored > 0) {
 					int toSend = Math.min(GAS_PUSH_RATE, hydrogenStored);
-					hydrogenStored -= handler.receiveGas(RetroNism_GasType.HYDROGEN, toSend);
+					hydrogenStored -= handler.receiveGas(Retronism_GasType.HYDROGEN, toSend);
 				}
 				if (oxygenStored > 0) {
 					int toSend = Math.min(GAS_PUSH_RATE, oxygenStored);
-					oxygenStored -= handler.receiveGas(RetroNism_GasType.OXYGEN, toSend);
+					oxygenStored -= handler.receiveGas(Retronism_GasType.OXYGEN, toSend);
 				}
 			}
 		}

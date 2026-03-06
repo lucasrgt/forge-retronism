@@ -1,6 +1,6 @@
 package retronism.api;
 
-public interface RetroNism_IFluidHandler {
+public interface Retronism_IFluidHandler {
 	int receiveFluid(int fluidType, int amountMB);
 	int extractFluid(int fluidType, int amountMB);
 	int getFluidType();

@@ -1,6 +1,6 @@
 package retronism.api;
 
-public class RetroNism_GasType {
+public class Retronism_GasType {
 	public static final int NONE = 0;
 	public static final int HYDROGEN = 1;
 	public static final int OXYGEN = 2;

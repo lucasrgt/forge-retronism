@@ -5,15 +5,15 @@ import net.minecraft.src.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RetroNism_RecipesCrusher {
-	private static final RetroNism_RecipesCrusher crushingBase = new RetroNism_RecipesCrusher();
+public class Retronism_RecipesCrusher {
+	private static final Retronism_RecipesCrusher crushingBase = new Retronism_RecipesCrusher();
 	private Map crusherList = new HashMap();
 
-	public static final RetroNism_RecipesCrusher crushing() {
+	public static final Retronism_RecipesCrusher crushing() {
 		return crushingBase;
 	}
 
-	private RetroNism_RecipesCrusher() {
+	private Retronism_RecipesCrusher() {
 	}
 
 	public void addCrushing(int inputID, ItemStack output) {

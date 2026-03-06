@@ -3,8 +3,8 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class RetroNism_TileGasPipe extends TileEntity implements RetroNism_IGasHandler, RetroNism_ISideConfigurable {
-	private int gasType = RetroNism_GasType.NONE;
+public class Retronism_TileGasPipe extends TileEntity implements Retronism_IGasHandler, Retronism_ISideConfigurable {
+	private int gasType = Retronism_GasType.NONE;
 	private int gasAmount = 0;
 	private static final int MAX_GAS = 500;
 	private static final int TRANSFER_RATE = 200;
@@ -17,21 +17,21 @@ public class RetroNism_TileGasPipe extends TileEntity implements RetroNism_IGasH
 
 	{
 		for (int s = 0; s < 6; s++) {
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_GAS, RetroNism_SideConfig.MODE_INPUT_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_GAS, Retronism_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
 	}
 	public boolean supportsType(int type) {
-		return type == RetroNism_SideConfig.TYPE_GAS;
+		return type == Retronism_SideConfig.TYPE_GAS;
 	}
 
 	public int receiveGas(int type, int amountMB) {
-		if (type == RetroNism_GasType.NONE) return 0;
-		if (gasType != RetroNism_GasType.NONE && gasType != type) return 0;
+		if (type == Retronism_GasType.NONE) return 0;
+		if (gasType != Retronism_GasType.NONE && gasType != type) return 0;
 		int canReceive = TRANSFER_RATE - receivedThisTick;
 		if (canReceive <= 0) return 0;
 		int space = MAX_GAS - gasAmount;
@@ -48,7 +48,7 @@ public class RetroNism_TileGasPipe extends TileEntity implements RetroNism_IGasH
 		if (gasType != type || gasAmount <= 0) return 0;
 		int extracted = Math.min(amountMB, gasAmount);
 		gasAmount -= extracted;
-		if (gasAmount == 0) gasType = RetroNism_GasType.NONE;
+		if (gasAmount == 0) gasType = Retronism_GasType.NONE;
 		return extracted;
 	}
 
@@ -57,15 +57,15 @@ public class RetroNism_TileGasPipe extends TileEntity implements RetroNism_IGasH
 	public int getGasCapacity() { return MAX_GAS; }
 
 	public int getSideMode(int side) {
-		return RetroNism_SideConfig.get(sideConfig, side, RetroNism_SideConfig.TYPE_GAS);
+		return Retronism_SideConfig.get(sideConfig, side, Retronism_SideConfig.TYPE_GAS);
 	}
 
 	private boolean canSendTo(int side, TileEntity te) {
-		if (!RetroNism_SideConfig.canOutput(getSideMode(side))) return false;
-		int oppSide = RetroNism_SideConfig.oppositeSide(side);
-		if (te instanceof RetroNism_ISideConfigurable) {
-			int neighborMode = RetroNism_SideConfig.get(((RetroNism_ISideConfigurable) te).getSideConfig(), oppSide, RetroNism_SideConfig.TYPE_GAS);
-			if (!RetroNism_SideConfig.canInput(neighborMode)) return false;
+		if (!Retronism_SideConfig.canOutput(getSideMode(side))) return false;
+		int oppSide = Retronism_SideConfig.oppositeSide(side);
+		if (te instanceof Retronism_ISideConfigurable) {
+			int neighborMode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, Retronism_SideConfig.TYPE_GAS);
+			if (!Retronism_SideConfig.canInput(neighborMode)) return false;
 		}
 		return true;
 	}
@@ -81,10 +81,10 @@ public class RetroNism_TileGasPipe extends TileEntity implements RetroNism_IGasH
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
-			if (te instanceof RetroNism_IGasHandler && !(te instanceof RetroNism_TileGasPipe)) {
-				if (((RetroNism_IGasHandler) te).getGasAmount() < ((RetroNism_IGasHandler) te).getGasCapacity()) receivers++;
-			} else if (te instanceof RetroNism_TileGasPipe) {
-				if (((RetroNism_TileGasPipe) te).gasAmount < this.gasAmount) receivers++;
+			if (te instanceof Retronism_IGasHandler && !(te instanceof Retronism_TileGasPipe)) {
+				if (((Retronism_IGasHandler) te).getGasAmount() < ((Retronism_IGasHandler) te).getGasCapacity()) receivers++;
+			} else if (te instanceof Retronism_TileGasPipe) {
+				if (((Retronism_TileGasPipe) te).gasAmount < this.gasAmount) receivers++;
 			}
 		}
 
@@ -99,14 +99,14 @@ public class RetroNism_TileGasPipe extends TileEntity implements RetroNism_IGasH
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
-			if (te instanceof RetroNism_IGasHandler && !(te instanceof RetroNism_TileGasPipe)) {
-				RetroNism_IGasHandler handler = (RetroNism_IGasHandler) te;
+			if (te instanceof Retronism_IGasHandler && !(te instanceof Retronism_TileGasPipe)) {
+				Retronism_IGasHandler handler = (Retronism_IGasHandler) te;
 				if (handler.getGasAmount() < handler.getGasCapacity()) {
 					int toSend = Math.min(perReceiver, gasAmount);
 					gasAmount -= handler.receiveGas(gasType, toSend);
 				}
-			} else if (te instanceof RetroNism_TileGasPipe) {
-				RetroNism_TileGasPipe other = (RetroNism_TileGasPipe) te;
+			} else if (te instanceof Retronism_TileGasPipe) {
+				Retronism_TileGasPipe other = (Retronism_TileGasPipe) te;
 				if (other.gasAmount < this.gasAmount) {
 					int toSend = Math.min(perReceiver, gasAmount);
 					gasAmount -= other.receiveGas(gasType, toSend);
@@ -114,7 +114,7 @@ public class RetroNism_TileGasPipe extends TileEntity implements RetroNism_IGasH
 			}
 		}
 
-		if (gasAmount == 0) gasType = RetroNism_GasType.NONE;
+		if (gasAmount == 0) gasType = Retronism_GasType.NONE;
 	}
 
 	public void readFromNBT(NBTTagCompound nbt) {

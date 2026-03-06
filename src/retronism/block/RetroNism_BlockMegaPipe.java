@@ -7,9 +7,9 @@ import retronism.api.*;
 import retronism.tile.*;
 import retronism.gui.*;
 
-public class RetroNism_BlockMegaPipe extends Block {
+public class Retronism_BlockMegaPipe extends Block {
 
-	public RetroNism_BlockMegaPipe(int id, int tex) {
+	public Retronism_BlockMegaPipe(int id, int tex) {
 		super(id, tex, Material.iron);
 		setHardness(1.0F);
 		setResistance(3.0F);
@@ -20,21 +20,21 @@ public class RetroNism_BlockMegaPipe extends Block {
 	public boolean renderAsNormalBlock() { return false; }
 
 	public int getRenderType() {
-		return mod_RetroNism.megaPipeRenderID;
+		return mod_Retronism.megaPipeRenderID;
 	}
 
 	public TileEntity getBlockEntity() {
-		return new RetroNism_TileMegaPipe();
+		return new Retronism_TileMegaPipe();
 	}
 
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {
 		ItemStack held = player.getCurrentEquippedItem();
-		if (held != null && held.itemID == mod_RetroNism.wrench.shiftedIndex) {
+		if (held != null && held.itemID == mod_Retronism.wrench.shiftedIndex) {
 			if (world.multiplayerWorld) return true;
 			TileEntity te = world.getBlockTileEntity(x, y, z);
-			if (te instanceof RetroNism_TileMegaPipe) {
+			if (te instanceof Retronism_TileMegaPipe) {
 				ModLoader.getMinecraftInstance().displayGuiScreen(
-					new RetroNism_GuiMegaPipeConfig(player, (RetroNism_TileMegaPipe) te));
+					new Retronism_GuiMegaPipeConfig(player, (Retronism_TileMegaPipe) te));
 			}
 			return true;
 		}
@@ -43,15 +43,15 @@ public class RetroNism_BlockMegaPipe extends Block {
 
 	public boolean canConnectTo(IBlockAccess world, int x, int y, int z) {
 		TileEntity te = world.getBlockTileEntity(x, y, z);
-		if (te instanceof RetroNism_IEnergyReceiver) return true;
-		if (te instanceof RetroNism_TileGenerator) return true;
-		if (te instanceof RetroNism_IFluidHandler) return true;
-		if (te instanceof RetroNism_IGasHandler) return true;
+		if (te instanceof Retronism_IEnergyReceiver) return true;
+		if (te instanceof Retronism_TileGenerator) return true;
+		if (te instanceof Retronism_IFluidHandler) return true;
+		if (te instanceof Retronism_IGasHandler) return true;
 		if (te instanceof IInventory) return true;
 		int id = world.getBlockId(x, y, z);
-		return id == mod_RetroNism.cableBlock.blockID
-			|| id == mod_RetroNism.fluidPipeBlock.blockID
-			|| id == mod_RetroNism.gasPipeBlock.blockID
+		return id == mod_Retronism.cableBlock.blockID
+			|| id == mod_Retronism.fluidPipeBlock.blockID
+			|| id == mod_Retronism.gasPipeBlock.blockID
 			|| id == this.blockID;
 	}
 

@@ -5,16 +5,16 @@ import retronism.tile.*;
 import retronism.container.*;
 import org.lwjgl.opengl.GL11;
 
-public class RetroNism_GuiCrusher extends GuiContainer {
-	private RetroNism_TileCrusher crusherInventory;
+public class Retronism_GuiCrusher extends GuiContainer {
+	private Retronism_TileCrusher crusherInventory;
 	private int mouseX;
 	private int mouseY;
-	private RetroNism_GuiSideConfigHelper sideConfigHelper;
+	private Retronism_GuiSideConfigHelper sideConfigHelper;
 
-	public RetroNism_GuiCrusher(InventoryPlayer playerInv, RetroNism_TileCrusher crusher) {
-		super(new RetroNism_ContainerCrusher(playerInv, crusher));
+	public Retronism_GuiCrusher(InventoryPlayer playerInv, Retronism_TileCrusher crusher) {
+		super(new Retronism_ContainerCrusher(playerInv, crusher));
 		this.crusherInventory = crusher;
-		this.sideConfigHelper = new RetroNism_GuiSideConfigHelper(crusher, mod_RetroNism.crusherBlock.blockID);
+		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(crusher, mod_Retronism.crusherBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {
@@ -27,7 +27,7 @@ public class RetroNism_GuiCrusher extends GuiContainer {
 		int relMouseX = this.mouseX - guiLeft;
 		int relMouseY = this.mouseY - guiTop;
 		if (relMouseX >= 161 && relMouseX < 169 && relMouseY >= 16 && relMouseY < 70) {
-			String line1 = "Energy: " + this.crusherInventory.storedEnergy + " / " + RetroNism_TileCrusher.MAX_ENERGY + " RN";
+			String line1 = "Energy: " + this.crusherInventory.storedEnergy + " / " + Retronism_TileCrusher.MAX_ENERGY + " RN";
 			int maxW = this.fontRenderer.getStringWidth(line1);
 			int tx = relMouseX - maxW - 15;
 			int ty = relMouseY - 12;

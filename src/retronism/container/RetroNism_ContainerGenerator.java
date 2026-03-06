@@ -3,14 +3,14 @@ package retronism.container;
 import net.minecraft.src.*;
 import retronism.tile.*;
 
-public class RetroNism_ContainerGenerator extends Container {
-	private RetroNism_TileGenerator generator;
+public class Retronism_ContainerGenerator extends Container {
+	private Retronism_TileGenerator generator;
 	private int lastBurnTime = 0;
 	private int lastItemBurnTime = 0;
 	private int lastEnergy = 0;
 	private int lastOutput = 0;
 
-	public RetroNism_ContainerGenerator(InventoryPlayer playerInv, RetroNism_TileGenerator generator) {
+	public Retronism_ContainerGenerator(InventoryPlayer playerInv, Retronism_TileGenerator generator) {
 		this.generator = generator;
 		// Fuel slot (matches texture inner area at 80,35)
 		this.addSlot(new Slot(generator, 0, 80, 35));

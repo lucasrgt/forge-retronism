@@ -4,9 +4,9 @@ import net.minecraft.src.*;
 import retronism.*;
 import retronism.api.*;
 
-public class RetroNism_TileGasTank extends TileEntity implements RetroNism_IGasHandler, IInventory, RetroNism_ISideConfigurable {
+public class Retronism_TileGasTank extends TileEntity implements Retronism_IGasHandler, IInventory, Retronism_ISideConfigurable {
 	private ItemStack[] tankItems = new ItemStack[1];
-	private int gasType = RetroNism_GasType.NONE;
+	private int gasType = Retronism_GasType.NONE;
 	private int gasAmount = 0;
 
 	public static final int MAX_GAS = 16000;
@@ -15,22 +15,22 @@ public class RetroNism_TileGasTank extends TileEntity implements RetroNism_IGasH
 
 	{
 		for (int s = 0; s < 6; s++) {
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_GAS, RetroNism_SideConfig.MODE_INPUT_OUTPUT);
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ITEM, RetroNism_SideConfig.MODE_INPUT_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_GAS, Retronism_SideConfig.MODE_INPUT_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ITEM, Retronism_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
 	}
 	public boolean supportsType(int type) {
-		return type == RetroNism_SideConfig.TYPE_GAS || type == RetroNism_SideConfig.TYPE_ITEM;
+		return type == Retronism_SideConfig.TYPE_GAS || type == Retronism_SideConfig.TYPE_ITEM;
 	}
 
 	public int receiveGas(int type, int amountMB) {
-		if (type == RetroNism_GasType.NONE) return 0;
-		if (gasType != RetroNism_GasType.NONE && gasType != type) return 0;
+		if (type == Retronism_GasType.NONE) return 0;
+		if (gasType != Retronism_GasType.NONE && gasType != type) return 0;
 		int space = MAX_GAS - gasAmount;
 		int accepted = Math.min(amountMB, space);
 		if (accepted > 0) {
@@ -44,7 +44,7 @@ public class RetroNism_TileGasTank extends TileEntity implements RetroNism_IGasH
 		if (gasType != type || gasAmount <= 0) return 0;
 		int extracted = Math.min(amountMB, gasAmount);
 		gasAmount -= extracted;
-		if (gasAmount == 0) gasType = RetroNism_GasType.NONE;
+		if (gasAmount == 0) gasType = Retronism_GasType.NONE;
 		return extracted;
 	}
 
@@ -65,16 +65,16 @@ public class RetroNism_TileGasTank extends TileEntity implements RetroNism_IGasH
 		if (this.worldObj.multiplayerWorld) return;
 
 		if (tankItems[0] != null
-			&& tankItems[0].itemID == mod_RetroNism.gasCellEmpty.shiftedIndex
+			&& tankItems[0].itemID == mod_Retronism.gasCellEmpty.shiftedIndex
 			&& gasAmount >= CELL_AMOUNT
-			&& (gasType == RetroNism_GasType.HYDROGEN || gasType == RetroNism_GasType.OXYGEN)) {
+			&& (gasType == Retronism_GasType.HYDROGEN || gasType == Retronism_GasType.OXYGEN)) {
 			gasAmount -= CELL_AMOUNT;
-			if (gasType == RetroNism_GasType.HYDROGEN) {
-				tankItems[0] = new ItemStack(mod_RetroNism.gasCellHydrogen);
+			if (gasType == Retronism_GasType.HYDROGEN) {
+				tankItems[0] = new ItemStack(mod_Retronism.gasCellHydrogen);
 			} else {
-				tankItems[0] = new ItemStack(mod_RetroNism.gasCellOxygen);
+				tankItems[0] = new ItemStack(mod_Retronism.gasCellOxygen);
 			}
-			if (gasAmount == 0) gasType = RetroNism_GasType.NONE;
+			if (gasAmount == 0) gasType = Retronism_GasType.NONE;
 			this.onInventoryChanged();
 		}
 	}

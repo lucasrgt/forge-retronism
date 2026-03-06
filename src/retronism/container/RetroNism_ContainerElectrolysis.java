@@ -3,15 +3,15 @@ package retronism.container;
 import net.minecraft.src.*;
 import retronism.tile.*;
 
-public class RetroNism_ContainerElectrolysis extends Container {
-	private RetroNism_TileElectrolysis tile;
+public class Retronism_ContainerElectrolysis extends Container {
+	private Retronism_TileElectrolysis tile;
 	private int lastProcessTime = 0;
 	private int lastEnergy = 0;
 	private int lastWater = 0;
 	private int lastHydrogen = 0;
 	private int lastOxygen = 0;
 
-	public RetroNism_ContainerElectrolysis(InventoryPlayer playerInv, RetroNism_TileElectrolysis tile) {
+	public Retronism_ContainerElectrolysis(InventoryPlayer playerInv, Retronism_TileElectrolysis tile) {
 		this.tile = tile;
 
 		// Player inventory

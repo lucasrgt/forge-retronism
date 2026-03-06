@@ -4,13 +4,13 @@ import net.minecraft.src.*;
 import retronism.tile.*;
 import retronism.slot.*;
 
-public class RetroNism_ContainerFluidTank extends Container {
-	private RetroNism_TileFluidTank tank;
+public class Retronism_ContainerFluidTank extends Container {
+	private Retronism_TileFluidTank tank;
 	private int lastFluid = 0;
 
-	public RetroNism_ContainerFluidTank(InventoryPlayer playerInv, RetroNism_TileFluidTank tank) {
+	public Retronism_ContainerFluidTank(InventoryPlayer playerInv, Retronism_TileFluidTank tank) {
 		this.tank = tank;
-		this.addSlot(new RetroNism_SlotFluidTankBucket(tank, 0, 80, 35));
+		this.addSlot(new Retronism_SlotFluidTankBucket(tank, 0, 80, 35));
 
 		int i;
 		for (i = 0; i < 3; ++i) {

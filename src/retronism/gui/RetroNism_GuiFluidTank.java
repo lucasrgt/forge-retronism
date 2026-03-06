@@ -5,16 +5,16 @@ import retronism.tile.*;
 import retronism.container.*;
 import org.lwjgl.opengl.GL11;
 
-public class RetroNism_GuiFluidTank extends GuiContainer {
-	private RetroNism_TileFluidTank tank;
+public class Retronism_GuiFluidTank extends GuiContainer {
+	private Retronism_TileFluidTank tank;
 	private int mouseX;
 	private int mouseY;
-	private RetroNism_GuiSideConfigHelper sideConfigHelper;
+	private Retronism_GuiSideConfigHelper sideConfigHelper;
 
-	public RetroNism_GuiFluidTank(InventoryPlayer playerInv, RetroNism_TileFluidTank tank) {
-		super(new RetroNism_ContainerFluidTank(playerInv, tank));
+	public Retronism_GuiFluidTank(InventoryPlayer playerInv, Retronism_TileFluidTank tank) {
+		super(new Retronism_ContainerFluidTank(playerInv, tank));
 		this.tank = tank;
-		this.sideConfigHelper = new RetroNism_GuiSideConfigHelper(tank, mod_RetroNism.fluidTankBlock.blockID);
+		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(tank, mod_Retronism.fluidTankBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {
@@ -28,7 +28,7 @@ public class RetroNism_GuiFluidTank extends GuiContainer {
 
 		String tooltip = null;
 		if (relMouseX >= 7 && relMouseX < 23 && relMouseY >= 16 && relMouseY < 70) {
-			tooltip = "Water: " + this.tank.getFluidAmount() + " / " + RetroNism_TileFluidTank.MAX_FLUID + " mB";
+			tooltip = "Water: " + this.tank.getFluidAmount() + " / " + Retronism_TileFluidTank.MAX_FLUID + " mB";
 		}
 
 		if (tooltip != null) {

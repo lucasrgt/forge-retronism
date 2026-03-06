@@ -3,7 +3,7 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyReceiver, RetroNism_IFluidHandler, IInventory, RetroNism_ISideConfigurable {
+public class Retronism_TilePump extends TileEntity implements Retronism_IEnergyReceiver, Retronism_IFluidHandler, IInventory, Retronism_ISideConfigurable {
 	private ItemStack[] pumpItems = new ItemStack[1]; // bucket slot
 	public int storedEnergy = 0;
 	public int fluidAmount = 0;
@@ -18,18 +18,18 @@ public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyR
 
 	{
 		for (int s = 0; s < 6; s++) {
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ENERGY, RetroNism_SideConfig.MODE_INPUT);
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_FLUID, RetroNism_SideConfig.MODE_OUTPUT);
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ITEM, RetroNism_SideConfig.MODE_INPUT_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ENERGY, Retronism_SideConfig.MODE_INPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_FLUID, Retronism_SideConfig.MODE_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ITEM, Retronism_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
 	}
 	public boolean supportsType(int type) {
-		return type == RetroNism_SideConfig.TYPE_ENERGY || type == RetroNism_SideConfig.TYPE_FLUID || type == RetroNism_SideConfig.TYPE_ITEM;
+		return type == Retronism_SideConfig.TYPE_ENERGY || type == Retronism_SideConfig.TYPE_FLUID || type == Retronism_SideConfig.TYPE_ITEM;
 	}
 
 	public int receiveEnergy(int amount) {
@@ -47,13 +47,13 @@ public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyR
 	}
 
 	public int extractFluid(int fluidType, int amountMB) {
-		if (fluidType != RetroNism_FluidType.WATER || fluidAmount <= 0) return 0;
+		if (fluidType != Retronism_FluidType.WATER || fluidAmount <= 0) return 0;
 		int extracted = Math.min(amountMB, fluidAmount);
 		fluidAmount -= extracted;
 		return extracted;
 	}
 
-	public int getFluidType() { return fluidAmount > 0 ? RetroNism_FluidType.WATER : RetroNism_FluidType.NONE; }
+	public int getFluidType() { return fluidAmount > 0 ? Retronism_FluidType.WATER : Retronism_FluidType.NONE; }
 	public int getFluidAmount() { return fluidAmount; }
 	public int getFluidCapacity() { return MAX_FLUID; }
 
@@ -107,19 +107,19 @@ public class RetroNism_TilePump extends TileEntity implements RetroNism_IEnergyR
 
 		for (int side = 0; side < 6; side++) {
 			if (fluidAmount <= 0) break;
-			int myMode = RetroNism_SideConfig.get(sideConfig, side, RetroNism_SideConfig.TYPE_FLUID);
-			if (!RetroNism_SideConfig.canOutput(myMode)) continue;
+			int myMode = Retronism_SideConfig.get(sideConfig, side, Retronism_SideConfig.TYPE_FLUID);
+			if (!Retronism_SideConfig.canOutput(myMode)) continue;
 			int[] d = dirs[side];
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
-			if (te instanceof RetroNism_IFluidHandler && te != this) {
-				int oppSide = RetroNism_SideConfig.oppositeSide(side);
-				if (te instanceof RetroNism_ISideConfigurable) {
-					int neighborMode = RetroNism_SideConfig.get(((RetroNism_ISideConfigurable) te).getSideConfig(), oppSide, RetroNism_SideConfig.TYPE_FLUID);
-					if (!RetroNism_SideConfig.canInput(neighborMode)) continue;
+			if (te instanceof Retronism_IFluidHandler && te != this) {
+				int oppSide = Retronism_SideConfig.oppositeSide(side);
+				if (te instanceof Retronism_ISideConfigurable) {
+					int neighborMode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, Retronism_SideConfig.TYPE_FLUID);
+					if (!Retronism_SideConfig.canInput(neighborMode)) continue;
 				}
-				RetroNism_IFluidHandler handler = (RetroNism_IFluidHandler) te;
+				Retronism_IFluidHandler handler = (Retronism_IFluidHandler) te;
 				int toSend = Math.min(PUSH_RATE, fluidAmount);
-				int accepted = handler.receiveFluid(RetroNism_FluidType.WATER, toSend);
+				int accepted = handler.receiveFluid(Retronism_FluidType.WATER, toSend);
 				fluidAmount -= accepted;
 			}
 		}

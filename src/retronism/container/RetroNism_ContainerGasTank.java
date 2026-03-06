@@ -5,14 +5,14 @@ import retronism.*;
 import retronism.tile.*;
 import retronism.slot.*;
 
-public class RetroNism_ContainerGasTank extends Container {
-	private RetroNism_TileGasTank tank;
+public class Retronism_ContainerGasTank extends Container {
+	private Retronism_TileGasTank tank;
 	private int lastGasType = 0;
 	private int lastGasAmount = 0;
 
-	public RetroNism_ContainerGasTank(InventoryPlayer playerInv, RetroNism_TileGasTank tank) {
+	public Retronism_ContainerGasTank(InventoryPlayer playerInv, Retronism_TileGasTank tank) {
 		this.tank = tank;
-		this.addSlot(new RetroNism_SlotGasTankCell(tank, 0, 80, 35));
+		this.addSlot(new Retronism_SlotGasTankCell(tank, 0, 80, 35));
 
 		int i;
 		for (i = 0; i < 3; ++i) {
@@ -57,7 +57,7 @@ public class RetroNism_ContainerGasTank extends Container {
 			result = slotStack.copy();
 			if (slotIndex == 0) {
 				this.func_28125_a(slotStack, 1, 37, true);
-			} else if (slotStack.itemID == mod_RetroNism.gasCellEmpty.shiftedIndex) {
+			} else if (slotStack.itemID == mod_Retronism.gasCellEmpty.shiftedIndex) {
 				this.func_28125_a(slotStack, 0, 1, false);
 			} else if (slotIndex >= 1 && slotIndex < 28) {
 				this.func_28125_a(slotStack, 28, 37, false);

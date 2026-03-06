@@ -3,8 +3,8 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class RetroNism_TileFluidPipe extends TileEntity implements RetroNism_IFluidHandler, RetroNism_ISideConfigurable {
-	private int fluidType = RetroNism_FluidType.NONE;
+public class Retronism_TileFluidPipe extends TileEntity implements Retronism_IFluidHandler, Retronism_ISideConfigurable {
+	private int fluidType = Retronism_FluidType.NONE;
 	private int fluidAmount = 0;
 	private static final int MAX_FLUID = 500;
 	private static final int TRANSFER_RATE = 200;
@@ -17,21 +17,21 @@ public class RetroNism_TileFluidPipe extends TileEntity implements RetroNism_IFl
 
 	{
 		for (int s = 0; s < 6; s++) {
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_FLUID, RetroNism_SideConfig.MODE_INPUT_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_FLUID, Retronism_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
 	}
 	public boolean supportsType(int type) {
-		return type == RetroNism_SideConfig.TYPE_FLUID;
+		return type == Retronism_SideConfig.TYPE_FLUID;
 	}
 
 	public int receiveFluid(int type, int amountMB) {
-		if (type == RetroNism_FluidType.NONE) return 0;
-		if (fluidType != RetroNism_FluidType.NONE && fluidType != type) return 0;
+		if (type == Retronism_FluidType.NONE) return 0;
+		if (fluidType != Retronism_FluidType.NONE && fluidType != type) return 0;
 		int canReceive = TRANSFER_RATE - receivedThisTick;
 		if (canReceive <= 0) return 0;
 		int space = MAX_FLUID - fluidAmount;
@@ -48,7 +48,7 @@ public class RetroNism_TileFluidPipe extends TileEntity implements RetroNism_IFl
 		if (fluidType != type || fluidAmount <= 0) return 0;
 		int extracted = Math.min(amountMB, fluidAmount);
 		fluidAmount -= extracted;
-		if (fluidAmount == 0) fluidType = RetroNism_FluidType.NONE;
+		if (fluidAmount == 0) fluidType = Retronism_FluidType.NONE;
 		return extracted;
 	}
 
@@ -57,15 +57,15 @@ public class RetroNism_TileFluidPipe extends TileEntity implements RetroNism_IFl
 	public int getFluidCapacity() { return MAX_FLUID; }
 
 	public int getSideMode(int side) {
-		return RetroNism_SideConfig.get(sideConfig, side, RetroNism_SideConfig.TYPE_FLUID);
+		return Retronism_SideConfig.get(sideConfig, side, Retronism_SideConfig.TYPE_FLUID);
 	}
 
 	private boolean canSendTo(int side, TileEntity te) {
-		if (!RetroNism_SideConfig.canOutput(getSideMode(side))) return false;
-		int oppSide = RetroNism_SideConfig.oppositeSide(side);
-		if (te instanceof RetroNism_ISideConfigurable) {
-			int neighborMode = RetroNism_SideConfig.get(((RetroNism_ISideConfigurable) te).getSideConfig(), oppSide, RetroNism_SideConfig.TYPE_FLUID);
-			if (!RetroNism_SideConfig.canInput(neighborMode)) return false;
+		if (!Retronism_SideConfig.canOutput(getSideMode(side))) return false;
+		int oppSide = Retronism_SideConfig.oppositeSide(side);
+		if (te instanceof Retronism_ISideConfigurable) {
+			int neighborMode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, Retronism_SideConfig.TYPE_FLUID);
+			if (!Retronism_SideConfig.canInput(neighborMode)) return false;
 		}
 		return true;
 	}
@@ -81,10 +81,10 @@ public class RetroNism_TileFluidPipe extends TileEntity implements RetroNism_IFl
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
-			if (te instanceof RetroNism_IFluidHandler && !(te instanceof RetroNism_TileFluidPipe)) {
-				if (((RetroNism_IFluidHandler) te).getFluidAmount() < ((RetroNism_IFluidHandler) te).getFluidCapacity()) receivers++;
-			} else if (te instanceof RetroNism_TileFluidPipe) {
-				if (((RetroNism_TileFluidPipe) te).fluidAmount < this.fluidAmount) receivers++;
+			if (te instanceof Retronism_IFluidHandler && !(te instanceof Retronism_TileFluidPipe)) {
+				if (((Retronism_IFluidHandler) te).getFluidAmount() < ((Retronism_IFluidHandler) te).getFluidCapacity()) receivers++;
+			} else if (te instanceof Retronism_TileFluidPipe) {
+				if (((Retronism_TileFluidPipe) te).fluidAmount < this.fluidAmount) receivers++;
 			}
 		}
 
@@ -99,14 +99,14 @@ public class RetroNism_TileFluidPipe extends TileEntity implements RetroNism_IFl
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
-			if (te instanceof RetroNism_IFluidHandler && !(te instanceof RetroNism_TileFluidPipe)) {
-				RetroNism_IFluidHandler handler = (RetroNism_IFluidHandler) te;
+			if (te instanceof Retronism_IFluidHandler && !(te instanceof Retronism_TileFluidPipe)) {
+				Retronism_IFluidHandler handler = (Retronism_IFluidHandler) te;
 				if (handler.getFluidAmount() < handler.getFluidCapacity()) {
 					int toSend = Math.min(perReceiver, fluidAmount);
 					fluidAmount -= handler.receiveFluid(fluidType, toSend);
 				}
-			} else if (te instanceof RetroNism_TileFluidPipe) {
-				RetroNism_TileFluidPipe other = (RetroNism_TileFluidPipe) te;
+			} else if (te instanceof Retronism_TileFluidPipe) {
+				Retronism_TileFluidPipe other = (Retronism_TileFluidPipe) te;
 				if (other.fluidAmount < this.fluidAmount) {
 					int toSend = Math.min(perReceiver, fluidAmount);
 					fluidAmount -= other.receiveFluid(fluidType, toSend);
@@ -114,7 +114,7 @@ public class RetroNism_TileFluidPipe extends TileEntity implements RetroNism_IFl
 			}
 		}
 
-		if (fluidAmount == 0) fluidType = RetroNism_FluidType.NONE;
+		if (fluidAmount == 0) fluidType = Retronism_FluidType.NONE;
 	}
 
 	public void readFromNBT(NBTTagCompound nbt) {

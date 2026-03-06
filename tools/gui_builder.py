@@ -1,5 +1,5 @@
 """
-RetroNism GUI Texture Builder
+Retronism GUI Texture Builder
 Deterministic, pixel-perfect GUI texture generator for Minecraft Beta 1.7.3.
 
 Usage:

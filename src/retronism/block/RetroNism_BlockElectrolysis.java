@@ -8,15 +8,15 @@ import retronism.gui.*;
 
 import java.util.Random;
 
-public class RetroNism_BlockElectrolysis extends BlockContainer {
+public class Retronism_BlockElectrolysis extends BlockContainer {
 
-	public RetroNism_BlockElectrolysis(int id, int textureIndex) {
+	public Retronism_BlockElectrolysis(int id, int textureIndex) {
 		super(id, Material.iron);
 		this.blockIndexInTexture = textureIndex;
 	}
 
 	protected TileEntity getBlockEntity() {
-		return new RetroNism_TileElectrolysis();
+		return new Retronism_TileElectrolysis();
 	}
 
 	public int idDropped(int metadata, Random random) {
@@ -29,8 +29,8 @@ public class RetroNism_BlockElectrolysis extends BlockContainer {
 
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {
 		if (world.multiplayerWorld) return true;
-		RetroNism_TileElectrolysis tileEntity = (RetroNism_TileElectrolysis) world.getBlockTileEntity(x, y, z);
-		ModLoader.OpenGUI(player, new RetroNism_GuiElectrolysis(player.inventory, tileEntity));
+		Retronism_TileElectrolysis tileEntity = (Retronism_TileElectrolysis) world.getBlockTileEntity(x, y, z);
+		ModLoader.OpenGUI(player, new Retronism_GuiElectrolysis(player.inventory, tileEntity));
 		return true;
 	}
 }

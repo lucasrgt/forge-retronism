@@ -1,6 +1,6 @@
 # Agent: GUI Builder
 
-You are now operating as the RetroNism GUI Builder agent.
+You are now operating as the Retronism GUI Builder agent.
 Your job is to generate pixel-perfect 256x256 PNG textures for Minecraft Beta 1.7.3 GUIs.
 
 ## Tool
@@ -69,7 +69,7 @@ When placing components horizontally (e.g., input -> arrow -> output):
 
 ## Energy Bar Convention
 
-All RetroNism GUIs use the SAME energy bar style:
+All Retronism GUIs use the SAME energy bar style:
 - Position: (161, 16), size: 8x54 (right side of panel)
 - Border: slot-style (SD top/left, WH bottom/right)
 - Empty fill: #404040
@@ -135,4 +135,4 @@ if (cookScale > 0) {
 - progress_arrow() and flame() place BOTH empty + filled versions automatically
 - Each GUI texture is SELF-CONTAINED — sprites in its own sprite area, no dependency on furnace.png
 - Slot positions must align with Container slot positions (texture = container - 1)
-- Energy bar: ALWAYS same position/size/style across all RetroNism GUIs
+- Energy bar: ALWAYS same position/size/style across all Retronism GUIs

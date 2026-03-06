@@ -5,11 +5,11 @@ import org.junit.Before;
 import static org.junit.Assert.*;
 
 public class ElectrolysisTest {
-	private RetroNism_TileElectrolysis tile;
+	private Retronism_TileElectrolysis tile;
 
 	@Before
 	public void setUp() {
-		tile = new RetroNism_TileElectrolysis();
+		tile = new Retronism_TileElectrolysis();
 	}
 
 	@Test
@@ -37,7 +37,7 @@ public class ElectrolysisTest {
 
 	@Test
 	public void testReceiveWater() {
-		int accepted = tile.receiveFluid(RetroNism_FluidType.WATER, 500);
+		int accepted = tile.receiveFluid(Retronism_FluidType.WATER, 500);
 		assertEquals(500, accepted);
 		assertEquals(500, tile.waterStored);
 	}
@@ -50,20 +50,20 @@ public class ElectrolysisTest {
 
 	@Test
 	public void testRejectFluidNone() {
-		int accepted = tile.receiveFluid(RetroNism_FluidType.NONE, 500);
+		int accepted = tile.receiveFluid(Retronism_FluidType.NONE, 500);
 		assertEquals(0, accepted);
 	}
 
 	@Test
 	public void testReceiveGasRejected() {
-		int accepted = tile.receiveGas(RetroNism_GasType.HYDROGEN, 100);
+		int accepted = tile.receiveGas(Retronism_GasType.HYDROGEN, 100);
 		assertEquals("Electrolysis should not accept gas input", 0, accepted);
 	}
 
 	@Test
 	public void testExtractHydrogen() {
 		tile.hydrogenStored = 500;
-		int extracted = tile.extractGas(RetroNism_GasType.HYDROGEN, 200);
+		int extracted = tile.extractGas(Retronism_GasType.HYDROGEN, 200);
 		assertEquals(200, extracted);
 		assertEquals(300, tile.hydrogenStored);
 	}
@@ -71,7 +71,7 @@ public class ElectrolysisTest {
 	@Test
 	public void testExtractOxygen() {
 		tile.oxygenStored = 300;
-		int extracted = tile.extractGas(RetroNism_GasType.OXYGEN, 200);
+		int extracted = tile.extractGas(Retronism_GasType.OXYGEN, 200);
 		assertEquals(200, extracted);
 		assertEquals(100, tile.oxygenStored);
 	}
@@ -79,14 +79,14 @@ public class ElectrolysisTest {
 	@Test
 	public void testExtractWrongGasType() {
 		tile.hydrogenStored = 500;
-		int extracted = tile.extractGas(RetroNism_GasType.OXYGEN, 200);
+		int extracted = tile.extractGas(Retronism_GasType.OXYGEN, 200);
 		assertEquals(0, extracted);
 	}
 
 	@Test
 	public void testCannotExtractFluid() {
 		tile.waterStored = 5000;
-		int extracted = tile.extractFluid(RetroNism_FluidType.WATER, 100);
+		int extracted = tile.extractFluid(Retronism_FluidType.WATER, 100);
 		assertEquals("Electrolysis should not allow fluid extraction", 0, extracted);
 	}
 
@@ -107,9 +107,9 @@ public class ElectrolysisTest {
 
 	@Test
 	public void testWaterCapacity() {
-		int first = tile.receiveFluid(RetroNism_FluidType.WATER, 8000);
+		int first = tile.receiveFluid(Retronism_FluidType.WATER, 8000);
 		assertEquals(8000, first);
-		int second = tile.receiveFluid(RetroNism_FluidType.WATER, 1);
+		int second = tile.receiveFluid(Retronism_FluidType.WATER, 1);
 		assertEquals(0, second);
 	}
 
@@ -127,9 +127,9 @@ public class ElectrolysisTest {
 		// After 200 ticks of processing:
 		// water should decrease by 1000, H2 increase by 1000, O2 increase by 500
 		// We can't call updateEntity (needs world), but we verify the constants are accessible
-		assertEquals(32000, RetroNism_TileElectrolysis.MAX_ENERGY);
-		assertEquals(8000, RetroNism_TileElectrolysis.MAX_WATER);
-		assertEquals(8000, RetroNism_TileElectrolysis.MAX_HYDROGEN);
-		assertEquals(8000, RetroNism_TileElectrolysis.MAX_OXYGEN);
+		assertEquals(32000, Retronism_TileElectrolysis.MAX_ENERGY);
+		assertEquals(8000, Retronism_TileElectrolysis.MAX_WATER);
+		assertEquals(8000, Retronism_TileElectrolysis.MAX_HYDROGEN);
+		assertEquals(8000, Retronism_TileElectrolysis.MAX_OXYGEN);
 	}
 }

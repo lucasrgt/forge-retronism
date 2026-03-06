@@ -2,13 +2,13 @@ package retronism.tile;
 
 import net.minecraft.src.*;
 
-public class RetroNism_TextureGasOverlayFX extends TextureFX {
+public class Retronism_TextureGasOverlayFX extends TextureFX {
 	private float[] field_g = new float[256];
 	private float[] field_h = new float[256];
 	private float[] field_i = new float[256];
 	private float[] field_j = new float[256];
 
-	public RetroNism_TextureGasOverlayFX(int slot) {
+	public Retronism_TextureGasOverlayFX(int slot) {
 		super(slot);
 	}
 

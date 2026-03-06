@@ -10,7 +10,7 @@ import org.lwjgl.opengl.GL11;
 import java.awt.image.BufferedImage;
 import net.minecraft.client.Minecraft;
 
-public class mod_RetroNism extends BaseMod {
+public class mod_Retronism extends BaseMod {
 
 	public static int cableRenderID;
 	public static int fluidPipeRenderID;
@@ -18,106 +18,106 @@ public class mod_RetroNism extends BaseMod {
 	public static int megaPipeRenderID;
 	public static final int GAS_OVERLAY_INDEX = 175;
 
-	public static final Block testBlock = (new RetroNism_BlockTest(200, 1))
+	public static final Block testBlock = (new Retronism_BlockTest(200, 1))
 		.setHardness(3.0F)
 		.setResistance(5.0F)
 		.setStepSound(Block.soundMetalFootstep)
 		.setBlockName("retroNismTest");
 
-	public static final Block cableBlock = (new RetroNism_BlockCable(201, 22))
+	public static final Block cableBlock = (new Retronism_BlockCable(201, 22))
 		.setHardness(0.5F)
 		.setResistance(2.0F)
 		.setStepSound(Block.soundMetalFootstep)
 		.setBlockName("retroNismCable");
 
-	public static final Block crusherBlock = (new RetroNism_BlockCrusher(202, 45))
+	public static final Block crusherBlock = (new Retronism_BlockCrusher(202, 45))
 		.setHardness(3.5F)
 		.setResistance(5.0F)
 		.setStepSound(Block.soundStoneFootstep)
 		.setBlockName("retroNismCrusher");
 
-	public static final Block generatorBlock = (new RetroNism_BlockGenerator(203, 45))
+	public static final Block generatorBlock = (new Retronism_BlockGenerator(203, 45))
 		.setHardness(3.5F)
 		.setResistance(5.0F)
 		.setStepSound(Block.soundStoneFootstep)
 		.setBlockName("retroNismGenerator");
 
-	public static final Block pumpBlock = (new RetroNism_BlockPump(204, 45))
+	public static final Block pumpBlock = (new Retronism_BlockPump(204, 45))
 		.setHardness(3.5F)
 		.setResistance(5.0F)
 		.setStepSound(Block.soundStoneFootstep)
 		.setBlockName("retroNismPump");
 
-	public static final Block fluidPipeBlock = (new RetroNism_BlockFluidPipe(205, 23))
+	public static final Block fluidPipeBlock = (new Retronism_BlockFluidPipe(205, 23))
 		.setHardness(0.5F)
 		.setResistance(2.0F)
 		.setStepSound(Block.soundMetalFootstep)
 		.setBlockName("retroNismFluidPipe");
 
-	public static final Block electrolysisBlock = (new RetroNism_BlockElectrolysis(206, 45))
+	public static final Block electrolysisBlock = (new Retronism_BlockElectrolysis(206, 45))
 		.setHardness(3.5F)
 		.setResistance(5.0F)
 		.setStepSound(Block.soundStoneFootstep)
 		.setBlockName("retroNismElectrolysis");
 
-	public static final Block gasPipeBlock = (new RetroNism_BlockGasPipe(207, 54))
+	public static final Block gasPipeBlock = (new Retronism_BlockGasPipe(207, 54))
 		.setHardness(0.5F)
 		.setResistance(2.0F)
 		.setStepSound(Block.soundMetalFootstep)
 		.setBlockName("retroNismGasPipe");
 
-	public static final Block fluidTankBlock = (new RetroNism_BlockFluidTank(208, 45))
+	public static final Block fluidTankBlock = (new Retronism_BlockFluidTank(208, 45))
 		.setHardness(3.5F)
 		.setResistance(5.0F)
 		.setStepSound(Block.soundStoneFootstep)
 		.setBlockName("retroNismFluidTank");
 
-	public static final Block gasTankBlock = (new RetroNism_BlockGasTank(209, 45))
+	public static final Block gasTankBlock = (new Retronism_BlockGasTank(209, 45))
 		.setHardness(3.5F)
 		.setResistance(5.0F)
 		.setStepSound(Block.soundStoneFootstep)
 		.setBlockName("retroNismGasTank");
 
-	public static final Block megaPipeBlock = (new RetroNism_BlockMegaPipe(210, 22))
+	public static final Block megaPipeBlock = (new Retronism_BlockMegaPipe(210, 22))
 		.setBlockName("retroNismMegaPipe");
 
-	public static final Item testItem = (new RetroNism_ItemTest(500))
+	public static final Item testItem = (new Retronism_ItemTest(500))
 		.setIconIndex(7 + 3 * 16)
 		.setItemName("retroNismTestItem");
 
-	public static final Item ironDust = (new RetroNism_ItemDust(501))
+	public static final Item ironDust = (new Retronism_ItemDust(501))
 		.setIconIndex(13 + 1 * 16)
 		.setItemName("retroNismIronDust");
 
-	public static final Item goldDust = (new RetroNism_ItemDust(502))
+	public static final Item goldDust = (new Retronism_ItemDust(502))
 		.setIconIndex(13 + 2 * 16)
 		.setItemName("retroNismGoldDust");
 
-	public static final Item diamondDust = (new RetroNism_ItemDust(503))
+	public static final Item diamondDust = (new Retronism_ItemDust(503))
 		.setIconIndex(13 + 3 * 16)
 		.setItemName("retroNismDiamondDust");
 
-	public static final Item obsidianDust = (new RetroNism_ItemDust(504))
+	public static final Item obsidianDust = (new Retronism_ItemDust(504))
 		.setIconIndex(13 + 4 * 16)
 		.setItemName("retroNismObsidianDust");
 
-	public static final Item gasCellEmpty = (new RetroNism_ItemGasCell(505))
+	public static final Item gasCellEmpty = (new Retronism_ItemGasCell(505))
 		.setIconIndex(10 + 6 * 16)
 		.setItemName("retroNismGasCellEmpty");
 
-	public static final Item gasCellHydrogen = (new RetroNism_ItemGasCell(506))
+	public static final Item gasCellHydrogen = (new Retronism_ItemGasCell(506))
 		.setIconIndex(11 + 6 * 16)
 		.setItemName("retroNismGasCellHydrogen");
 
-	public static final Item gasCellOxygen = (new RetroNism_ItemGasCell(507))
+	public static final Item gasCellOxygen = (new Retronism_ItemGasCell(507))
 		.setIconIndex(12 + 6 * 16)
 		.setItemName("retroNismGasCellOxygen");
 
-	public static final Item wrench = (new RetroNism_ItemWrench(508))
+	public static final Item wrench = (new Retronism_ItemWrench(508))
 		.setIconIndex(10 + 1 * 16)
 		.setItemName("retroNismWrench");
 
-	public mod_RetroNism() {
+	public mod_Retronism() {
 		cableRenderID = ModLoader.getUniqueBlockModelID(this, true);
 		fluidPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
 		gasPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
@@ -134,18 +134,18 @@ public class mod_RetroNism extends BaseMod {
 		ModLoader.RegisterBlock(fluidTankBlock);
 		ModLoader.RegisterBlock(gasTankBlock);
 		ModLoader.RegisterBlock(megaPipeBlock);
-		ModLoader.RegisterTileEntity(RetroNism_TileCrusher.class, "Crusher");
-		ModLoader.RegisterTileEntity(RetroNism_TileGenerator.class, "Generator");
-		ModLoader.RegisterTileEntity(RetroNism_TileCable.class, "Cable");
-		ModLoader.RegisterTileEntity(RetroNism_TilePump.class, "Pump");
-		ModLoader.RegisterTileEntity(RetroNism_TileFluidPipe.class, "FluidPipe");
-		ModLoader.RegisterTileEntity(RetroNism_TileElectrolysis.class, "Electrolysis");
-		ModLoader.RegisterTileEntity(RetroNism_TileGasPipe.class, "GasPipe");
-		ModLoader.RegisterTileEntity(RetroNism_TileFluidTank.class, "FluidTank");
-		ModLoader.RegisterTileEntity(RetroNism_TileGasTank.class, "GasTank");
-		ModLoader.RegisterTileEntity(RetroNism_TileMegaPipe.class, "MegaPipe");
-		ModLoader.AddName(testBlock, "RetroNism Test Block");
-		ModLoader.AddName(cableBlock, "RetroNism Cable");
+		ModLoader.RegisterTileEntity(Retronism_TileCrusher.class, "Crusher");
+		ModLoader.RegisterTileEntity(Retronism_TileGenerator.class, "Generator");
+		ModLoader.RegisterTileEntity(Retronism_TileCable.class, "Cable");
+		ModLoader.RegisterTileEntity(Retronism_TilePump.class, "Pump");
+		ModLoader.RegisterTileEntity(Retronism_TileFluidPipe.class, "FluidPipe");
+		ModLoader.RegisterTileEntity(Retronism_TileElectrolysis.class, "Electrolysis");
+		ModLoader.RegisterTileEntity(Retronism_TileGasPipe.class, "GasPipe");
+		ModLoader.RegisterTileEntity(Retronism_TileFluidTank.class, "FluidTank");
+		ModLoader.RegisterTileEntity(Retronism_TileGasTank.class, "GasTank");
+		ModLoader.RegisterTileEntity(Retronism_TileMegaPipe.class, "MegaPipe");
+		ModLoader.AddName(testBlock, "Retronism Test Block");
+		ModLoader.AddName(cableBlock, "Retronism Cable");
 		ModLoader.AddName(crusherBlock, "Crusher");
 		ModLoader.AddName(generatorBlock, "Generator");
 		ModLoader.AddName(pumpBlock, "Water Pump");
@@ -155,7 +155,7 @@ public class mod_RetroNism extends BaseMod {
 		ModLoader.AddName(fluidTankBlock, "Fluid Tank");
 		ModLoader.AddName(gasTankBlock, "Gas Tank");
 		ModLoader.AddName(megaPipeBlock, "Mega Pipe");
-		ModLoader.AddName(testItem, "RetroNism Test Item");
+		ModLoader.AddName(testItem, "Retronism Test Item");
 		ModLoader.AddName(ironDust, "Iron Dust");
 		ModLoader.AddName(goldDust, "Gold Dust");
 		ModLoader.AddName(diamondDust, "Diamond Dust");
@@ -280,11 +280,11 @@ public class mod_RetroNism extends BaseMod {
 		);
 
 		// Crusher recipes: ore -> 2 dust
-		RetroNism_RecipesCrusher.crushing().addCrushing(Block.oreIron.blockID, new ItemStack(ironDust, 2));
-		RetroNism_RecipesCrusher.crushing().addCrushing(Block.oreGold.blockID, new ItemStack(goldDust, 2));
+		Retronism_RecipesCrusher.crushing().addCrushing(Block.oreIron.blockID, new ItemStack(ironDust, 2));
+		Retronism_RecipesCrusher.crushing().addCrushing(Block.oreGold.blockID, new ItemStack(goldDust, 2));
 		// Crusher recipes: material -> dust
-		RetroNism_RecipesCrusher.crushing().addCrushing(Item.diamond.shiftedIndex, new ItemStack(diamondDust, 2));
-		RetroNism_RecipesCrusher.crushing().addCrushing(Block.obsidian.blockID, new ItemStack(obsidianDust, 2));
+		Retronism_RecipesCrusher.crushing().addCrushing(Item.diamond.shiftedIndex, new ItemStack(diamondDust, 2));
+		Retronism_RecipesCrusher.crushing().addCrushing(Block.obsidian.blockID, new ItemStack(obsidianDust, 2));
 
 		// Smelting recipes: dust -> ingot
 		FurnaceRecipes.smelting().addSmelting(ironDust.shiftedIndex, new ItemStack(Item.ingotIron));
@@ -352,17 +352,17 @@ public class mod_RetroNism extends BaseMod {
 
 	private static int getPipeSideMode(IBlockAccess world, int x, int y, int z, int side, int type) {
 		TileEntity te = world.getBlockTileEntity(x, y, z);
-		if (te instanceof RetroNism_ISideConfigurable) {
-			return RetroNism_SideConfig.get(((RetroNism_ISideConfigurable) te).getSideConfig(), side, type);
+		if (te instanceof Retronism_ISideConfigurable) {
+			return Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), side, type);
 		}
-		return RetroNism_SideConfig.MODE_INPUT_OUTPUT;
+		return Retronism_SideConfig.MODE_INPUT_OUTPUT;
 	}
 
 	private boolean renderCable(RenderBlocks renderer, IBlockAccess world, int x, int y, int z, Block block) {
 		float min = 6.0F / 16.0F;
 		float max = 10.0F / 16.0F;
-		RetroNism_BlockCable cable = (RetroNism_BlockCable) block;
-		int E = RetroNism_SideConfig.TYPE_ENERGY;
+		Retronism_BlockCable cable = (Retronism_BlockCable) block;
+		int E = Retronism_SideConfig.TYPE_ENERGY;
 
 		// Center piece
 		block.setBlockBounds(min, min, min, max, max, max);
@@ -371,8 +371,8 @@ public class mod_RetroNism extends BaseMod {
 		// Down (-Y) = SIDE_BOTTOM(0)
 		if(cable.canConnectTo(world, x, y - 1, z)) {
 			int mode = getPipeSideMode(world, x, y, z, 0, E);
-			if (mode != RetroNism_SideConfig.MODE_NONE) {
-				float end = (mode == RetroNism_SideConfig.MODE_INPUT) ? INSET : (mode == RetroNism_SideConfig.MODE_OUTPUT) ? -INSET : 0.0F;
+			if (mode != Retronism_SideConfig.MODE_NONE) {
+				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? -INSET : 0.0F;
 				block.setBlockBounds(min, end, min, max, min, max);
 				renderer.renderStandardBlock(block, x, y, z);
 			}
@@ -380,8 +380,8 @@ public class mod_RetroNism extends BaseMod {
 		// Up (+Y) = SIDE_TOP(1)
 		if(cable.canConnectTo(world, x, y + 1, z)) {
 			int mode = getPipeSideMode(world, x, y, z, 1, E);
-			if (mode != RetroNism_SideConfig.MODE_NONE) {
-				float end = (mode == RetroNism_SideConfig.MODE_INPUT) ? 1.0F - INSET : (mode == RetroNism_SideConfig.MODE_OUTPUT) ? 1.0F + INSET : 1.0F;
+			if (mode != Retronism_SideConfig.MODE_NONE) {
+				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? 1.0F - INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? 1.0F + INSET : 1.0F;
 				block.setBlockBounds(min, max, min, max, end, max);
 				renderer.renderStandardBlock(block, x, y, z);
 			}
@@ -389,8 +389,8 @@ public class mod_RetroNism extends BaseMod {
 		// North (-Z) = SIDE_NORTH(2)
 		if(cable.canConnectTo(world, x, y, z - 1)) {
 			int mode = getPipeSideMode(world, x, y, z, 2, E);
-			if (mode != RetroNism_SideConfig.MODE_NONE) {
-				float end = (mode == RetroNism_SideConfig.MODE_INPUT) ? INSET : (mode == RetroNism_SideConfig.MODE_OUTPUT) ? -INSET : 0.0F;
+			if (mode != Retronism_SideConfig.MODE_NONE) {
+				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? -INSET : 0.0F;
 				block.setBlockBounds(min, min, end, max, max, min);
 				renderer.renderStandardBlock(block, x, y, z);
 			}
@@ -398,8 +398,8 @@ public class mod_RetroNism extends BaseMod {
 		// South (+Z) = SIDE_SOUTH(3)
 		if(cable.canConnectTo(world, x, y, z + 1)) {
 			int mode = getPipeSideMode(world, x, y, z, 3, E);
-			if (mode != RetroNism_SideConfig.MODE_NONE) {
-				float end = (mode == RetroNism_SideConfig.MODE_INPUT) ? 1.0F - INSET : (mode == RetroNism_SideConfig.MODE_OUTPUT) ? 1.0F + INSET : 1.0F;
+			if (mode != Retronism_SideConfig.MODE_NONE) {
+				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? 1.0F - INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? 1.0F + INSET : 1.0F;
 				block.setBlockBounds(min, min, max, max, max, end);
 				renderer.renderStandardBlock(block, x, y, z);
 			}
@@ -407,8 +407,8 @@ public class mod_RetroNism extends BaseMod {
 		// West (-X) = SIDE_WEST(4)
 		if(cable.canConnectTo(world, x - 1, y, z)) {
 			int mode = getPipeSideMode(world, x, y, z, 4, E);
-			if (mode != RetroNism_SideConfig.MODE_NONE) {
-				float end = (mode == RetroNism_SideConfig.MODE_INPUT) ? INSET : (mode == RetroNism_SideConfig.MODE_OUTPUT) ? -INSET : 0.0F;
+			if (mode != Retronism_SideConfig.MODE_NONE) {
+				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? -INSET : 0.0F;
 				block.setBlockBounds(end, min, min, min, max, max);
 				renderer.renderStandardBlock(block, x, y, z);
 			}
@@ -416,8 +416,8 @@ public class mod_RetroNism extends BaseMod {
 		// East (+X) = SIDE_EAST(5)
 		if(cable.canConnectTo(world, x + 1, y, z)) {
 			int mode = getPipeSideMode(world, x, y, z, 5, E);
-			if (mode != RetroNism_SideConfig.MODE_NONE) {
-				float end = (mode == RetroNism_SideConfig.MODE_INPUT) ? 1.0F - INSET : (mode == RetroNism_SideConfig.MODE_OUTPUT) ? 1.0F + INSET : 1.0F;
+			if (mode != Retronism_SideConfig.MODE_NONE) {
+				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? 1.0F - INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? 1.0F + INSET : 1.0F;
 				block.setBlockBounds(max, min, min, end, max, max);
 				renderer.renderStandardBlock(block, x, y, z);
 			}
@@ -428,20 +428,20 @@ public class mod_RetroNism extends BaseMod {
 	}
 
 	private static float negBound(int mode) {
-		if (mode == RetroNism_SideConfig.MODE_INPUT) return INSET;
-		if (mode == RetroNism_SideConfig.MODE_OUTPUT) return -INSET;
+		if (mode == Retronism_SideConfig.MODE_INPUT) return INSET;
+		if (mode == Retronism_SideConfig.MODE_OUTPUT) return -INSET;
 		return 0.0F;
 	}
 	private static float posBound(int mode) {
-		if (mode == RetroNism_SideConfig.MODE_INPUT) return 1.0F - INSET;
-		if (mode == RetroNism_SideConfig.MODE_OUTPUT) return 1.0F + INSET;
+		if (mode == Retronism_SideConfig.MODE_INPUT) return 1.0F - INSET;
+		if (mode == Retronism_SideConfig.MODE_OUTPUT) return 1.0F + INSET;
 		return 1.0F;
 	}
 
 	private void renderPipeArm(RenderBlocks renderer, Block block, int x, int y, int z,
 			int side, int mode, float min, float max, float iMin, float iMax,
 			float fillRatio, int fluidTex, float eps) {
-		if (mode == RetroNism_SideConfig.MODE_NONE) return;
+		if (mode == Retronism_SideConfig.MODE_NONE) return;
 		boolean hasFluid = fillRatio > 0 && fluidTex >= 0;
 		float fillTop = iMin + (iMax - iMin) * fillRatio;
 
@@ -532,14 +532,14 @@ public class mod_RetroNism extends BaseMod {
 		float iMin = 6.0F / 16.0F;
 		float iMax = 10.0F / 16.0F;
 		float eps = 0.002F;
-		RetroNism_BlockFluidPipe pipe = (RetroNism_BlockFluidPipe) block;
-		int F = RetroNism_SideConfig.TYPE_FLUID;
+		Retronism_BlockFluidPipe pipe = (Retronism_BlockFluidPipe) block;
+		int F = Retronism_SideConfig.TYPE_FLUID;
 
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		float fillRatio = 0.0F;
 		int fluidTex = -1;
-		if (te instanceof RetroNism_TileFluidPipe) {
-			RetroNism_TileFluidPipe tilePipe = (RetroNism_TileFluidPipe) te;
+		if (te instanceof Retronism_TileFluidPipe) {
+			Retronism_TileFluidPipe tilePipe = (Retronism_TileFluidPipe) te;
 			if (tilePipe.getFluidAmount() > 0) {
 				float visualCapacity = 200.0F;
 				fillRatio = Math.min(1.0F, (float) tilePipe.getFluidAmount() / visualCapacity);
@@ -576,7 +576,7 @@ public class mod_RetroNism extends BaseMod {
 
 	private void renderGasArm(RenderBlocks renderer, Block block, int x, int y, int z,
 			int side, int mode, float min, float max, float iMin, float iMax, boolean hasGas, int gasColor) {
-		if (mode == RetroNism_SideConfig.MODE_NONE) return;
+		if (mode == Retronism_SideConfig.MODE_NONE) return;
 		switch (side) {
 			case 0: {
 				float end = negBound(mode);
@@ -628,17 +628,17 @@ public class mod_RetroNism extends BaseMod {
 		float max = 11.0F / 16.0F;
 		float iMin = 6.0F / 16.0F;
 		float iMax = 10.0F / 16.0F;
-		RetroNism_BlockGasPipe pipe = (RetroNism_BlockGasPipe) block;
-		int G = RetroNism_SideConfig.TYPE_GAS;
+		Retronism_BlockGasPipe pipe = (Retronism_BlockGasPipe) block;
+		int G = Retronism_SideConfig.TYPE_GAS;
 
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		boolean hasGas = false;
 		int gasColor = 0xFFFFFFFF;
-		if (te instanceof RetroNism_TileGasPipe) {
-			RetroNism_TileGasPipe tilePipe = (RetroNism_TileGasPipe) te;
+		if (te instanceof Retronism_TileGasPipe) {
+			Retronism_TileGasPipe tilePipe = (Retronism_TileGasPipe) te;
 			if (tilePipe.getGasAmount() > 0) {
 				hasGas = true;
-				gasColor = RetroNism_GasType.getColor(tilePipe.getGasType());
+				gasColor = Retronism_GasType.getColor(tilePipe.getGasType());
 			}
 		}
 
@@ -706,12 +706,12 @@ public class mod_RetroNism extends BaseMod {
 
 	// MEGA_TUBE_TYPES maps tube index to SideConfig type: 0=energy, 1=fluid, 2=gas, 3=item
 	private static final int[] MEGA_TUBE_TYPES = {
-		RetroNism_SideConfig.TYPE_ENERGY, RetroNism_SideConfig.TYPE_FLUID,
-		RetroNism_SideConfig.TYPE_GAS, RetroNism_SideConfig.TYPE_ITEM
+		Retronism_SideConfig.TYPE_ENERGY, Retronism_SideConfig.TYPE_FLUID,
+		Retronism_SideConfig.TYPE_GAS, Retronism_SideConfig.TYPE_ITEM
 	};
 
 	private boolean renderMegaPipe(RenderBlocks renderer, IBlockAccess world, int x, int y, int z, Block block) {
-		RetroNism_BlockMegaPipe mega = (RetroNism_BlockMegaPipe) block;
+		Retronism_BlockMegaPipe mega = (Retronism_BlockMegaPipe) block;
 
 		boolean[] connected = new boolean[6];
 		for (int side = 0; side < 6; side++) {
@@ -731,7 +731,7 @@ public class mod_RetroNism extends BaseMod {
 			for (int side = 0; side < 6; side++) {
 				if (!connected[side]) continue;
 				int mode = getPipeSideMode(world, x, y, z, side, type);
-				if (mode == RetroNism_SideConfig.MODE_NONE) continue;
+				if (mode == Retronism_SideConfig.MODE_NONE) continue;
 
 				switch (side) {
 					case 0: { // Down
@@ -806,7 +806,7 @@ public class mod_RetroNism extends BaseMod {
 	}
 
 	public void RegisterAnimation(Minecraft game) {
-		ModLoader.addAnimation(new RetroNism_TextureGasOverlayFX(GAS_OVERLAY_INDEX));
+		ModLoader.addAnimation(new Retronism_TextureGasOverlayFX(GAS_OVERLAY_INDEX));
 	}
 
 	public String Version() {

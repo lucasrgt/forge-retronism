@@ -3,22 +3,23 @@ package retronism.gui;
 import net.minecraft.src.*;
 import retronism.api.*;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
-public class RetroNism_GuiSideConfigHelper extends Gui {
-	private RetroNism_ISideConfigurable tile;
+public class Retronism_GuiSideConfigHelper extends Gui {
+	private Retronism_ISideConfigurable tile;
 	private int machineBlockId;
 	public boolean configMode = false;
 	private static final RenderItem itemRenderer = new RenderItem();
 
-	private static final int TAB_W = 26;
-	private static final int TAB_H = 26;
+	private static final int TAB_W = 30;
+	private static final int TAB_H = 28;
 	private static final int CELL_SIZE = 14;
 	private static final int ROW_H = 22;
 	private static final int START_Y = 24;
 	private static final String[] SIDE_NAMES = {"Bottom", "Top", "North", "South", "West", "East"};
 	private static final String[] TYPE_SHORT = {"E", "F", "G", "I"};
 
-	public RetroNism_GuiSideConfigHelper(RetroNism_ISideConfigurable tile, int machineBlockId) {
+	public Retronism_GuiSideConfigHelper(Retronism_ISideConfigurable tile, int machineBlockId) {
 		this.tile = tile;
 		this.machineBlockId = machineBlockId;
 	}
@@ -29,69 +30,97 @@ public class RetroNism_GuiSideConfigHelper extends Gui {
 
 	// Draw the two tabs above the GUI. Always called.
 	public void drawTabs(int guiLeft, int guiTop, FontRenderer font, RenderEngine renderEngine) {
+		// --- Pass 1: Tab backgrounds (2D, z=300 overlay) ---
 		GL11.glPushMatrix();
 		GL11.glTranslatef(0, 0, 300.0F);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 
-		drawTab(guiLeft, guiTop, TAB_W, TAB_H, !configMode, font, renderEngine,
-			new ItemStack(machineBlockId, 1, 0));
-		drawTab(guiLeft + TAB_W + 2, guiTop, TAB_W, TAB_H, configMode, font, renderEngine,
-			new ItemStack(mod_RetroNism.wrench, 1, 0));
+		drawTabBackground(guiLeft, guiTop, TAB_W, TAB_H, !configMode);
+		drawTabBackground(guiLeft + TAB_W + 2, guiTop, TAB_W, TAB_H, configMode);
+
+		// First tab inactive: extend left border down to merge with panel edge
+		if (configMode) {
+			drawRect(guiLeft, guiTop, guiLeft + 1, guiTop + 2, 0xFF000000);
+			drawRect(guiLeft + 1, guiTop, guiLeft + 2, guiTop + 1, 0xFFFFFFFF);
+		}
 
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glPopMatrix();
-	}
 
-	private void drawTab(int x, int y, int w, int h, boolean active, FontRenderer font, RenderEngine renderEngine, ItemStack icon) {
-		// y = guiTop. Panel border: y=black, y+1..y+2=white highlight.
-		// Active: extends 3px into panel covering border + highlight.
-		// Inactive: stops at y (panel border acts as bottom).
-		int top = y - h;
-		int bot = active ? (y + 4) : y;
-		int bg = active ? 0xFFC6C6C6 : 0xFF8B8B8B;
-
-		// --- Black outer border (rounded top corners, no bottom) ---
-		drawRect(x + 2, top, x + w - 2, top + 1, 0xFF000000);
-		drawRect(x + 1, top + 1, x + 2, top + 2, 0xFF000000);
-		drawRect(x + w - 2, top + 1, x + w - 1, top + 2, 0xFF000000);
-		drawRect(x, top + 2, x + 1, bot, 0xFF000000);
-		drawRect(x + w - 1, top + 2, x + w, bot, 0xFF000000);
-
-		// --- White highlight (2px thick, inner top + inner left) ---
-		drawRect(x + 2, top + 1, x + w - 2, top + 3, 0xFFFFFFFF);
-		drawRect(x + 1, top + 2, x + 3, bot, 0xFFFFFFFF);
-
-		// --- Dark shadow (2px thick, inner right) ---
-		drawRect(x + w - 3, top + 3, x + w - 1, bot, 0xFF555555);
-		drawRect(x + w - 3, top + 1, x + w - 2, top + 3, 0xFFFFFFFF);
-
-		// --- Background fill ---
-		drawRect(x + 3, top + 3, x + w - 3, bot, bg);
-
-		// Active: ensure connection area is fully bg (cover panel border + highlight + corner pixel)
-		if (active) {
-			drawRect(x + 1, y, x + w - 1, y + 4, bg);
-			drawRect(x, y, x + 1, y + 4, 0xFF000000);
-			drawRect(x + w - 1, y, x + w, y + 4, 0xFF000000);
-			drawRect(x + 1, y, x + 3, y + 4, 0xFFFFFFFF);
-			drawRect(x + w - 3, y, x + w - 1, y + 4, 0xFF555555);
-			drawRect(x + 3, y, x + w - 3, y + 4, bg);
-		}
-
-		// --- Item icon centered in tab ---
-		int iconX = x + (w - 16) / 2;
-		int iconY = top + (h - 16) / 2 + 1;
+		// --- Pass 2: Item icons ---
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glEnable(GL11.GL_LIGHTING);
+		GL11.glPushMatrix();
+		GL11.glRotatef(120.0F, 1.0F, 0.0F, 0.0F);
 		RenderHelper.enableStandardItemLighting();
-		itemRenderer.renderItemIntoGUI(font, renderEngine, icon, iconX, iconY);
+		GL11.glPopMatrix();
+		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+
+		GL11.glPushMatrix();
+		GL11.glTranslatef(0, 0, 300.0F);
+
+		int top = guiTop - TAB_H;
+		int iconY = top + (TAB_H - 16) / 2 + 1;
+		itemRenderer.renderItemIntoGUI(font, renderEngine,
+			new ItemStack(machineBlockId, 1, 0),
+			guiLeft + (TAB_W - 16) / 2, iconY);
+		itemRenderer.renderItemIntoGUI(font, renderEngine,
+			new ItemStack(mod_Retronism.wrench, 1, 0),
+			guiLeft + TAB_W + 2 + (TAB_W - 16) / 2, iconY);
+
+		GL11.glPopMatrix();
+		GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 		RenderHelper.disableStandardItemLighting();
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+	}
+
+	private void drawTabBackground(int x, int y, int w, int h, boolean active) {
+		int top = y - h;
+		int bot = active ? (y + 3) : y;
+		int bg = active ? 0xFFC6C6C6 : 0xFF8B8B8B;
+
+		// 1. Fill entire interior with bg first (no gaps)
+		drawRect(x + 1, top + 1, x + w - 3, top + 2, bg);
+		drawRect(x + 1, top + 2, x + w - 1, bot, bg);
+
+		// 2. Black outer border (on top of bg)
+		// Top edge + left corner (1-step) + right corner (2-step staircase)
+		drawRect(x + 2, top, x + w - 3, top + 1, 0xFF000000);
+		drawRect(x + 1, top + 1, x + 2, top + 2, 0xFF000000);
+		drawRect(x + w - 3, top + 1, x + w - 2, top + 2, 0xFF000000);
+		drawRect(x + w - 2, top + 2, x + w - 1, top + 3, 0xFF000000);
+		drawRect(x, top + 2, x + 1, bot, 0xFF000000);
+		drawRect(x + w - 1, top + 3, x + w, bot, 0xFF000000);
+
+		// 3. White highlight (2px thick, inner top + inner left)
+		drawRect(x + 2, top + 1, x + w - 3, top + 3, 0xFFFFFFFF);
+		drawRect(x + 1, top + 2, x + 3, bot, 0xFFFFFFFF);
+
+		// 4. Dark shadow (2px thick, inner right — 1px bg gap from highlight)
+		drawRect(x + w - 3, top + 3, x + w - 1, bot, 0xFF555555);
+
+		// 5. Round inner corner of highlight L-shape (1px diagonal)
+		drawRect(x + 3, top + 3, x + 4, top + 4, 0xFFFFFFFF);
+
+		// Active: connection area merges tab into panel
+		if (active) {
+			drawRect(x + 1, y, x + w - 1, y + 3, bg);
+			drawRect(x, y, x + 1, y + 3, 0xFF000000);
+			drawRect(x + w - 1, y, x + w, y + 1, 0xFF000000);
+			drawRect(x + w - 1, y + 1, x + w, y + 3, 0xFFFFFFFF);
+			drawRect(x + 1, y, x + 3, y + 3, 0xFFFFFFFF);
+			drawRect(x + w - 3, y, x + w - 1, y + 3, 0xFF555555);
+			drawRect(x + 3, y, x + w - 3, y + 3, bg);
+			drawRect(x + w - 2, y + 2, x + w - 1, y + 3, 0xFFFFFFFF);
+			// Cover stray white pixel from GUI panel border below left highlight
+			drawRect(x + 3, y + 3, x + 5, y + 4, bg);
+			// Extend left border down to merge with panel edge
+			drawRect(x, y + 3, x + 1, y + 5, 0xFF000000);
+			drawRect(x + 1, y + 3, x + 2, y + 4, 0xFFFFFFFF);
+		}
 	}
 
 	// Draw the full config overlay (replaces entire GUI content). Only called when configMode=true.
@@ -121,10 +150,10 @@ public class RetroNism_GuiSideConfigHelper extends Gui {
 
 			// Type cells
 			int cellX = guiLeft + 60;
-			for (int type = 0; type < RetroNism_SideConfig.TYPE_COUNT; type++) {
+			for (int type = 0; type < Retronism_SideConfig.TYPE_COUNT; type++) {
 				if (!tile.supportsType(type)) continue;
-				int mode = RetroNism_SideConfig.get(config, side, type);
-				int color = RetroNism_SideConfig.getColor(type, mode);
+				int mode = Retronism_SideConfig.get(config, side, type);
+				int color = Retronism_SideConfig.getColor(type, mode);
 
 				// Cell border + fill
 				drawRect(cellX, rowY + 1, cellX + CELL_SIZE, rowY + 1 + CELL_SIZE, 0xFF373737);
@@ -136,7 +165,7 @@ public class RetroNism_GuiSideConfigHelper extends Gui {
 				font.drawString(label, cellX + (CELL_SIZE - lw) / 2, rowY + 4, 0xFFFFFF);
 
 				// Mode name next to cell
-				String modeName = RetroNism_SideConfig.getModeName(mode);
+				String modeName = Retronism_SideConfig.getModeName(mode);
 				font.drawString(modeName, cellX + CELL_SIZE + 3, rowY + 4, 4210752);
 
 				cellX += CELL_SIZE + font.getStringWidth(modeName) + 8;
@@ -147,19 +176,19 @@ public class RetroNism_GuiSideConfigHelper extends Gui {
 		for (int side = 0; side < 6; side++) {
 			int rowY = guiTop + START_Y + side * ROW_H;
 			int cellX = guiLeft + 60;
-			for (int type = 0; type < RetroNism_SideConfig.TYPE_COUNT; type++) {
+			for (int type = 0; type < Retronism_SideConfig.TYPE_COUNT; type++) {
 				if (!tile.supportsType(type)) continue;
-				int mode = RetroNism_SideConfig.get(config, side, type);
+				int mode = Retronism_SideConfig.get(config, side, type);
 				if (mouseX >= cellX && mouseX < cellX + CELL_SIZE && mouseY >= rowY + 1 && mouseY < rowY + 1 + CELL_SIZE) {
-					String tip = "Click to cycle: " + RetroNism_SideConfig.getModeName(mode)
-						+ " -> " + RetroNism_SideConfig.getModeName(RetroNism_SideConfig.cycleMode(mode));
+					String tip = "Click to cycle: " + Retronism_SideConfig.getModeName(mode)
+						+ " -> " + Retronism_SideConfig.getModeName(Retronism_SideConfig.cycleMode(mode));
 					int tw = font.getStringWidth(tip);
 					int tx = mouseX + 8;
 					int ty = mouseY - 12;
 					drawRect(tx - 2, ty - 2, tx + tw + 2, ty + 10, 0xCC000000);
 					font.drawStringWithShadow(tip, tx, ty, 0xFFFFFF);
 				}
-				String modeName = RetroNism_SideConfig.getModeName(mode);
+				String modeName = Retronism_SideConfig.getModeName(mode);
 				cellX += CELL_SIZE + font.getStringWidth(modeName) + 8;
 			}
 		}
@@ -194,11 +223,11 @@ public class RetroNism_GuiSideConfigHelper extends Gui {
 		for (int side = 0; side < 6; side++) {
 			int rowY = guiTop + START_Y + side * ROW_H;
 			int cellX = guiLeft + 60;
-			for (int type = 0; type < RetroNism_SideConfig.TYPE_COUNT; type++) {
+			for (int type = 0; type < Retronism_SideConfig.TYPE_COUNT; type++) {
 				if (!tile.supportsType(type)) continue;
 				if (mouseX >= cellX && mouseX < cellX + CELL_SIZE && mouseY >= rowY + 1 && mouseY < rowY + 1 + CELL_SIZE) {
-					int oldMode = RetroNism_SideConfig.get(config, side, type);
-					int newMode = RetroNism_SideConfig.cycleMode(oldMode);
+					int oldMode = Retronism_SideConfig.get(config, side, type);
+					int newMode = Retronism_SideConfig.cycleMode(oldMode);
 					tile.setSideMode(side, type, newMode);
 					if (tile instanceof TileEntity) {
 						TileEntity te = (TileEntity) tile;
@@ -206,8 +235,8 @@ public class RetroNism_GuiSideConfigHelper extends Gui {
 					}
 					return true;
 				}
-				int mode = RetroNism_SideConfig.get(config, side, type);
-				String modeName = RetroNism_SideConfig.getModeName(mode);
+				int mode = Retronism_SideConfig.get(config, side, type);
+				String modeName = Retronism_SideConfig.getModeName(mode);
 				cellX += CELL_SIZE + font.getStringWidth(modeName) + 8;
 			}
 		}

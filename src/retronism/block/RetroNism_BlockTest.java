@@ -4,13 +4,13 @@ import net.minecraft.src.*;
 import retronism.api.*;
 import retronism.tile.*;
 
-public class RetroNism_BlockTest extends Block {
+public class Retronism_BlockTest extends Block {
 
-	public RetroNism_BlockTest(int id, int textureIndex) {
+	public Retronism_BlockTest(int id, int textureIndex) {
 		super(id, textureIndex, Material.iron);
 	}
 
-	public String getModName() { return "RetroNism"; }
+	public String getModName() { return "Retronism"; }
 
 	public int quantityDropped(java.util.Random random) {
 		return 1;

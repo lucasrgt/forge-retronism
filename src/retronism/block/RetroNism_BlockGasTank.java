@@ -7,16 +7,16 @@ import retronism.gui.*;
 
 import java.util.Random;
 
-public class RetroNism_BlockGasTank extends BlockContainer {
+public class Retronism_BlockGasTank extends BlockContainer {
 	private Random tankRand = new Random();
 
-	public RetroNism_BlockGasTank(int id, int textureIndex) {
+	public Retronism_BlockGasTank(int id, int textureIndex) {
 		super(id, Material.iron);
 		this.blockIndexInTexture = textureIndex;
 	}
 
 	protected TileEntity getBlockEntity() {
-		return new RetroNism_TileGasTank();
+		return new Retronism_TileGasTank();
 	}
 
 	public int idDropped(int metadata, Random random) {
@@ -29,13 +29,13 @@ public class RetroNism_BlockGasTank extends BlockContainer {
 
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {
 		if (world.multiplayerWorld) return true;
-		RetroNism_TileGasTank tileEntity = (RetroNism_TileGasTank) world.getBlockTileEntity(x, y, z);
-		ModLoader.OpenGUI(player, new RetroNism_GuiGasTank(player.inventory, tileEntity));
+		Retronism_TileGasTank tileEntity = (Retronism_TileGasTank) world.getBlockTileEntity(x, y, z);
+		ModLoader.OpenGUI(player, new Retronism_GuiGasTank(player.inventory, tileEntity));
 		return true;
 	}
 
 	public void onBlockRemoval(World world, int x, int y, int z) {
-		RetroNism_TileGasTank tank = (RetroNism_TileGasTank) world.getBlockTileEntity(x, y, z);
+		Retronism_TileGasTank tank = (Retronism_TileGasTank) world.getBlockTileEntity(x, y, z);
 		for (int i = 0; i < tank.getSizeInventory(); ++i) {
 			ItemStack stack = tank.getStackInSlot(i);
 			if (stack != null) {

@@ -8,10 +8,10 @@ import retronism.gui.*;
 
 import java.util.Random;
 
-public class RetroNism_BlockGenerator extends BlockContainer {
+public class Retronism_BlockGenerator extends BlockContainer {
 	private Random generatorRand = new Random();
 
-	public RetroNism_BlockGenerator(int id, int textureIndex) {
+	public Retronism_BlockGenerator(int id, int textureIndex) {
 		super(id, Material.iron);
 		this.blockIndexInTexture = textureIndex;
 	}
@@ -26,17 +26,17 @@ public class RetroNism_BlockGenerator extends BlockContainer {
 
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {
 		if (world.multiplayerWorld) return true;
-		RetroNism_TileGenerator tileEntity = (RetroNism_TileGenerator) world.getBlockTileEntity(x, y, z);
-		ModLoader.OpenGUI(player, new RetroNism_GuiGenerator(player.inventory, tileEntity));
+		Retronism_TileGenerator tileEntity = (Retronism_TileGenerator) world.getBlockTileEntity(x, y, z);
+		ModLoader.OpenGUI(player, new Retronism_GuiGenerator(player.inventory, tileEntity));
 		return true;
 	}
 
 	protected TileEntity getBlockEntity() {
-		return new RetroNism_TileGenerator();
+		return new Retronism_TileGenerator();
 	}
 
 	public void onBlockRemoval(World world, int x, int y, int z) {
-		RetroNism_TileGenerator generator = (RetroNism_TileGenerator) world.getBlockTileEntity(x, y, z);
+		Retronism_TileGenerator generator = (Retronism_TileGenerator) world.getBlockTileEntity(x, y, z);
 		for (int i = 0; i < generator.getSizeInventory(); ++i) {
 			ItemStack stack = generator.getStackInSlot(i);
 			if (stack != null) {

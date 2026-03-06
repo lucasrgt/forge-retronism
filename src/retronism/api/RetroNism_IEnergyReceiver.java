@@ -1,6 +1,6 @@
 package retronism.api;
 
-public interface RetroNism_IEnergyReceiver {
+public interface Retronism_IEnergyReceiver {
 	int receiveEnergy(int amount);
 	int getStoredEnergy();
 	int getMaxEnergy();

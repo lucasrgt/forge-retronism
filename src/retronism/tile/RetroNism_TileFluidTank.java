@@ -3,7 +3,7 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class RetroNism_TileFluidTank extends TileEntity implements RetroNism_IFluidHandler, IInventory, RetroNism_ISideConfigurable {
+public class Retronism_TileFluidTank extends TileEntity implements Retronism_IFluidHandler, IInventory, Retronism_ISideConfigurable {
 	private ItemStack[] tankItems = new ItemStack[1];
 	private int fluidAmount = 0;
 
@@ -13,21 +13,21 @@ public class RetroNism_TileFluidTank extends TileEntity implements RetroNism_IFl
 
 	{
 		for (int s = 0; s < 6; s++) {
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_FLUID, RetroNism_SideConfig.MODE_INPUT_OUTPUT);
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ITEM, RetroNism_SideConfig.MODE_INPUT_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_FLUID, Retronism_SideConfig.MODE_INPUT_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ITEM, Retronism_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
 	}
 	public boolean supportsType(int type) {
-		return type == RetroNism_SideConfig.TYPE_FLUID || type == RetroNism_SideConfig.TYPE_ITEM;
+		return type == Retronism_SideConfig.TYPE_FLUID || type == Retronism_SideConfig.TYPE_ITEM;
 	}
 
 	public int receiveFluid(int fluidType, int amountMB) {
-		if (fluidType != RetroNism_FluidType.WATER) return 0;
+		if (fluidType != Retronism_FluidType.WATER) return 0;
 		int space = MAX_FLUID - fluidAmount;
 		int accepted = Math.min(amountMB, space);
 		fluidAmount += accepted;
@@ -35,14 +35,14 @@ public class RetroNism_TileFluidTank extends TileEntity implements RetroNism_IFl
 	}
 
 	public int extractFluid(int fluidType, int amountMB) {
-		if (fluidType != RetroNism_FluidType.WATER || fluidAmount <= 0) return 0;
+		if (fluidType != Retronism_FluidType.WATER || fluidAmount <= 0) return 0;
 		int extracted = Math.min(amountMB, fluidAmount);
 		fluidAmount -= extracted;
 		return extracted;
 	}
 
 	public int getFluidType() {
-		return fluidAmount > 0 ? RetroNism_FluidType.WATER : RetroNism_FluidType.NONE;
+		return fluidAmount > 0 ? Retronism_FluidType.WATER : Retronism_FluidType.NONE;
 	}
 
 	public int getFluidAmount() { return fluidAmount; }

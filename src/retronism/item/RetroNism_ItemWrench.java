@@ -6,9 +6,9 @@ import retronism.api.*;
 import retronism.tile.*;
 import retronism.gui.*;
 
-public class RetroNism_ItemWrench extends Item {
+public class Retronism_ItemWrench extends Item {
 
-	public RetroNism_ItemWrench(int id) {
+	public Retronism_ItemWrench(int id) {
 		super(id);
 		this.maxStackSize = 1;
 	}
@@ -21,21 +21,21 @@ public class RetroNism_ItemWrench extends Item {
 		// Only cycle config on pipes (Cable, FluidPipe, GasPipe)
 		// MegaPipe is handled in its block's blockActivated
 		// Machines use GUI tabs instead
-		if (te instanceof RetroNism_TileCable || te instanceof RetroNism_TileFluidPipe || te instanceof RetroNism_TileGasPipe) {
-			RetroNism_ISideConfigurable configurable = (RetroNism_ISideConfigurable) te;
+		if (te instanceof Retronism_TileCable || te instanceof Retronism_TileFluidPipe || te instanceof Retronism_TileGasPipe) {
+			Retronism_ISideConfigurable configurable = (Retronism_ISideConfigurable) te;
 			int[] config = configurable.getSideConfig();
-			StringBuilder msg = new StringBuilder(RetroNism_SideConfig.getSideName(side) + ": ");
+			StringBuilder msg = new StringBuilder(Retronism_SideConfig.getSideName(side) + ": ");
 			boolean first = true;
 
-			for (int type = 0; type < RetroNism_SideConfig.TYPE_COUNT; type++) {
+			for (int type = 0; type < Retronism_SideConfig.TYPE_COUNT; type++) {
 				if (!configurable.supportsType(type)) continue;
-				int oldMode = RetroNism_SideConfig.get(config, side, type);
-				int newMode = RetroNism_SideConfig.cycleMode(oldMode);
+				int oldMode = Retronism_SideConfig.get(config, side, type);
+				int newMode = Retronism_SideConfig.cycleMode(oldMode);
 				configurable.setSideMode(side, type, newMode);
 				if (!first) msg.append(", ");
-				msg.append(RetroNism_SideConfig.getTypeName(type));
+				msg.append(Retronism_SideConfig.getTypeName(type));
 				msg.append("=");
-				msg.append(RetroNism_SideConfig.getModeName(newMode));
+				msg.append(Retronism_SideConfig.getModeName(newMode));
 				first = false;
 			}
 

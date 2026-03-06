@@ -4,16 +4,16 @@ import net.minecraft.src.*;
 import retronism.tile.*;
 import retronism.slot.*;
 
-public class RetroNism_ContainerPump extends Container {
-	private RetroNism_TilePump pump;
+public class Retronism_ContainerPump extends Container {
+	private Retronism_TilePump pump;
 	private int lastEnergy = 0;
 	private int lastFluid = 0;
 
-	public RetroNism_ContainerPump(InventoryPlayer playerInv, RetroNism_TilePump pump) {
+	public Retronism_ContainerPump(InventoryPlayer playerInv, Retronism_TilePump pump) {
 		this.pump = pump;
 
 		// Bucket slot (matches texture inner area at 80,35)
-		this.addSlot(new RetroNism_SlotPumpBucket(pump, 0, 80, 35));
+		this.addSlot(new Retronism_SlotPumpBucket(pump, 0, 80, 35));
 
 		// Player inventory
 		int i;

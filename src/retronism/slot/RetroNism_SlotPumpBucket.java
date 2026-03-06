@@ -2,9 +2,9 @@ package retronism.slot;
 
 import net.minecraft.src.*;
 
-public class RetroNism_SlotPumpBucket extends Slot {
+public class Retronism_SlotPumpBucket extends Slot {
 
-	public RetroNism_SlotPumpBucket(IInventory inventory, int slotIndex, int x, int y) {
+	public Retronism_SlotPumpBucket(IInventory inventory, int slotIndex, int x, int y) {
 		super(inventory, slotIndex, x, y);
 	}
 

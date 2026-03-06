@@ -6,16 +6,16 @@ import retronism.tile.*;
 
 import java.util.Random;
 
-public class RetroNism_BlockCable extends BlockContainer {
+public class Retronism_BlockCable extends BlockContainer {
 
-	public RetroNism_BlockCable(int id, int textureIndex) {
+	public Retronism_BlockCable(int id, int textureIndex) {
 		super(id, Material.circuits);
 		this.blockIndexInTexture = textureIndex;
 		this.setBlockBounds(6.0F/16, 6.0F/16, 6.0F/16, 10.0F/16, 10.0F/16, 10.0F/16);
 	}
 
 	protected TileEntity getBlockEntity() {
-		return new RetroNism_TileCable();
+		return new Retronism_TileCable();
 	}
 
 	public boolean isOpaqueCube() {
@@ -27,7 +27,7 @@ public class RetroNism_BlockCable extends BlockContainer {
 	}
 
 	public int getRenderType() {
-		return mod_RetroNism.cableRenderID;
+		return mod_Retronism.cableRenderID;
 	}
 
 	public int quantityDropped(Random random) {
@@ -40,9 +40,9 @@ public class RetroNism_BlockCable extends BlockContainer {
 
 	public boolean canConnectTo(IBlockAccess world, int x, int y, int z) {
 		int id = world.getBlockId(x, y, z);
-		if (id == this.blockID || id == mod_RetroNism.megaPipeBlock.blockID) return true;
+		if (id == this.blockID || id == mod_Retronism.megaPipeBlock.blockID) return true;
 		TileEntity te = world.getBlockTileEntity(x, y, z);
-		return te instanceof RetroNism_IEnergyReceiver || te instanceof RetroNism_TileGenerator;
+		return te instanceof Retronism_IEnergyReceiver || te instanceof Retronism_TileGenerator;
 	}
 
 	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int i, int j, int k) {

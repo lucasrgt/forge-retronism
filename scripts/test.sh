@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-BASE="c:/Users/lucas/RetroNism"
+BASE="c:/Users/lucas/Retronism"
 cd "$BASE"
 
 echo "=== Transpiling ==="

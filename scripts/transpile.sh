@@ -2,13 +2,13 @@
 # Transpiles organized src/retronism/ -> flat mcp/minecraft/src/net/minecraft/src/
 # Rewrites packages and removes internal imports so RetroMCP can compile
 set -e
-BASE="c:/Users/lucas/RetroNism"
+BASE="c:/Users/lucas/Retronism"
 SRC="$BASE/src/retronism"
 DEST="$BASE/mcp/minecraft/src/net/minecraft/src"
 
-# Remove old transpiled mod files (only RetroNism_ prefixed + mod_RetroNism)
-find "$DEST" -maxdepth 1 -name "RetroNism_*.java" -delete 2>/dev/null || true
-find "$DEST" -maxdepth 1 -name "mod_RetroNism.java" -delete 2>/dev/null || true
+# Remove old transpiled mod files (only Retronism_ prefixed + mod_Retronism)
+find "$DEST" -maxdepth 1 -name "Retronism_*.java" -delete 2>/dev/null || true
+find "$DEST" -maxdepth 1 -name "mod_Retronism.java" -delete 2>/dev/null || true
 
 find "$SRC" -name "*.java" | while read -r file; do
     filename=$(basename "$file")

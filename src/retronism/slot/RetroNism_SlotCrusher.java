@@ -2,10 +2,10 @@ package retronism.slot;
 
 import net.minecraft.src.*;
 
-public class RetroNism_SlotCrusher extends Slot {
+public class Retronism_SlotCrusher extends Slot {
 	private EntityPlayer thePlayer;
 
-	public RetroNism_SlotCrusher(EntityPlayer player, IInventory inventory, int slotIndex, int x, int y) {
+	public Retronism_SlotCrusher(EntityPlayer player, IInventory inventory, int slotIndex, int x, int y) {
 		super(inventory, slotIndex, x, y);
 		this.thePlayer = player;
 	}

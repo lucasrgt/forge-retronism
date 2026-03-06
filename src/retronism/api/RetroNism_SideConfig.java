@@ -1,6 +1,6 @@
 package retronism.api;
 
-public class RetroNism_SideConfig {
+public class Retronism_SideConfig {
 	// IO Modes
 	public static final int MODE_NONE = 0;
 	public static final int MODE_INPUT = 1;

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-BASE="c:/Users/lucas/RetroNism"
+BASE="c:/Users/lucas/Retronism"
 cd "$BASE"
 
 echo "=== Transpiling ==="
@@ -18,7 +18,7 @@ TEST_SRC="$BASE/tests/src"
 TEST_OUT="$BASE/tests/out"
 
 # Ensure mod is compiled in bin/
-if [ ! -f "$BIN/net/minecraft/src/RetroNism_TileFluidPipe.class" ]; then
+if [ ! -f "$BIN/net/minecraft/src/Retronism_TileFluidPipe.class" ]; then
     echo "ERROR: Mod classes not found in bin/. Run recompile first."
     exit 1
 fi

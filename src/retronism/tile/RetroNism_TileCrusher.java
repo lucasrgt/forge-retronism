@@ -4,7 +4,7 @@ import net.minecraft.src.*;
 import retronism.api.*;
 import retronism.recipe.*;
 
-public class RetroNism_TileCrusher extends TileEntity implements IInventory, RetroNism_IEnergyReceiver, RetroNism_ISideConfigurable {
+public class Retronism_TileCrusher extends TileEntity implements IInventory, Retronism_IEnergyReceiver, Retronism_ISideConfigurable {
 	private ItemStack[] crusherItemStacks = new ItemStack[2]; // 0=input, 1=output
 	public int crusherCookTime = 0;
 	public int storedEnergy = 0;
@@ -14,17 +14,17 @@ public class RetroNism_TileCrusher extends TileEntity implements IInventory, Ret
 
 	{
 		for (int s = 0; s < 6; s++) {
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ENERGY, RetroNism_SideConfig.MODE_INPUT);
-			RetroNism_SideConfig.set(sideConfig, s, RetroNism_SideConfig.TYPE_ITEM, RetroNism_SideConfig.MODE_INPUT_OUTPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ENERGY, Retronism_SideConfig.MODE_INPUT);
+			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ITEM, Retronism_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) RetroNism_SideConfig.set(sideConfig, side, type, mode);
+		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
 	}
 	public boolean supportsType(int type) {
-		return type == RetroNism_SideConfig.TYPE_ENERGY || type == RetroNism_SideConfig.TYPE_ITEM;
+		return type == Retronism_SideConfig.TYPE_ENERGY || type == Retronism_SideConfig.TYPE_ITEM;
 	}
 
 	public int receiveEnergy(int amount) {
@@ -115,7 +115,7 @@ public class RetroNism_TileCrusher extends TileEntity implements IInventory, Ret
 
 	private boolean canCrush() {
 		if (this.crusherItemStacks[0] == null) return false;
-		ItemStack result = RetroNism_RecipesCrusher.crushing().getCrushingResult(this.crusherItemStacks[0].getItem().shiftedIndex);
+		ItemStack result = Retronism_RecipesCrusher.crushing().getCrushingResult(this.crusherItemStacks[0].getItem().shiftedIndex);
 		if (result == null) return false;
 		if (this.crusherItemStacks[1] == null) return true;
 		if (!this.crusherItemStacks[1].isItemEqual(result)) return false;
@@ -125,7 +125,7 @@ public class RetroNism_TileCrusher extends TileEntity implements IInventory, Ret
 
 	public void crushItem() {
 		if (this.canCrush()) {
-			ItemStack result = RetroNism_RecipesCrusher.crushing().getCrushingResult(this.crusherItemStacks[0].getItem().shiftedIndex);
+			ItemStack result = Retronism_RecipesCrusher.crushing().getCrushingResult(this.crusherItemStacks[0].getItem().shiftedIndex);
 			if (this.crusherItemStacks[1] == null) {
 				this.crusherItemStacks[1] = result.copy();
 			} else if (this.crusherItemStacks[1].itemID == result.itemID) {

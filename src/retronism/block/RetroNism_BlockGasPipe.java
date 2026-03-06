@@ -6,16 +6,16 @@ import retronism.tile.*;
 
 import java.util.Random;
 
-public class RetroNism_BlockGasPipe extends BlockContainer {
+public class Retronism_BlockGasPipe extends BlockContainer {
 
-	public RetroNism_BlockGasPipe(int id, int textureIndex) {
+	public Retronism_BlockGasPipe(int id, int textureIndex) {
 		super(id, Material.iron);
 		this.blockIndexInTexture = textureIndex;
 		this.setBlockBounds(5.0F/16, 5.0F/16, 5.0F/16, 11.0F/16, 11.0F/16, 11.0F/16);
 	}
 
 	protected TileEntity getBlockEntity() {
-		return new RetroNism_TileGasPipe();
+		return new Retronism_TileGasPipe();
 	}
 
 	public boolean isOpaqueCube() {
@@ -27,7 +27,7 @@ public class RetroNism_BlockGasPipe extends BlockContainer {
 	}
 
 	public int getRenderType() {
-		return mod_RetroNism.gasPipeRenderID;
+		return mod_Retronism.gasPipeRenderID;
 	}
 
 	public int quantityDropped(Random random) {
@@ -40,9 +40,9 @@ public class RetroNism_BlockGasPipe extends BlockContainer {
 
 	public boolean canConnectTo(IBlockAccess world, int x, int y, int z) {
 		int id = world.getBlockId(x, y, z);
-		if (id == this.blockID || id == mod_RetroNism.megaPipeBlock.blockID) return true;
+		if (id == this.blockID || id == mod_Retronism.megaPipeBlock.blockID) return true;
 		TileEntity te = world.getBlockTileEntity(x, y, z);
-		return te instanceof RetroNism_IGasHandler;
+		return te instanceof Retronism_IGasHandler;
 	}
 
 	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int i, int j, int k) {

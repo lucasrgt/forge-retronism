@@ -2,11 +2,11 @@ package retronism.item;
 
 import net.minecraft.src.*;
 
-public class RetroNism_ItemTest extends Item {
+public class Retronism_ItemTest extends Item {
 
-	public String getModName() { return "RetroNism"; }
+	public String getModName() { return "Retronism"; }
 
-	public RetroNism_ItemTest(int id) {
+	public Retronism_ItemTest(int id) {
 		super(id);
 		this.maxStackSize = 64;
 	}

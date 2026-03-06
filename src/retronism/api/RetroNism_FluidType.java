@@ -1,6 +1,6 @@
 package retronism.api;
 
-public class RetroNism_FluidType {
+public class Retronism_FluidType {
 	public static final int NONE = 0;
 	public static final int WATER = 1;
 
