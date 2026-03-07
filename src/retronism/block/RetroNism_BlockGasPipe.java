@@ -31,6 +31,10 @@ public class Retronism_BlockGasPipe extends BlockContainer {
 		return mod_Retronism.gasPipeRenderID;
 	}
 
+	public void onNeighborBlockChange(World world, int x, int y, int z, int neighborBlockID) {
+		world.markBlockNeedsUpdate(x, y, z);
+	}
+
 	public int quantityDropped(Random random) {
 		return 1;
 	}

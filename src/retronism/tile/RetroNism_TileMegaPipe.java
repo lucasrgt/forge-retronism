@@ -30,6 +30,7 @@ public class Retronism_TileMegaPipe extends TileEntity
 
 	// Item buffer
 	public ItemStack itemBuffer = null;
+	private int itemReceivedFrom = -1;
 
 	// Side config
 	private int[] sideConfig = new int[24];
@@ -293,14 +294,23 @@ public class Retronism_TileMegaPipe extends TileEntity
 
 	private int[] getInsertSlotsFor(TileEntity te) {
 		if (te instanceof Retronism_ISlotAccess) return ((Retronism_ISlotAccess) te).getInsertSlots();
-		if (te instanceof TileEntityFurnace) return new int[]{0, 1};
+		if (te instanceof TileEntityFurnace) return new int[]{0};
 		return null;
 	}
 
+	public void receiveItem(ItemStack stack, int fromSide) {
+		this.itemBuffer = stack;
+		this.itemReceivedFrom = fromSide;
+	}
+
 	private void distributeItems() {
-		if (this.itemBuffer == null) return;
+		if (this.itemBuffer == null) {
+			this.itemReceivedFrom = -1;
+			return;
+		}
 
 		for (int side = 0; side < 6; side++) {
+			if (side == itemReceivedFrom) continue;
 			int[] d = DIRS[side];
 			TileEntity te = worldObj.getBlockTileEntity(xCoord+d[0], yCoord+d[1], zCoord+d[2]);
 			if (te == null || te == this) continue;
@@ -308,8 +318,19 @@ public class Retronism_TileMegaPipe extends TileEntity
 			if (te instanceof Retronism_TileMegaPipe) {
 				Retronism_TileMegaPipe other = (Retronism_TileMegaPipe) te;
 				if (other.itemBuffer == null) {
-					other.itemBuffer = this.itemBuffer;
+					int oppSide = Retronism_SideConfig.oppositeSide(side);
+					other.receiveItem(this.itemBuffer, oppSide);
 					this.itemBuffer = null;
+					this.itemReceivedFrom = -1;
+					return;
+				}
+			} else if (te instanceof Retronism_TileItemPipe) {
+				Retronism_TileItemPipe pipe = (Retronism_TileItemPipe) te;
+				if (pipe.getStackInSlot(0) == null) {
+					int oppSide = Retronism_SideConfig.oppositeSide(side);
+					pipe.receiveItem(this.itemBuffer, oppSide);
+					this.itemBuffer = null;
+					this.itemReceivedFrom = -1;
 					return;
 				}
 			} else if (te instanceof IInventory) {
@@ -319,7 +340,10 @@ public class Retronism_TileMegaPipe extends TileEntity
 				if (this.itemBuffer != null && this.itemBuffer.stackSize <= 0) {
 					this.itemBuffer = null;
 				}
-				if (this.itemBuffer == null) return;
+				if (this.itemBuffer == null) {
+					this.itemReceivedFrom = -1;
+					return;
+				}
 			}
 		}
 	}
@@ -371,6 +395,8 @@ public class Retronism_TileMegaPipe extends TileEntity
 		if (nbt.hasKey("Item")) {
 			this.itemBuffer = new ItemStack(nbt.getCompoundTag("Item"));
 		}
+		this.itemReceivedFrom = nbt.getInteger("ItemFrom");
+		if (this.itemReceivedFrom < -1 || this.itemReceivedFrom > 5) this.itemReceivedFrom = -1;
 		if (nbt.hasKey("SC0")) {
 			for (int i = 0; i < 24; i++) this.sideConfig[i] = nbt.getInteger("SC" + i);
 		}
@@ -388,6 +414,7 @@ public class Retronism_TileMegaPipe extends TileEntity
 			this.itemBuffer.writeToNBT(itemTag);
 			nbt.setCompoundTag("Item", itemTag);
 		}
+		nbt.setInteger("ItemFrom", this.itemReceivedFrom);
 		for (int i = 0; i < 24; i++) nbt.setInteger("SC" + i, this.sideConfig[i]);
 	}
 }

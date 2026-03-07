@@ -19,6 +19,11 @@ find "$SRC" -name "*.java" | while read -r file; do
         "$file" > "$DEST/$filename"
 done
 
+# Fix filename case: class is mod_Retronism but file is mod_RetroNism.java
+if [ -f "$DEST/mod_RetroNism.java" ]; then
+    mv "$DEST/mod_RetroNism.java" "$DEST/mod_Retronism.java"
+fi
+
 echo "Transpiled $(find "$SRC" -name '*.java' | wc -l) files to $DEST"
 
 # Copy assets (textures) to temp/merged for jar injection

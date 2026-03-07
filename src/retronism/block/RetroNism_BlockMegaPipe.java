@@ -7,7 +7,7 @@ import retronism.api.*;
 import retronism.tile.*;
 import retronism.gui.*;
 
-public class Retronism_BlockMegaPipe extends Block {
+public class Retronism_BlockMegaPipe extends BlockContainer {
 
 	public Retronism_BlockMegaPipe(int id, int tex) {
 		super(id, tex, Material.iron);
@@ -19,11 +19,15 @@ public class Retronism_BlockMegaPipe extends Block {
 	public boolean isOpaqueCube() { return false; }
 	public boolean renderAsNormalBlock() { return false; }
 
+	public void onNeighborBlockChange(World world, int x, int y, int z, int neighborBlockID) {
+		world.markBlockNeedsUpdate(x, y, z);
+	}
+
 	public int getRenderType() {
 		return mod_Retronism.megaPipeRenderID;
 	}
 
-	public TileEntity getBlockEntity() {
+	protected TileEntity getBlockEntity() {
 		return new Retronism_TileMegaPipe();
 	}
 

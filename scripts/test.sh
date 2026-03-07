@@ -24,7 +24,7 @@ echo "Injected mod classes"
 
 # Inject custom textures into run jar
 cd "$BASE/temp/merged"
-jar uf "$BASE/tests/data/minecraft_run.jar" gui/retronism_*.png anim/retronism_*.png item/retronism_*.png
+jar uf "$BASE/tests/data/minecraft_run.jar" gui/retronism_*.png anim/retronism_*.png item/retronism_*.png block/retronism_*.png
 echo "Injected custom textures"
 cd "$BASE"
 rm -rf "$TMP"

@@ -21,7 +21,19 @@ public class Retronism_BlockCrusher extends BlockContainer {
 	}
 
 	public int getBlockTextureFromSide(int side) {
-		return side == 1 ? this.blockIndexInTexture + 17 : (side == 0 ? this.blockIndexInTexture + 17 : this.blockIndexInTexture);
+		return mod_Retronism.texCrusher;
+	}
+
+	public boolean isOpaqueCube() {
+		return false;
+	}
+
+	public boolean renderAsNormalBlock() {
+		return false;
+	}
+
+	public int getRenderType() {
+		return mod_Retronism.crusherRenderID;
 	}
 
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {

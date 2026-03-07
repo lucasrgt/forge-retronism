@@ -47,6 +47,9 @@
 - Mod classes use `Retronism_` prefix (e.g., `Retronism_BlockCable`, `Retronism_ItemTest`)
 - Block IDs start at 200, Item IDs start at 500
 
+## Running the game
+- Always kill existing java proccesses and then start the game again after updating the code 
+
 ## Agents (on-demand context loading)
 - When generating GUI textures, or the user mentions GUI/textura, READ `ai/agents/gui_builder.md` FIRST — it has the full API, palette, coordinates and workflow
 - Always use `tools/gui_builder.py` — never hand-draw pixels

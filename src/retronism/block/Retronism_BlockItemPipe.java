@@ -26,6 +26,10 @@ public class Retronism_BlockItemPipe extends BlockContainer {
 		return mod_Retronism.itemPipeRenderID;
 	}
 
+	public void onNeighborBlockChange(World world, int x, int y, int z, int neighborBlockID) {
+		world.markBlockNeedsUpdate(x, y, z);
+	}
+
 	public int quantityDropped(Random random) { return 1; }
 	public int idDropped(int metadata, Random random) { return this.blockID; }
 
@@ -37,9 +41,9 @@ public class Retronism_BlockItemPipe extends BlockContainer {
 			if (!hasMachineNeighbor(world, x, y, z)) return false;
 			if (world.multiplayerWorld) return true;
 			TileEntity te = world.getBlockTileEntity(x, y, z);
-			if (te instanceof Retronism_ISideConfigurable) {
+			if (te instanceof Retronism_TileItemPipe) {
 				ModLoader.getMinecraftInstance().displayGuiScreen(
-					new Retronism_GuiPipeConfig(player, (Retronism_ISideConfigurable) te));
+					new Retronism_GuiItemPipe(player.inventory, (Retronism_TileItemPipe) te));
 			}
 			return true;
 		}

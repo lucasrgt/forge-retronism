@@ -45,4 +45,6 @@ java -cp "$TEST_OUT;$BIN;$JUNIT;$HAMCREST" \
     net.minecraft.src.ElectrolysisTest \
     net.minecraft.src.PumpTest \
     net.minecraft.src.PumpSlotTest \
-    net.minecraft.src.SideConfigTest
+    net.minecraft.src.SideConfigTest \
+    net.minecraft.src.ItemPipeTest \
+    net.minecraft.src.MegaPipeItemTest

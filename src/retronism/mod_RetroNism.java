@@ -17,7 +17,11 @@ public class mod_Retronism extends BaseMod {
 	public static int gasPipeRenderID;
 	public static int megaPipeRenderID;
 	public static int itemPipeRenderID;
+	public static int crusherRenderID;
 	public static final int GAS_OVERLAY_INDEX = 175;
+
+	// Block texture index for crusher (set by ModLoader.addOverride at runtime)
+	public static int texCrusher;
 
 	public static final Block testBlock = (new Retronism_BlockTest(200, 1))
 		.setHardness(3.0F)
@@ -88,6 +92,12 @@ public class mod_Retronism extends BaseMod {
 		.setStepSound(Block.soundMetalFootstep)
 		.setBlockName("retroNismItemPipe");
 
+	public static final Block megaCrusherCoreBlock = (new Retronism_BlockMegaCrusherCore(212, 45))
+		.setHardness(3.5F)
+		.setResistance(5.0F)
+		.setStepSound(Block.soundStoneFootstep)
+		.setBlockName("retroNismMegaCrusherCore");
+
 	public static final Item testItem = (new Retronism_ItemTest(500))
 		.setIconIndex(7 + 3 * 16)
 		.setItemName("retroNismTestItem");
@@ -129,8 +139,13 @@ public class mod_Retronism extends BaseMod {
 		gasPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
 		megaPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
 		itemPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
+		crusherRenderID = ModLoader.getUniqueBlockModelID(this, true);
 
 		wrench.setIconIndex(ModLoader.addOverride("/gui/items.png", "/item/retronism_wrench.png"));
+
+		// Register crusher texture (Blockbench export)
+		texCrusher = ModLoader.addOverride("/terrain.png", "/block/retronism_crusher.png");
+		crusherBlock.blockIndexInTexture = texCrusher;
 
 		ModLoader.RegisterBlock(testBlock);
 		ModLoader.RegisterBlock(cableBlock);
@@ -144,7 +159,9 @@ public class mod_Retronism extends BaseMod {
 		ModLoader.RegisterBlock(gasTankBlock);
 		ModLoader.RegisterBlock(megaPipeBlock);
 		ModLoader.RegisterBlock(itemPipeBlock);
+		ModLoader.RegisterBlock(megaCrusherCoreBlock);
 		ModLoader.RegisterTileEntity(Retronism_TileCrusher.class, "Crusher");
+		ModLoader.RegisterTileEntity(Retronism_TileMegaCrusher.class, "MegaCrusher");
 		ModLoader.RegisterTileEntity(Retronism_TileGenerator.class, "Generator");
 		ModLoader.RegisterTileEntity(Retronism_TileCable.class, "Cable");
 		ModLoader.RegisterTileEntity(Retronism_TilePump.class, "Pump");
@@ -167,6 +184,7 @@ public class mod_Retronism extends BaseMod {
 		ModLoader.AddName(gasTankBlock, "Gas Tank");
 		ModLoader.AddName(megaPipeBlock, "Mega Pipe");
 		ModLoader.AddName(itemPipeBlock, "Item Pipe");
+		ModLoader.AddName(megaCrusherCoreBlock, "Mega Crusher");
 		ModLoader.AddName(testItem, "Retronism Test Item");
 		ModLoader.AddName(ironDust, "Iron Dust");
 		ModLoader.AddName(goldDust, "Gold Dust");
@@ -327,10 +345,17 @@ public class mod_Retronism extends BaseMod {
 		if(modelID == itemPipeRenderID) {
 			return renderItemPipe(renderer, world, x, y, z, block);
 		}
+		if(modelID == crusherRenderID) {
+			return renderCrusher(renderer, world, x, y, z, block);
+		}
 		return false;
 	}
 
 	public void RenderInvBlock(RenderBlocks renderer, Block block, int metadata, int modelID) {
+		if(modelID == crusherRenderID) {
+			renderCrusherInv(renderer, block);
+			return;
+		}
 		if(modelID == megaPipeRenderID) {
 			renderMegaPipeInv(renderer, block);
 			return;
@@ -938,6 +963,56 @@ public class mod_Retronism extends BaseMod {
 			renderer.overrideBlockTexture = -1;
 		}
 
+		GL11.glTranslatef(0.5F, 0.5F, 0.5F);
+		block.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+	}
+
+	// ========== CRUSHER RENDER (from Blockbench model) ==========
+	// Blockbench cubes → setBlockBounds (values / 16.0F)
+	private static final float[][] CRUSHER_PARTS = {
+		// {fromX, fromY, fromZ, toX, toY, toZ}
+		{0, 0, 0, 16, 3, 16},       // base_plate
+		{2, 3, 2, 14, 10, 14},      // body_main
+		{1, 10, 1, 15, 13, 15},     // upper_section
+		{0, 13, 0, 16, 16, 2},      // hopper_front
+		{0, 13, 14, 16, 16, 16},    // hopper_back
+		{0, 13, 2, 2, 16, 14},      // hopper_left
+		{14, 13, 2, 16, 16, 14},    // hopper_right
+		{0, 4, 5, 2, 9, 11},        // piston_left
+		{14, 4, 5, 16, 9, 11},      // piston_right
+		{3, 4, 4, 5, 9, 12},        // jaw_left
+		{11, 4, 4, 13, 9, 12},      // jaw_right
+	};
+
+	private boolean renderCrusher(RenderBlocks renderer, IBlockAccess world, int x, int y, int z, Block block) {
+		for (int i = 0; i < CRUSHER_PARTS.length; i++) {
+			float[] p = CRUSHER_PARTS[i];
+			block.setBlockBounds(p[0]/16F, p[1]/16F, p[2]/16F, p[3]/16F, p[4]/16F, p[5]/16F);
+			renderer.renderStandardBlock(block, x, y, z);
+		}
+		block.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+		return true;
+	}
+
+	private void renderCrusherInv(RenderBlocks renderer, Block block) {
+		Tessellator t = Tessellator.instance;
+		GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
+		for (int i = 0; i < CRUSHER_PARTS.length; i++) {
+			float[] p = CRUSHER_PARTS[i];
+			block.setBlockBounds(p[0]/16F, p[1]/16F, p[2]/16F, p[3]/16F, p[4]/16F, p[5]/16F);
+			t.startDrawingQuads(); t.setNormal(0,-1,0);
+			renderer.renderBottomFace(block, 0, 0, 0, block.getBlockTextureFromSide(0)); t.draw();
+			t.startDrawingQuads(); t.setNormal(0,1,0);
+			renderer.renderTopFace(block, 0, 0, 0, block.getBlockTextureFromSide(1)); t.draw();
+			t.startDrawingQuads(); t.setNormal(0,0,-1);
+			renderer.renderEastFace(block, 0, 0, 0, block.getBlockTextureFromSide(2)); t.draw();
+			t.startDrawingQuads(); t.setNormal(0,0,1);
+			renderer.renderWestFace(block, 0, 0, 0, block.getBlockTextureFromSide(3)); t.draw();
+			t.startDrawingQuads(); t.setNormal(-1,0,0);
+			renderer.renderNorthFace(block, 0, 0, 0, block.getBlockTextureFromSide(4)); t.draw();
+			t.startDrawingQuads(); t.setNormal(1,0,0);
+			renderer.renderSouthFace(block, 0, 0, 0, block.getBlockTextureFromSide(5)); t.draw();
+		}
 		GL11.glTranslatef(0.5F, 0.5F, 0.5F);
 		block.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
 	}
