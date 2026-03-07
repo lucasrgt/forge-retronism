@@ -1,0 +1,14 @@
+const { contextBridge, ipcRenderer } = require('electron')
+
+contextBridge.exposeInMainWorld('api', {
+  saveFile: (filePath: string, content: string) => ipcRenderer.invoke('save-file', { filePath, content }),
+  saveDialog: (defaultPath: string, filters?: any[]) => ipcRenderer.invoke('save-dialog', { defaultPath, filters }),
+  openDialog: (filters?: any[]) => ipcRenderer.invoke('open-dialog', { filters }),
+  readFile: (filePath: string) => ipcRenderer.invoke('read-file', filePath),
+  readFileBase64: (filePath: string) => ipcRenderer.invoke('read-file-base64', filePath),
+  getProjectRoot: () => ipcRenderer.invoke('get-project-root'),
+  exportToMod: (files: any[]) => ipcRenderer.invoke('export-to-mod', { files }),
+  onMcpStateUpdate: (callback: (data: string) => void) => {
+    ipcRenderer.on('mcp-state-update', (_event: any, data: string) => callback(data))
+  },
+})

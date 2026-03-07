@@ -1,0 +1,13 @@
+{
+  "name": "retronism-multiblock-designer",
+  "version": "1.0.0",
+  "description": "Visual multiblock structure designer for RetroNism mod",
+  "main": "main.js",
+  "scripts": {
+    "start": "node launch.js"
+  },
+  "dependencies": {
+    "electron": "^28.3.3",
+    "three": "^0.170.0"
+  }
+}

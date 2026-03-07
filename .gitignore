@@ -16,3 +16,15 @@ tests/out/
 # Python
 __pycache__/
 *.pyc
+
+# Node
+node_modules/
+
+# Build artifacts
+tools/mod-maker-mcp/dist/
+tools/mod-maker/dist/
+tools/mod-maker/dist-electron/
+tools/multiblock-designer/node_modules/
+
+# MCP config (local)
+.mcp.json

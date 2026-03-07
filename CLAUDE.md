@@ -52,6 +52,8 @@
 
 ## Agents (on-demand context loading)
 - When generating GUI textures, or the user mentions GUI/textura, READ `ai/agents/gui_builder.md` FIRST — it has the full API, palette, coordinates and workflow
+- When creating 3D models for machines, READ `ai/agents/model_builder.md` FIRST — Blockbench constraints, design philosophy, UV rules, render integration
+- When creating a new machine end-to-end (structure → model → code → test), READ `ai/agents/machine_builder.md` FIRST — full pipeline orchestrator
 - Always use `tools/gui_builder.py` — never hand-draw pixels
 
 ## Language
