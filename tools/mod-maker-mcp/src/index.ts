@@ -24,7 +24,7 @@ import {
 } from './state.js';
 import { generateAllFiles } from './codegen.js';
 import { blockRegistry } from './types.js';
-import type { StructureType, IOType, PortMode, GuiComponentType, SlotType, BlockCategory } from './types.js';
+import type { StructureType, IOType, PortMode, GuiComponentType, SlotType, IoMode, BlockCategory } from './types.js';
 import type { Face, TemplateName } from './state.js';
 
 // ---------------------------------------------------------------------------
@@ -181,6 +181,7 @@ server.tool(
       w: z.number().int().optional().describe('Width override (for resizable components)'),
       h: z.number().int().optional().describe('Height override (for resizable components)'),
       slotType: z.enum(['input', 'output', 'fuel']).optional().describe('Slot role (for slot/big_slot)'),
+      ioMode: z.enum(['input', 'output', 'display']).optional().describe('I/O mode: input buffer, output buffer, or display only'),
     })).default([]).describe('Additional components to add after preset'),
   },
   async (args) => {
@@ -190,11 +191,12 @@ server.tool(
     for (const c of args.components) {
       addGuiComponent(c.type as GuiComponentType, c.x, c.y, {
         w: c.w, h: c.h, slotType: c.slotType as SlotType | undefined,
+        ioMode: c.ioMode as IoMode | undefined,
       });
     }
     const state = getState();
     const comps = state.guiComponents.map((c, i) =>
-      `  [${i}] ${c.type} at (${c.x},${c.y}) ${c.w}x${c.h}${c.slotType ? ` [${c.slotType}]` : ''}`
+      `  [${i}] ${c.type} at (${c.x},${c.y}) ${c.w}x${c.h}${c.slotType ? ` [${c.slotType}]` : ''} io:${c.ioMode}`
     ).join('\n');
     return { content: [{ type: 'text', text: `GUI has ${state.guiComponents.length} components:\n${comps}` }] };
   },
@@ -226,7 +228,7 @@ server.tool(
     }
 
     const comps = state.guiComponents.map((c, i) =>
-      `  [${i}] ${c.type} at (${c.x},${c.y}) ${c.w}x${c.h}${c.slotType ? ` [${c.slotType}]` : ''}`
+      `  [${i}] ${c.type} at (${c.x},${c.y}) ${c.w}x${c.h}${c.slotType ? ` [${c.slotType}]` : ''} io:${c.ioMode}`
     ).join('\n');
 
     return {
@@ -391,7 +393,7 @@ server.tool(
     if (removeGuiComponent(args.index)) {
       const state = getState();
       const comps = state.guiComponents.map((c, i) =>
-        `  [${i}] ${c.type} at (${c.x},${c.y}) ${c.w}x${c.h}${c.slotType ? ` [${c.slotType}]` : ''}`
+        `  [${i}] ${c.type} at (${c.x},${c.y}) ${c.w}x${c.h}${c.slotType ? ` [${c.slotType}]` : ''} io:${c.ioMode}`
       ).join('\n');
       return { content: [{ type: 'text', text: `Removed component ${args.index}.\n\nGUI has ${state.guiComponents.length} components:\n${comps || '  (none)'}` }] };
     }
@@ -412,15 +414,17 @@ server.tool(
     w: z.number().int().optional().describe('New width (resizable components only)'),
     h: z.number().int().optional().describe('New height (resizable components only)'),
     slotType: z.enum(['input', 'output', 'fuel']).optional().describe('Slot role (slot/big_slot only)'),
+    ioMode: z.enum(['input', 'output', 'display']).optional().describe('I/O mode: input buffer, output buffer, or display only'),
   },
   async (args) => {
     if (updateGuiComponent(args.index, {
       x: args.x, y: args.y, w: args.w, h: args.h,
       slotType: args.slotType as any,
+      ioMode: args.ioMode as any,
     })) {
       const state = getState();
       const comp = state.guiComponents[args.index];
-      return { content: [{ type: 'text', text: `Updated component [${args.index}]: ${comp.type} at (${comp.x},${comp.y}) ${comp.w}x${comp.h}${comp.slotType ? ` [${comp.slotType}]` : ''}` }] };
+      return { content: [{ type: 'text', text: `Updated component [${args.index}]: ${comp.type} at (${comp.x},${comp.y}) ${comp.w}x${comp.h}${comp.slotType ? ` [${comp.slotType}]` : ''} io:${comp.ioMode}` }] };
     }
     return { content: [{ type: 'text', text: `Invalid index ${args.index}.` }] };
   },
@@ -880,7 +884,7 @@ ${portXml}
 </ports>
 
 <gui components="${state.guiComponents.length}">
-${state.guiComponents.map((c, i) => `  <component index="${i}" type="${c.type}" x="${c.x}" y="${c.y}" w="${c.w}" h="${c.h}"${c.slotType ? ` slotType="${c.slotType}"` : ''} />`).join('\n')}
+${state.guiComponents.map((c, i) => `  <component index="${i}" type="${c.type}" x="${c.x}" y="${c.y}" w="${c.w}" h="${c.h}"${c.slotType ? ` slotType="${c.slotType}"` : ''} ioMode="${c.ioMode}" />`).join('\n')}
 </gui>
 
 ${modelInfo}

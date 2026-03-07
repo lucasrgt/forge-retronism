@@ -1,6 +1,6 @@
 import {
   MultiblockState, BlockEntry, StructureType, IOType,
-  PortMode, GuiComponent, GuiComponentType, SlotType,
+  PortMode, GuiComponent, GuiComponentType, SlotType, IoMode,
   GUI_COMP_DEFS, SerializedMultiblock, StructureLayer,
   blockRegistry, BlockDef, BlockModel, ModelElement,
 } from './types.js';
@@ -74,6 +74,11 @@ export function placeBlock(x: number, y: number, z: number, type: string, mode: 
   const { w, h, d } = state.dimensions;
   if (x < 0 || x >= w || y < 0 || y >= h || z < 0 || z >= d) return false;
   state.blocks.set(`${x},${y},${z}`, { blockId: type, mode });
+  // Auto-link: placing a port auto-activates its IO type
+  const def = blockRegistry.get(type);
+  if (def?.portType && !state.ioTypes.includes(def.portType)) {
+    state.ioTypes.push(def.portType);
+  }
   notifyChange();
   return true;
 }
@@ -111,7 +116,7 @@ export function clearBlocks(): void {
 }
 
 export function addGuiComponent(type: GuiComponentType, x: number, y: number, extra?: {
-  w?: number; h?: number; slotType?: SlotType;
+  w?: number; h?: number; slotType?: SlotType; ioMode?: IoMode;
 }): number {
   const def = GUI_COMP_DEFS[type];
   if (!def) return -1;
@@ -122,6 +127,7 @@ export function addGuiComponent(type: GuiComponentType, x: number, y: number, ex
     w: extra?.w || def.w,
     h: extra?.h || def.h,
     slotType: extra?.slotType || def.slotType || null,
+    ioMode: extra?.ioMode || def.ioMode,
   };
   state.guiComponents.push(comp);
   notifyChange();
@@ -281,7 +287,7 @@ export function removeGuiComponent(index: number): boolean {
 }
 
 export function updateGuiComponent(index: number, opts: {
-  x?: number; y?: number; w?: number; h?: number; slotType?: SlotType;
+  x?: number; y?: number; w?: number; h?: number; slotType?: SlotType; ioMode?: IoMode;
 }): boolean {
   if (index < 0 || index >= state.guiComponents.length) return false;
   const comp = state.guiComponents[index];
@@ -290,6 +296,7 @@ export function updateGuiComponent(index: number, opts: {
   if (opts.w !== undefined) comp.w = opts.w;
   if (opts.h !== undefined) comp.h = opts.h;
   if (opts.slotType !== undefined) comp.slotType = opts.slotType;
+  if (opts.ioMode !== undefined) comp.ioMode = opts.ioMode;
   notifyChange();
   return true;
 }
@@ -313,7 +320,10 @@ export function deserialize(data: SerializedMultiblock): void {
   state.energyPerTick = data.energyPerTick;
   state.blockId = data.blockId;
   state.casingId = data.casingId;
-  state.guiComponents = data.guiComponents ? [...data.guiComponents] : [];
+  state.guiComponents = data.guiComponents ? data.guiComponents.map(c => ({
+    ...c,
+    ioMode: c.ioMode || GUI_COMP_DEFS[c.type]?.ioMode || 'display',
+  })) : [];
   state.model = data.model || null;
 
   state.blocks.clear();

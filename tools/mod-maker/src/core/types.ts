@@ -13,6 +13,7 @@ export type StructureType = 'machine' | 'tank' | 'reactor' | 'custom'
 export type PortMode = 'input' | 'output' | 'input_output'
 export type IOType = 'energy' | 'fluid' | 'gas' | 'item'
 export type SlotRole = 'input' | 'output' | 'fuel'
+export type IoMode = 'input' | 'output' | 'display'
 export type GuiComponentType = 'slot' | 'big_slot' | 'energy_bar' | 'progress_arrow' | 'flame' | 'fluid_tank' | 'gas_tank' | 'separator'
 export type BlockCategory = 'casing' | 'controller' | 'port' | 'glass' | 'custom'
 
@@ -61,15 +62,16 @@ export interface GuiComponent {
   w: number
   h: number
   slotType: SlotRole | null
+  ioMode: IoMode
 }
 
-export const GUI_COMP_DEFS: Record<GuiComponentType, { w: number; h: number; label: string; resizable: boolean; slotType?: SlotRole }> = {
-  slot:           { w: 18, h: 18, label: 'Slot', resizable: false, slotType: 'input' },
-  big_slot:       { w: 26, h: 26, label: 'Big Slot', resizable: false, slotType: 'output' },
-  energy_bar:     { w: 8,  h: 54, label: 'Energy Bar', resizable: true },
-  progress_arrow: { w: 24, h: 17, label: 'Progress Arrow', resizable: false },
-  flame:          { w: 14, h: 14, label: 'Flame', resizable: false },
-  fluid_tank:     { w: 18, h: 54, label: 'Fluid Tank', resizable: true },
-  gas_tank:       { w: 18, h: 54, label: 'Gas Tank', resizable: true },
-  separator:      { w: 162, h: 2, label: 'Separator', resizable: true },
+export const GUI_COMP_DEFS: Record<GuiComponentType, { w: number; h: number; label: string; resizable: boolean; slotType?: SlotRole; ioMode: IoMode }> = {
+  slot:           { w: 18, h: 18, label: 'Slot', resizable: false, slotType: 'input', ioMode: 'input' },
+  big_slot:       { w: 26, h: 26, label: 'Big Slot', resizable: false, slotType: 'output', ioMode: 'output' },
+  energy_bar:     { w: 8,  h: 54, label: 'Energy Bar', resizable: true, ioMode: 'display' },
+  progress_arrow: { w: 24, h: 17, label: 'Progress Arrow', resizable: false, ioMode: 'display' },
+  flame:          { w: 14, h: 14, label: 'Flame', resizable: false, ioMode: 'display' },
+  fluid_tank:     { w: 18, h: 54, label: 'Fluid Tank', resizable: true, ioMode: 'input' },
+  gas_tank:       { w: 18, h: 54, label: 'Gas Tank', resizable: true, ioMode: 'input' },
+  separator:      { w: 162, h: 2, label: 'Separator', resizable: true, ioMode: 'display' },
 }

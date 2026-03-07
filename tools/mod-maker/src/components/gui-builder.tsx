@@ -119,12 +119,15 @@ export function GuiBuilder() {
       switch (comp.type) {
         case 'slot':
           drawSlot(comp.x, comp.y, 18, 18)
-          if (comp.slotType === 'input') { ctx.fillStyle = '#4af'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText('IN', comp.x * s + 2, (comp.y - 4) * s) }
-          if (comp.slotType === 'output') { ctx.fillStyle = '#f80'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText('OUT', comp.x * s + 2, (comp.y - 4) * s) }
+          { const modeLabel = comp.ioMode === 'input' ? 'IN' : comp.ioMode === 'output' ? 'OUT' : 'DSP'
+            const modeColor = comp.ioMode === 'input' ? '#4af' : comp.ioMode === 'output' ? '#f80' : '#888'
+            ctx.fillStyle = modeColor; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText(modeLabel, comp.x * s + 2, (comp.y - 4) * s) }
           break
         case 'big_slot':
           drawSlot(comp.x, comp.y, 26, 26)
-          ctx.fillStyle = '#f80'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText('OUT', comp.x * s + 2, (comp.y - 4) * s)
+          { const modeLabel = comp.ioMode === 'input' ? 'IN' : comp.ioMode === 'output' ? 'OUT' : 'DSP'
+            const modeColor = comp.ioMode === 'input' ? '#4af' : comp.ioMode === 'output' ? '#f80' : '#888'
+            ctx.fillStyle = modeColor; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText(modeLabel, comp.x * s + 2, (comp.y - 4) * s) }
           break
         case 'energy_bar':
           drawSlot(comp.x, comp.y, comp.w, comp.h)
@@ -132,7 +135,8 @@ export function GuiBuilder() {
             const c = py % 2 === 0 ? MC.ENERGY_A : MC.ENERGY_B
             hLine(comp.x + 1, py, comp.w - 2, c)
           }
-          ctx.fillStyle = '#3fb'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText('NRG', comp.x * s, (comp.y - 4) * s)
+          { const ioLabel = comp.ioMode === 'input' ? 'NRG↓' : comp.ioMode === 'output' ? 'NRG↑' : 'NRG'
+            ctx.fillStyle = '#3fb'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText(ioLabel, comp.x * s, (comp.y - 4) * s) }
           break
         case 'progress_arrow':
           fill(comp.x, comp.y + 3, 17, 11, MC.SL)
@@ -148,13 +152,15 @@ export function GuiBuilder() {
           drawSlot(comp.x, comp.y, comp.w, comp.h)
           for (let py = comp.y + 1 + Math.floor(comp.h * 0.2); py < comp.y + comp.h - 1; py++)
             hLine(comp.x + 1, py, comp.w - 2, MC.FLUID)
-          ctx.fillStyle = '#48f'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText('FLUID', comp.x * s, (comp.y - 4) * s)
+          { const ioLabel = comp.ioMode === 'input' ? 'FLD↓' : comp.ioMode === 'output' ? 'FLD↑' : 'FLUID'
+            ctx.fillStyle = '#48f'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText(ioLabel, comp.x * s, (comp.y - 4) * s) }
           break
         case 'gas_tank':
           drawSlot(comp.x, comp.y, comp.w, comp.h)
           for (let py = comp.y + 1 + Math.floor(comp.h * 0.2); py < comp.y + comp.h - 1; py++)
             hLine(comp.x + 1, py, comp.w - 2, MC.GAS)
-          ctx.fillStyle = '#aaa'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText('GAS', comp.x * s, (comp.y - 4) * s)
+          { const ioLabel = comp.ioMode === 'input' ? 'GAS↓' : comp.ioMode === 'output' ? 'GAS↑' : 'GAS'
+            ctx.fillStyle = '#aaa'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText(ioLabel, comp.x * s, (comp.y - 4) * s) }
           break
         case 'separator':
           hLine(comp.x, comp.y, comp.w, MC.SD)
@@ -347,6 +353,17 @@ export function GuiBuilder() {
                   <option value="input">Input</option>
                   <option value="output">Output</option>
                   <option value="fuel">Fuel</option>
+                </Select>
+              </>
+            )}
+            {!['progress_arrow', 'flame', 'separator'].includes(selectedComp.type) && (
+              <>
+                <Label>I/O Mode</Label>
+                <Select value={selectedComp.ioMode}
+                  onChange={(e) => useStore.getState().updateGuiComponent(selectedCompIndex, { ioMode: e.target.value as any })}>
+                  <option value="input">Input</option>
+                  <option value="output">Output</option>
+                  <option value="display">Display Only</option>
                 </Select>
               </>
             )}

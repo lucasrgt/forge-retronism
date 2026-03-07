@@ -6,20 +6,21 @@ export type StructureType = 'machine' | 'tank' | 'reactor' | 'custom';
 export type PortMode = 'input' | 'output' | 'input_output';
 export type IOType = 'energy' | 'fluid' | 'gas' | 'item';
 export type SlotType = 'input' | 'output' | 'fuel';
+export type IoMode = 'input' | 'output' | 'display';
 
 export type GuiComponentType =
   | 'slot' | 'big_slot' | 'energy_bar' | 'progress_arrow'
   | 'flame' | 'fluid_tank' | 'gas_tank' | 'separator';
 
-export const GUI_COMP_DEFS: Record<GuiComponentType, { w: number; h: number; slotType?: SlotType }> = {
-  slot:           { w: 18, h: 18, slotType: 'input' },
-  big_slot:       { w: 26, h: 26, slotType: 'output' },
-  energy_bar:     { w: 8,  h: 54 },
-  progress_arrow: { w: 24, h: 17 },
-  flame:          { w: 14, h: 14 },
-  fluid_tank:     { w: 18, h: 54 },
-  gas_tank:       { w: 18, h: 54 },
-  separator:      { w: 162, h: 2 },
+export const GUI_COMP_DEFS: Record<GuiComponentType, { w: number; h: number; slotType?: SlotType; ioMode: IoMode }> = {
+  slot:           { w: 18, h: 18, slotType: 'input', ioMode: 'input' },
+  big_slot:       { w: 26, h: 26, slotType: 'output', ioMode: 'output' },
+  energy_bar:     { w: 8,  h: 54, ioMode: 'display' },
+  progress_arrow: { w: 24, h: 17, ioMode: 'display' },
+  flame:          { w: 14, h: 14, ioMode: 'display' },
+  fluid_tank:     { w: 18, h: 54, ioMode: 'input' },
+  gas_tank:       { w: 18, h: 54, ioMode: 'input' },
+  separator:      { w: 162, h: 2, ioMode: 'display' },
 };
 
 export interface BlockDef {
@@ -45,6 +46,7 @@ export interface GuiComponent {
   w: number;
   h: number;
   slotType: SlotType | null;
+  ioMode: IoMode;
 }
 
 export interface Capacity {

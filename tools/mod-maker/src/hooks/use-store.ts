@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { BlockType, StructureType, IOType, PortMode, BlockEntry, GuiComponent, GuiComponentType, SlotRole, BlockDef, BlockCategory } from '@/core/types'
+import type { BlockType, StructureType, IOType, PortMode, BlockEntry, GuiComponent, GuiComponentType, SlotRole, IoMode, BlockDef, BlockCategory } from '@/core/types'
 import { BLOCK_TYPES, GUI_COMP_DEFS, blockRegistry, getBlockInfo } from '@/core/types'
 
 const GUI_W = 176
@@ -74,7 +74,7 @@ interface MultiblockStore {
   setLayerFilter: (layer: number) => void
 
   // Actions: GUI
-  addGuiComponent: (type: GuiComponentType, x: number, y: number, extra?: { w?: number; h?: number; slotType?: SlotRole }) => void
+  addGuiComponent: (type: GuiComponentType, x: number, y: number, extra?: { w?: number; h?: number; slotType?: SlotRole; ioMode?: IoMode }) => void
   removeGuiComponent: (index: number) => void
   updateGuiComponent: (index: number, updates: Partial<GuiComponent>) => void
   clearGui: () => void
@@ -143,6 +143,12 @@ export const useStore = create<MultiblockStore>((set, get) => ({
     if (x < 0 || x >= w || y < 0 || y >= h || z < 0 || z >= d) return s
     const blocks = new Map(s.blocks)
     blocks.set(`${x},${y},${z}`, { type, mode })
+
+    // Auto-link: placing a port auto-activates its IO type
+    const def = blockRegistry.get(type)
+    if (def?.portType && !s.ioTypes.includes(def.portType)) {
+      return { blocks, ioTypes: [...s.ioTypes, def.portType] }
+    }
     return { blocks }
   }),
   removeBlock: (x, y, z) => set((s) => {
@@ -180,6 +186,7 @@ export const useStore = create<MultiblockStore>((set, get) => ({
       w: extra?.w || def.w,
       h: extra?.h || def.h,
       slotType: extra?.slotType || def.slotType || null,
+      ioMode: extra?.ioMode || def.ioMode,
     }
     const guiComponents = [...s.guiComponents, comp]
     return { guiComponents, selectedCompIndex: guiComponents.length - 1 }
@@ -332,7 +339,10 @@ export const useStore = create<MultiblockStore>((set, get) => ({
       energyPerTick: data.energyPerTick,
       blockId: data.blockId,
       casingId: data.casingId,
-      guiComponents: data.guiComponents ? [...data.guiComponents] : [],
+      guiComponents: data.guiComponents ? data.guiComponents.map((c) => ({
+        ...c,
+        ioMode: c.ioMode || GUI_COMP_DEFS[c.type]?.ioMode || 'display',
+      })) : [],
       blocks,
       selectedBlock: null,
       selectedCompIndex: -1,
