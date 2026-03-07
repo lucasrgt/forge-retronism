@@ -234,7 +234,7 @@ export function StructureEditor() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Block palette toolbar */}
-      <div className="flex items-center justify-between px-2 py-1.5 bg-card border-b border-border flex-wrap gap-1">
+      <div className="flex items-center justify-between px-3 py-2 bg-background border-b border-border flex-wrap gap-1">
         <div className="flex gap-1 flex-wrap">
           {[...blockRegistry.values()].map((def) => (
             <Button

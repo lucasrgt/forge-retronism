@@ -45,7 +45,7 @@ export default function App() {
             {activeTab === 'structure' && <StructureEditor />}
             {activeTab === 'gui' && <GuiBuilder />}
           </div>
-          <div className="flex items-center justify-between px-3 py-1 bg-card border-t border-border text-[11px] text-muted-foreground">
+          <div className="flex items-center justify-between px-3 py-1.5 border-t border-border text-xs text-muted-foreground">
             <span>Click to place blocks. Right-click to select. Alt+drag to orbit.</span>
             <div className="flex items-center gap-3">
               <span className={`flex items-center gap-1 ${mcpConnected ? 'text-green-400' : 'text-muted-foreground'}`}>

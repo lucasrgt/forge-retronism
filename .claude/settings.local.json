@@ -27,7 +27,14 @@
       "Bash(bash scripts/test.sh)",
       "Bash(python -c \":*)",
       "WebSearch",
-      "Bash(ls c:/Users/lucas/RetroNism/mcp/minecraft/src/net/minecraft/src/mod_Retro*)"
+      "Bash(ls c:/Users/lucas/RetroNism/mcp/minecraft/src/net/minecraft/src/mod_Retro*)",
+      "Bash(npx tsc)",
+      "mcp__retronism-mod-maker__place_blocks",
+      "Bash(netstat -ano)",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 9741 -ErrorAction SilentlyContinue | Format-Table LocalPort,State,OwningProcess\")",
+      "Bash(tasklist)",
+      "mcp__retronism-mod-maker__export_json",
+      "mcp__retronism-mod-maker__create_multiblock"
     ]
   }
 }

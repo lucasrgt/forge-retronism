@@ -10,16 +10,16 @@ interface TabsProps {
 
 export function Tabs({ tabs, active, onChange, className }: TabsProps) {
   return (
-    <div className={cn('flex bg-card border-b-2 border-border', className)}>
+    <div className={cn('inline-flex h-9 items-center justify-start gap-1 rounded-lg bg-muted p-1 mx-2 mt-2', className)}>
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
           className={cn(
-            'px-6 py-2 text-xs font-bold transition-all border-b-2 -mb-[2px]',
+            'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all',
             active === tab.id
-              ? 'text-primary border-primary'
-              : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-white/[0.03]',
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground',
           )}
         >
           {tab.label}

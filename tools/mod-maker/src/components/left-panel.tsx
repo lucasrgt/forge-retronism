@@ -10,7 +10,7 @@ export function LeftPanel() {
   const s = useStore()
 
   return (
-    <div className="w-60 bg-card border-r border-border overflow-y-auto p-2 space-y-2 shrink-0">
+    <div className="w-60 bg-background border-r border-border overflow-y-auto p-3 space-y-3 shrink-0">
       <Card>
         <CardTitle>Structure</CardTitle>
         <Label>Name</Label>

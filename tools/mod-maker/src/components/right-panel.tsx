@@ -21,7 +21,7 @@ export function RightPanel() {
   const selCoords = selectedBlock?.split(',').map(Number)
 
   return (
-    <div className="w-56 bg-card border-l border-border overflow-y-auto p-2 space-y-2 shrink-0">
+    <div className="w-56 bg-background border-l border-border overflow-y-auto p-3 space-y-3 shrink-0">
       {selEntry && selCoords && (
         <Card>
           <CardTitle>Selected Block</CardTitle>
