@@ -74,7 +74,7 @@ export function StructureEditor() {
     canvas.addEventListener('keydown', onKeyDown)
     canvas.addEventListener('keyup', onKeyUp)
 
-    // Mouse controls: orbit (alt+drag / middle), pan (space+drag), right-click select
+    // Mouse controls: orbit (alt+drag / middle), pan (space+drag)
     canvas.addEventListener('mousedown', (e) => {
       if (e.altKey || e.button === 1) {
         orbitState.dragging = true
@@ -89,8 +89,8 @@ export function StructureEditor() {
     canvas.addEventListener('mousemove', (e) => {
       if (orbitState.panning) {
         // Pan: move target in camera-local XY plane
-        const dx = (e.clientX - orbitState.lastX) * 0.005 * orbitState.radius
-        const dy = (e.clientY - orbitState.lastY) * 0.005 * orbitState.radius
+        const dx = (e.clientX - orbitState.lastX) * 0.002 * orbitState.radius
+        const dy = (e.clientY - orbitState.lastY) * 0.002 * orbitState.radius
         const right = new THREE.Vector3()
         const up = new THREE.Vector3()
         camera.getWorldDirection(new THREE.Vector3())
@@ -129,8 +129,37 @@ export function StructureEditor() {
       return raycaster.intersectObjects(meshArray)
     }
 
-    // Left-click: place block on face
+    // Left-click: select existing block, or place on face if clicking empty adjacent
     canvas.addEventListener('click', (e) => {
+      if (e.altKey || spaceDown) return
+      const hits = raycastBlocks(e)
+      if (hits.length > 0) {
+        const hit = hits[0]
+        const key = hit.object.userData.key as string
+        const store = useStore.getState()
+        if (e.shiftKey) {
+          // Shift+click: place block on adjacent face
+          const normal = hit.face?.normal
+          if (normal) {
+            const pos = key.split(',').map(Number)
+            const nx = pos[0] + Math.round(normal.x)
+            const ny = pos[1] + Math.round(normal.y)
+            const nz = pos[2] + Math.round(normal.z)
+            const { w, h, d } = store.dimensions
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h && nz >= 0 && nz < d) {
+              store.placeBlock(nx, ny, nz, store.selectedTool)
+            }
+          }
+        } else {
+          // Click: select block
+          store.setSelectedBlock(key)
+        }
+      }
+    })
+
+    // Right-click: place block on adjacent face
+    canvas.addEventListener('contextmenu', (e) => {
+      e.preventDefault()
       if (e.altKey || spaceDown) return
       const hits = raycastBlocks(e)
       if (hits.length > 0) {
@@ -147,17 +176,6 @@ export function StructureEditor() {
             store.placeBlock(nx, ny, nz, store.selectedTool)
           }
         }
-      }
-    })
-
-    // Right-click: select block
-    canvas.addEventListener('contextmenu', (e) => {
-      e.preventDefault()
-      if (e.altKey || spaceDown) return
-      const hits = raycastBlocks(e)
-      if (hits.length > 0) {
-        const key = hits[0].object.userData.key as string
-        useStore.getState().setSelectedBlock(key)
       }
     })
 
