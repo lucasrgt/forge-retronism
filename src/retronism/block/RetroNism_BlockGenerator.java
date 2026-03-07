@@ -25,6 +25,7 @@ public class Retronism_BlockGenerator extends BlockContainer {
 	}
 
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {
+		if (player.isSneaking()) return false;
 		if (world.multiplayerWorld) return true;
 		Retronism_TileGenerator tileEntity = (Retronism_TileGenerator) world.getBlockTileEntity(x, y, z);
 		ModLoader.OpenGUI(player, new Retronism_GuiGenerator(player.inventory, tileEntity));

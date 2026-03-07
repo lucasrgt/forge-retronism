@@ -16,6 +16,7 @@ public class mod_Retronism extends BaseMod {
 	public static int fluidPipeRenderID;
 	public static int gasPipeRenderID;
 	public static int megaPipeRenderID;
+	public static int itemPipeRenderID;
 	public static final int GAS_OVERLAY_INDEX = 175;
 
 	public static final Block testBlock = (new Retronism_BlockTest(200, 1))
@@ -81,6 +82,12 @@ public class mod_Retronism extends BaseMod {
 	public static final Block megaPipeBlock = (new Retronism_BlockMegaPipe(210, 22))
 		.setBlockName("retroNismMegaPipe");
 
+	public static final Block itemPipeBlock = (new Retronism_BlockItemPipe(211, 22))
+		.setHardness(0.5F)
+		.setResistance(2.0F)
+		.setStepSound(Block.soundMetalFootstep)
+		.setBlockName("retroNismItemPipe");
+
 	public static final Item testItem = (new Retronism_ItemTest(500))
 		.setIconIndex(7 + 3 * 16)
 		.setItemName("retroNismTestItem");
@@ -114,7 +121,6 @@ public class mod_Retronism extends BaseMod {
 		.setItemName("retroNismGasCellOxygen");
 
 	public static final Item wrench = (new Retronism_ItemWrench(508))
-		.setIconIndex(10 + 1 * 16)
 		.setItemName("retroNismWrench");
 
 	public mod_Retronism() {
@@ -122,6 +128,9 @@ public class mod_Retronism extends BaseMod {
 		fluidPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
 		gasPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
 		megaPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
+		itemPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
+
+		wrench.setIconIndex(ModLoader.addOverride("/gui/items.png", "/item/retronism_wrench.png"));
 
 		ModLoader.RegisterBlock(testBlock);
 		ModLoader.RegisterBlock(cableBlock);
@@ -134,6 +143,7 @@ public class mod_Retronism extends BaseMod {
 		ModLoader.RegisterBlock(fluidTankBlock);
 		ModLoader.RegisterBlock(gasTankBlock);
 		ModLoader.RegisterBlock(megaPipeBlock);
+		ModLoader.RegisterBlock(itemPipeBlock);
 		ModLoader.RegisterTileEntity(Retronism_TileCrusher.class, "Crusher");
 		ModLoader.RegisterTileEntity(Retronism_TileGenerator.class, "Generator");
 		ModLoader.RegisterTileEntity(Retronism_TileCable.class, "Cable");
@@ -144,6 +154,7 @@ public class mod_Retronism extends BaseMod {
 		ModLoader.RegisterTileEntity(Retronism_TileFluidTank.class, "FluidTank");
 		ModLoader.RegisterTileEntity(Retronism_TileGasTank.class, "GasTank");
 		ModLoader.RegisterTileEntity(Retronism_TileMegaPipe.class, "MegaPipe");
+		ModLoader.RegisterTileEntity(Retronism_TileItemPipe.class, "ItemPipe");
 		ModLoader.AddName(testBlock, "Retronism Test Block");
 		ModLoader.AddName(cableBlock, "Retronism Cable");
 		ModLoader.AddName(crusherBlock, "Crusher");
@@ -155,6 +166,7 @@ public class mod_Retronism extends BaseMod {
 		ModLoader.AddName(fluidTankBlock, "Fluid Tank");
 		ModLoader.AddName(gasTankBlock, "Gas Tank");
 		ModLoader.AddName(megaPipeBlock, "Mega Pipe");
+		ModLoader.AddName(itemPipeBlock, "Item Pipe");
 		ModLoader.AddName(testItem, "Retronism Test Item");
 		ModLoader.AddName(ironDust, "Iron Dust");
 		ModLoader.AddName(goldDust, "Gold Dust");
@@ -264,6 +276,14 @@ public class mod_Retronism extends BaseMod {
 		);
 
 		ModLoader.AddRecipe(
+			new ItemStack(itemPipeBlock, 16),
+			new Object[] {
+				"C",
+				'C', Block.chest
+			}
+		);
+
+		ModLoader.AddRecipe(
 			new ItemStack(megaPipeBlock, 16),
 			new Object[] {
 				"D",
@@ -304,6 +324,9 @@ public class mod_Retronism extends BaseMod {
 		if(modelID == megaPipeRenderID) {
 			return renderMegaPipe(renderer, world, x, y, z, block);
 		}
+		if(modelID == itemPipeRenderID) {
+			return renderItemPipe(renderer, world, x, y, z, block);
+		}
 		return false;
 	}
 
@@ -312,7 +335,7 @@ public class mod_Retronism extends BaseMod {
 			renderMegaPipeInv(renderer, block);
 			return;
 		}
-		if(modelID == cableRenderID || modelID == fluidPipeRenderID || modelID == gasPipeRenderID) {
+		if(modelID == cableRenderID || modelID == fluidPipeRenderID || modelID == gasPipeRenderID || modelID == itemPipeRenderID) {
 			float bMin = (modelID == cableRenderID) ? 6.0F/16 : 5.0F/16;
 			float bMax = (modelID == cableRenderID) ? 10.0F/16 : 11.0F/16;
 			block.setBlockBounds(2.0F/16, bMin, bMin, 14.0F/16, bMax, bMax);
@@ -350,6 +373,10 @@ public class mod_Retronism extends BaseMod {
 	// Arm offset: INPUT recedes 2px, OUTPUT extends 2px, I/O normal, NONE no arm
 	private static final float INSET = 2.0F / 16.0F;
 
+	// Connector plate dimensions for pipes (wider than arm)
+	private static final float PIPE_PLATE_MIN = 3.0F / 16.0F;
+	private static final float PIPE_PLATE_MAX = 13.0F / 16.0F;
+
 	private static int getPipeSideMode(IBlockAccess world, int x, int y, int z, int side, int type) {
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		if (te instanceof Retronism_ISideConfigurable) {
@@ -358,9 +385,17 @@ public class mod_Retronism extends BaseMod {
 		return Retronism_SideConfig.MODE_INPUT_OUTPUT;
 	}
 
+	// Connector plate dimensions for cables (wider than arm)
+	private static final float CABLE_PLATE_MIN = 4.0F / 16.0F;
+	private static final float CABLE_PLATE_MAX = 12.0F / 16.0F;
+	private static final float PLATE_THICK = 1.0F / 16.0F;
+
 	private boolean renderCable(RenderBlocks renderer, IBlockAccess world, int x, int y, int z, Block block) {
 		float min = 6.0F / 16.0F;
 		float max = 10.0F / 16.0F;
+		float pMin = CABLE_PLATE_MIN;
+		float pMax = CABLE_PLATE_MAX;
+		float pT = PLATE_THICK;
 		Retronism_BlockCable cable = (Retronism_BlockCable) block;
 		int E = Retronism_SideConfig.TYPE_ENERGY;
 
@@ -369,57 +404,81 @@ public class mod_Retronism extends BaseMod {
 		renderer.renderStandardBlock(block, x, y, z);
 
 		// Down (-Y) = SIDE_BOTTOM(0)
-		if(cable.canConnectTo(world, x, y - 1, z)) {
+		if(cable.canConnectToSide(world, x, y, z, 0)) {
 			int mode = getPipeSideMode(world, x, y, z, 0, E);
 			if (mode != Retronism_SideConfig.MODE_NONE) {
 				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? -INSET : 0.0F;
 				block.setBlockBounds(min, end, min, max, min, max);
 				renderer.renderStandardBlock(block, x, y, z);
+				if (cable.isNeighborMachine(world, x, y - 1, z)) {
+					block.setBlockBounds(pMin, 0.0F, pMin, pMax, pT, pMax);
+					renderer.renderStandardBlock(block, x, y, z);
+				}
 			}
 		}
 		// Up (+Y) = SIDE_TOP(1)
-		if(cable.canConnectTo(world, x, y + 1, z)) {
+		if(cable.canConnectToSide(world, x, y, z, 1)) {
 			int mode = getPipeSideMode(world, x, y, z, 1, E);
 			if (mode != Retronism_SideConfig.MODE_NONE) {
 				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? 1.0F - INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? 1.0F + INSET : 1.0F;
 				block.setBlockBounds(min, max, min, max, end, max);
 				renderer.renderStandardBlock(block, x, y, z);
+				if (cable.isNeighborMachine(world, x, y + 1, z)) {
+					block.setBlockBounds(pMin, 1.0F - pT, pMin, pMax, 1.0F, pMax);
+					renderer.renderStandardBlock(block, x, y, z);
+				}
 			}
 		}
 		// North (-Z) = SIDE_NORTH(2)
-		if(cable.canConnectTo(world, x, y, z - 1)) {
+		if(cable.canConnectToSide(world, x, y, z, 2)) {
 			int mode = getPipeSideMode(world, x, y, z, 2, E);
 			if (mode != Retronism_SideConfig.MODE_NONE) {
 				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? -INSET : 0.0F;
 				block.setBlockBounds(min, min, end, max, max, min);
 				renderer.renderStandardBlock(block, x, y, z);
+				if (cable.isNeighborMachine(world, x, y, z - 1)) {
+					block.setBlockBounds(pMin, pMin, 0.0F, pMax, pMax, pT);
+					renderer.renderStandardBlock(block, x, y, z);
+				}
 			}
 		}
 		// South (+Z) = SIDE_SOUTH(3)
-		if(cable.canConnectTo(world, x, y, z + 1)) {
+		if(cable.canConnectToSide(world, x, y, z, 3)) {
 			int mode = getPipeSideMode(world, x, y, z, 3, E);
 			if (mode != Retronism_SideConfig.MODE_NONE) {
 				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? 1.0F - INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? 1.0F + INSET : 1.0F;
 				block.setBlockBounds(min, min, max, max, max, end);
 				renderer.renderStandardBlock(block, x, y, z);
+				if (cable.isNeighborMachine(world, x, y, z + 1)) {
+					block.setBlockBounds(pMin, pMin, 1.0F - pT, pMax, pMax, 1.0F);
+					renderer.renderStandardBlock(block, x, y, z);
+				}
 			}
 		}
 		// West (-X) = SIDE_WEST(4)
-		if(cable.canConnectTo(world, x - 1, y, z)) {
+		if(cable.canConnectToSide(world, x, y, z, 4)) {
 			int mode = getPipeSideMode(world, x, y, z, 4, E);
 			if (mode != Retronism_SideConfig.MODE_NONE) {
 				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? -INSET : 0.0F;
 				block.setBlockBounds(end, min, min, min, max, max);
 				renderer.renderStandardBlock(block, x, y, z);
+				if (cable.isNeighborMachine(world, x - 1, y, z)) {
+					block.setBlockBounds(0.0F, pMin, pMin, pT, pMax, pMax);
+					renderer.renderStandardBlock(block, x, y, z);
+				}
 			}
 		}
 		// East (+X) = SIDE_EAST(5)
-		if(cable.canConnectTo(world, x + 1, y, z)) {
+		if(cable.canConnectToSide(world, x, y, z, 5)) {
 			int mode = getPipeSideMode(world, x, y, z, 5, E);
 			if (mode != Retronism_SideConfig.MODE_NONE) {
 				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? 1.0F - INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? 1.0F + INSET : 1.0F;
 				block.setBlockBounds(max, min, min, end, max, max);
 				renderer.renderStandardBlock(block, x, y, z);
+				if (cable.isNeighborMachine(world, x + 1, y, z)) {
+					block.setBlockBounds(1.0F - pT, pMin, pMin, 1.0F, pMax, pMax);
+					renderer.renderStandardBlock(block, x, y, z);
+				}
 			}
 		}
 
@@ -523,6 +582,18 @@ public class mod_Retronism extends BaseMod {
 		}
 	}
 
+	private void renderConnectorPlate(RenderBlocks renderer, Block block, int x, int y, int z, int side, float pMin, float pMax, float pT) {
+		switch (side) {
+			case 0: block.setBlockBounds(pMin, 0.0F, pMin, pMax, pT, pMax); break;
+			case 1: block.setBlockBounds(pMin, 1.0F - pT, pMin, pMax, 1.0F, pMax); break;
+			case 2: block.setBlockBounds(pMin, pMin, 0.0F, pMax, pMax, pT); break;
+			case 3: block.setBlockBounds(pMin, pMin, 1.0F - pT, pMax, pMax, 1.0F); break;
+			case 4: block.setBlockBounds(0.0F, pMin, pMin, pT, pMax, pMax); break;
+			case 5: block.setBlockBounds(1.0F - pT, pMin, pMin, 1.0F, pMax, pMax); break;
+		}
+		renderer.renderStandardBlock(block, x, y, z);
+	}
+
 	// Neighbor positions matching SideConfig: Bottom, Top, North, South, West, East
 	private static final int[][] SIDE_OFFSETS = {{0,-1,0},{0,1,0},{0,0,-1},{0,0,1},{-1,0,0},{1,0,0}};
 
@@ -561,12 +632,15 @@ public class mod_Retronism extends BaseMod {
 			renderer.overrideBlockTexture = -1;
 		}
 
-		// Arms with side config
+		// Arms with side config + connector plates
 		for (int side = 0; side < 6; side++) {
 			int[] d = SIDE_OFFSETS[side];
-			if (pipe.canConnectTo(world, x+d[0], y+d[1], z+d[2])) {
+			if (pipe.canConnectToSide(world, x, y, z, side)) {
 				int mode = getPipeSideMode(world, x, y, z, side, F);
 				renderPipeArm(renderer, block, x, y, z, side, mode, min, max, iMin, iMax, fillRatio, fluidTex, eps);
+				if (pipe.isNeighborMachine(world, x+d[0], y+d[1], z+d[2])) {
+					renderConnectorPlate(renderer, block, x, y, z, side, PIPE_PLATE_MIN, PIPE_PLATE_MAX, PLATE_THICK);
+				}
 			}
 		}
 
@@ -656,9 +730,46 @@ public class mod_Retronism extends BaseMod {
 
 		for (int side = 0; side < 6; side++) {
 			int[] d = SIDE_OFFSETS[side];
-			if (pipe.canConnectTo(world, x+d[0], y+d[1], z+d[2])) {
+			if (pipe.canConnectToSide(world, x, y, z, side)) {
 				int mode = getPipeSideMode(world, x, y, z, side, G);
 				renderGasArm(renderer, block, x, y, z, side, mode, min, max, iMin, iMax, hasGas, gasColor);
+				if (pipe.isNeighborMachine(world, x+d[0], y+d[1], z+d[2])) {
+					renderConnectorPlate(renderer, block, x, y, z, side, PIPE_PLATE_MIN, PIPE_PLATE_MAX, PLATE_THICK);
+				}
+			}
+		}
+
+		block.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+		return true;
+	}
+
+	private boolean renderItemPipe(RenderBlocks renderer, IBlockAccess world, int x, int y, int z, Block block) {
+		float min = 5.0F / 16.0F;
+		float max = 11.0F / 16.0F;
+		Retronism_BlockItemPipe pipe = (Retronism_BlockItemPipe) block;
+		int I = Retronism_SideConfig.TYPE_ITEM;
+
+		// Center shell
+		block.setBlockBounds(min, min, min, max, max, max);
+		renderer.renderStandardBlock(block, x, y, z);
+
+		// Arms with side config + connector plates
+		for (int side = 0; side < 6; side++) {
+			int[] d = SIDE_OFFSETS[side];
+			if (pipe.canConnectToSide(world, x, y, z, side)) {
+				int mode = getPipeSideMode(world, x, y, z, side, I);
+				switch (side) {
+					case 0: block.setBlockBounds(min, negBound(mode), min, max, min, max); break;
+					case 1: block.setBlockBounds(min, max, min, max, posBound(mode), max); break;
+					case 2: block.setBlockBounds(min, min, negBound(mode), max, max, min); break;
+					case 3: block.setBlockBounds(min, min, max, max, max, posBound(mode)); break;
+					case 4: block.setBlockBounds(negBound(mode), min, min, min, max, max); break;
+					case 5: block.setBlockBounds(max, min, min, posBound(mode), max, max); break;
+				}
+				renderer.renderStandardBlock(block, x, y, z);
+				if (pipe.isNeighborMachine(world, x+d[0], y+d[1], z+d[2])) {
+					renderConnectorPlate(renderer, block, x, y, z, side, PIPE_PLATE_MIN, PIPE_PLATE_MAX, PLATE_THICK);
+				}
 			}
 		}
 
@@ -667,6 +778,7 @@ public class mod_Retronism extends BaseMod {
 	}
 
 	// ========== MEGA PIPE RENDER ==========
+
 	// Bundled cable style: 4 colored tubes (2x2, no gap) that all extend together
 	// Energy(yellow): Y=5-8, Z=5-8    Fluid(blue):  Y=5-8, Z=8-11
 	// Gas(gray):      Y=8-11, Z=5-8   Item(orange): Y=8-11, Z=8-11
@@ -710,6 +822,14 @@ public class mod_Retronism extends BaseMod {
 		Retronism_SideConfig.TYPE_GAS, Retronism_SideConfig.TYPE_ITEM
 	};
 
+	private static int getNeighborSideMode(IBlockAccess world, int nx, int ny, int nz, int oppSide, int type) {
+		TileEntity te = world.getBlockTileEntity(nx, ny, nz);
+		if (te instanceof Retronism_ISideConfigurable) {
+			return Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, type);
+		}
+		return Retronism_SideConfig.MODE_INPUT_OUTPUT;
+	}
+
 	private boolean renderMegaPipe(RenderBlocks renderer, IBlockAccess world, int x, int y, int z, Block block) {
 		Retronism_BlockMegaPipe mega = (Retronism_BlockMegaPipe) block;
 
@@ -718,6 +838,9 @@ public class mod_Retronism extends BaseMod {
 			int[] d = SIDE_OFFSETS[side];
 			connected[side] = mega.canConnectTo(world, x+d[0], y+d[1], z+d[2]);
 		}
+
+		// Track which sides have at least one active tube (for connector plates)
+		boolean[] sideHasArm = new boolean[6];
 
 		for (int i = 0; i < 4; i++) {
 			float tYMin = MEGA_TUBES[i][0], tYMax = MEGA_TUBES[i][1];
@@ -732,6 +855,11 @@ public class mod_Retronism extends BaseMod {
 				if (!connected[side]) continue;
 				int mode = getPipeSideMode(world, x, y, z, side, type);
 				if (mode == Retronism_SideConfig.MODE_NONE) continue;
+				int[] d = SIDE_OFFSETS[side];
+				int oppSide = Retronism_SideConfig.oppositeSide(side);
+				int neighborMode = getNeighborSideMode(world, x+d[0], y+d[1], z+d[2], oppSide, type);
+				if (neighborMode == Retronism_SideConfig.MODE_NONE) continue;
+				sideHasArm[side] = true;
 
 				switch (side) {
 					case 0: { // Down
@@ -765,6 +893,15 @@ public class mod_Retronism extends BaseMod {
 						break;
 					}
 				}
+			}
+		}
+
+		// Connector plates on machine connections (one plate per side, covering all tubes)
+		for (int side = 0; side < 6; side++) {
+			if (!sideHasArm[side]) continue;
+			int[] d = SIDE_OFFSETS[side];
+			if (mega.isNeighborMachine(world, x+d[0], y+d[1], z+d[2])) {
+				renderConnectorPlate(renderer, block, x, y, z, side, PIPE_PLATE_MIN, PIPE_PLATE_MAX, PLATE_THICK);
 			}
 		}
 

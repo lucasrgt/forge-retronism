@@ -21,10 +21,18 @@ public class Retronism_TileElectrolysis extends TileEntity implements Retronism_
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
+		if (!supportsType(type)) return;
+		int[] allowed = getAllowedModes(type);
+		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
 		return type == Retronism_SideConfig.TYPE_ENERGY || type == Retronism_SideConfig.TYPE_FLUID || type == Retronism_SideConfig.TYPE_GAS;
+	}
+	public int[] getAllowedModes(int type) {
+		if (type == Retronism_SideConfig.TYPE_ENERGY) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT};
+		if (type == Retronism_SideConfig.TYPE_FLUID) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT};
+		if (type == Retronism_SideConfig.TYPE_GAS) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_OUTPUT};
+		return new int[]{Retronism_SideConfig.MODE_NONE};
 	}
 
 	public static final int MAX_ENERGY = 32000;

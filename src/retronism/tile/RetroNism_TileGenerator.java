@@ -3,7 +3,7 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class Retronism_TileGenerator extends TileEntity implements IInventory, Retronism_ISideConfigurable {
+public class Retronism_TileGenerator extends TileEntity implements IInventory, Retronism_ISideConfigurable, Retronism_ISlotAccess {
 	private ItemStack[] generatorItems = new ItemStack[1]; // fuel slot only
 	public int burnTime = 0;
 	public int currentItemBurnTime = 0;
@@ -23,11 +23,21 @@ public class Retronism_TileGenerator extends TileEntity implements IInventory, R
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
+		if (!supportsType(type)) return;
+		int[] allowed = getAllowedModes(type);
+		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
 		return type == Retronism_SideConfig.TYPE_ENERGY || type == Retronism_SideConfig.TYPE_ITEM;
 	}
+	public int[] getAllowedModes(int type) {
+		if (type == Retronism_SideConfig.TYPE_ENERGY) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_OUTPUT};
+		if (type == Retronism_SideConfig.TYPE_ITEM) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT};
+		return new int[]{Retronism_SideConfig.MODE_NONE};
+	}
+
+	public int[] getInsertSlots() { return new int[]{0}; }
+	public int[] getExtractSlots() { return new int[]{}; }
 
 	public int getSizeInventory() {
 		return this.generatorItems.length;

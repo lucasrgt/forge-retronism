@@ -50,9 +50,13 @@ public class Retronism_TileMegaPipe extends TileEntity
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		Retronism_SideConfig.set(sideConfig, side, type, mode);
+		int[] allowed = getAllowedModes(type);
+		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) { return true; }
+	public int[] getAllowedModes(int type) {
+		return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
+	}
 
 	private boolean canSendType(int side, TileEntity te, int type) {
 		int myMode = Retronism_SideConfig.get(sideConfig, side, type);
@@ -287,6 +291,12 @@ public class Retronism_TileMegaPipe extends TileEntity
 
 	// ========== ITEMS ==========
 
+	private int[] getInsertSlotsFor(TileEntity te) {
+		if (te instanceof Retronism_ISlotAccess) return ((Retronism_ISlotAccess) te).getInsertSlots();
+		if (te instanceof TileEntityFurnace) return new int[]{0, 1};
+		return null;
+	}
+
 	private void distributeItems() {
 		if (this.itemBuffer == null) return;
 
@@ -304,7 +314,8 @@ public class Retronism_TileMegaPipe extends TileEntity
 				}
 			} else if (te instanceof IInventory) {
 				IInventory inv = (IInventory) te;
-				this.itemBuffer = insertIntoInventory(inv, this.itemBuffer);
+				int[] insertSlots = getInsertSlotsFor(te);
+				this.itemBuffer = insertIntoInventory(inv, this.itemBuffer, insertSlots);
 				if (this.itemBuffer != null && this.itemBuffer.stackSize <= 0) {
 					this.itemBuffer = null;
 				}
@@ -313,19 +324,36 @@ public class Retronism_TileMegaPipe extends TileEntity
 		}
 	}
 
-	private ItemStack insertIntoInventory(IInventory inv, ItemStack stack) {
-		for (int i = 0; i < inv.getSizeInventory(); i++) {
-			ItemStack existing = inv.getStackInSlot(i);
-			if (existing == null) {
-				inv.setInventorySlotContents(i, stack.copy());
-				return null;
-			} else if (existing.itemID == stack.itemID && existing.getItemDamage() == stack.getItemDamage()
-					&& existing.stackSize < existing.getMaxStackSize()) {
-				int space = existing.getMaxStackSize() - existing.stackSize;
-				int transfer = Math.min(space, stack.stackSize);
-				existing.stackSize += transfer;
-				stack.stackSize -= transfer;
-				if (stack.stackSize <= 0) return null;
+	private ItemStack insertIntoInventory(IInventory inv, ItemStack stack, int[] slots) {
+		if (slots != null) {
+			for (int i : slots) {
+				ItemStack existing = inv.getStackInSlot(i);
+				if (existing == null) {
+					inv.setInventorySlotContents(i, stack.copy());
+					return null;
+				} else if (existing.itemID == stack.itemID && existing.getItemDamage() == stack.getItemDamage()
+						&& existing.stackSize < existing.getMaxStackSize()) {
+					int space = existing.getMaxStackSize() - existing.stackSize;
+					int transfer = Math.min(space, stack.stackSize);
+					existing.stackSize += transfer;
+					stack.stackSize -= transfer;
+					if (stack.stackSize <= 0) return null;
+				}
+			}
+		} else {
+			for (int i = 0; i < inv.getSizeInventory(); i++) {
+				ItemStack existing = inv.getStackInSlot(i);
+				if (existing == null) {
+					inv.setInventorySlotContents(i, stack.copy());
+					return null;
+				} else if (existing.itemID == stack.itemID && existing.getItemDamage() == stack.getItemDamage()
+						&& existing.stackSize < existing.getMaxStackSize()) {
+					int space = existing.getMaxStackSize() - existing.stackSize;
+					int transfer = Math.min(space, stack.stackSize);
+					existing.stackSize += transfer;
+					stack.stackSize -= transfer;
+					if (stack.stackSize <= 0) return null;
+				}
 			}
 		}
 		return stack;

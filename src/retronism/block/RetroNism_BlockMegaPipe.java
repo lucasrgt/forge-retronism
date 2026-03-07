@@ -27,18 +27,30 @@ public class Retronism_BlockMegaPipe extends Block {
 		return new Retronism_TileMegaPipe();
 	}
 
+	private static final int[][] DIRS = {{0,-1,0},{0,1,0},{0,0,-1},{0,0,1},{-1,0,0},{1,0,0}};
+
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {
 		ItemStack held = player.getCurrentEquippedItem();
 		if (held != null && held.itemID == mod_Retronism.wrench.shiftedIndex) {
 			if (world.multiplayerWorld) return true;
 			TileEntity te = world.getBlockTileEntity(x, y, z);
-			if (te instanceof Retronism_TileMegaPipe) {
+			if (te instanceof Retronism_ISideConfigurable) {
 				ModLoader.getMinecraftInstance().displayGuiScreen(
-					new Retronism_GuiMegaPipeConfig(player, (Retronism_TileMegaPipe) te));
+					new Retronism_GuiPipeConfig(player, (Retronism_ISideConfigurable) te));
 			}
 			return true;
 		}
 		return false;
+	}
+
+	public boolean isNeighborMachine(IBlockAccess world, int nx, int ny, int nz) {
+		int id = world.getBlockId(nx, ny, nz);
+		if (id == this.blockID
+			|| id == mod_Retronism.cableBlock.blockID
+			|| id == mod_Retronism.fluidPipeBlock.blockID
+			|| id == mod_Retronism.gasPipeBlock.blockID
+			|| id == mod_Retronism.itemPipeBlock.blockID) return false;
+		return canConnectTo(world, nx, ny, nz);
 	}
 
 	public boolean canConnectTo(IBlockAccess world, int x, int y, int z) {
@@ -52,6 +64,7 @@ public class Retronism_BlockMegaPipe extends Block {
 		return id == mod_Retronism.cableBlock.blockID
 			|| id == mod_Retronism.fluidPipeBlock.blockID
 			|| id == mod_Retronism.gasPipeBlock.blockID
+			|| id == mod_Retronism.itemPipeBlock.blockID
 			|| id == this.blockID;
 	}
 

@@ -37,6 +37,13 @@ public class Retronism_GuiMegaPipeConfig extends GuiScreen {
 		this.tile = tile;
 	}
 
+	private int cycleAllowed(int current, int[] allowed) {
+		for (int i = 0; i < allowed.length; i++) {
+			if (allowed[i] == current) return allowed[(i + 1) % allowed.length];
+		}
+		return allowed[0];
+	}
+
 	public void drawScreen(int mouseX, int mouseY, float partialTick) {
 		this.drawDefaultBackground();
 
@@ -128,9 +135,13 @@ public class Retronism_GuiMegaPipeConfig extends GuiScreen {
 				if (mouseX >= cx && mouseX < cx + CELL_SIZE && mouseY >= cy && mouseY < cy + CELL_SIZE) {
 					int[] config = tile.getSideConfig();
 					int oldMode = Retronism_SideConfig.get(config, side, type);
-					int newMode = Retronism_SideConfig.cycleMode(oldMode);
+					int[] allowed = tile.getAllowedModes(type);
+					int newMode = cycleAllowed(oldMode, allowed);
 					tile.setSideMode(side, type, newMode);
 					tile.worldObj.markBlockNeedsUpdate(tile.xCoord, tile.yCoord, tile.zCoord);
+					for (int[] d : new int[][]{{0,-1,0},{0,1,0},{0,0,-1},{0,0,1},{-1,0,0},{1,0,0}}) {
+						tile.worldObj.markBlockNeedsUpdate(tile.xCoord+d[0], tile.yCoord+d[1], tile.zCoord+d[2]);
+					}
 					return;
 				}
 			}

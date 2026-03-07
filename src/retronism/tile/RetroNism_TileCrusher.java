@@ -4,7 +4,7 @@ import net.minecraft.src.*;
 import retronism.api.*;
 import retronism.recipe.*;
 
-public class Retronism_TileCrusher extends TileEntity implements IInventory, Retronism_IEnergyReceiver, Retronism_ISideConfigurable {
+public class Retronism_TileCrusher extends TileEntity implements IInventory, Retronism_IEnergyReceiver, Retronism_ISideConfigurable, Retronism_ISlotAccess {
 	private ItemStack[] crusherItemStacks = new ItemStack[2]; // 0=input, 1=output
 	public int crusherCookTime = 0;
 	public int storedEnergy = 0;
@@ -21,11 +21,21 @@ public class Retronism_TileCrusher extends TileEntity implements IInventory, Ret
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
+		if (!supportsType(type)) return;
+		int[] allowed = getAllowedModes(type);
+		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
 		return type == Retronism_SideConfig.TYPE_ENERGY || type == Retronism_SideConfig.TYPE_ITEM;
 	}
+	public int[] getAllowedModes(int type) {
+		if (type == Retronism_SideConfig.TYPE_ENERGY) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT};
+		if (type == Retronism_SideConfig.TYPE_ITEM) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
+		return new int[]{Retronism_SideConfig.MODE_NONE};
+	}
+
+	public int[] getInsertSlots() { return new int[]{0}; }
+	public int[] getExtractSlots() { return new int[]{1}; }
 
 	public int receiveEnergy(int amount) {
 		int space = MAX_ENERGY - storedEnergy;

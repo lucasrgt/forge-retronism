@@ -23,10 +23,16 @@ public class Retronism_TileGasPipe extends TileEntity implements Retronism_IGasH
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
+		if (!supportsType(type)) return;
+		int[] allowed = getAllowedModes(type);
+		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
 		return type == Retronism_SideConfig.TYPE_GAS;
+	}
+	public int[] getAllowedModes(int type) {
+		if (type == Retronism_SideConfig.TYPE_GAS) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
+		return new int[]{Retronism_SideConfig.MODE_NONE};
 	}
 
 	public int receiveGas(int type, int amountMB) {

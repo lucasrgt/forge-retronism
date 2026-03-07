@@ -8,7 +8,7 @@ DEST="$BASE/mcp/minecraft/src/net/minecraft/src"
 
 # Remove old transpiled mod files (only Retronism_ prefixed + mod_Retronism)
 find "$DEST" -maxdepth 1 -name "Retronism_*.java" -delete 2>/dev/null || true
-find "$DEST" -maxdepth 1 -name "mod_Retronism.java" -delete 2>/dev/null || true
+find "$DEST" -maxdepth 1 -name "mod_Retro*.java" -delete 2>/dev/null || true
 
 find "$SRC" -name "*.java" | while read -r file; do
     filename=$(basename "$file")

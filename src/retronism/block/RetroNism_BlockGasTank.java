@@ -28,6 +28,7 @@ public class Retronism_BlockGasTank extends BlockContainer {
 	}
 
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {
+		if (player.isSneaking()) return false;
 		if (world.multiplayerWorld) return true;
 		Retronism_TileGasTank tileEntity = (Retronism_TileGasTank) world.getBlockTileEntity(x, y, z);
 		ModLoader.OpenGUI(player, new Retronism_GuiGasTank(player.inventory, tileEntity));

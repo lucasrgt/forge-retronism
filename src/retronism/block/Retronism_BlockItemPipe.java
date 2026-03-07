@@ -7,37 +7,27 @@ import retronism.gui.*;
 
 import java.util.Random;
 
-public class Retronism_BlockGasPipe extends BlockContainer {
+public class Retronism_BlockItemPipe extends BlockContainer {
 
-	public Retronism_BlockGasPipe(int id, int textureIndex) {
+	public Retronism_BlockItemPipe(int id, int textureIndex) {
 		super(id, Material.iron);
 		this.blockIndexInTexture = textureIndex;
 		this.setBlockBounds(5.0F/16, 5.0F/16, 5.0F/16, 11.0F/16, 11.0F/16, 11.0F/16);
 	}
 
 	protected TileEntity getBlockEntity() {
-		return new Retronism_TileGasPipe();
+		return new Retronism_TileItemPipe();
 	}
 
-	public boolean isOpaqueCube() {
-		return false;
-	}
-
-	public boolean renderAsNormalBlock() {
-		return false;
-	}
+	public boolean isOpaqueCube() { return false; }
+	public boolean renderAsNormalBlock() { return false; }
 
 	public int getRenderType() {
-		return mod_Retronism.gasPipeRenderID;
+		return mod_Retronism.itemPipeRenderID;
 	}
 
-	public int quantityDropped(Random random) {
-		return 1;
-	}
-
-	public int idDropped(int metadata, Random random) {
-		return this.blockID;
-	}
+	public int quantityDropped(Random random) { return 1; }
+	public int idDropped(int metadata, Random random) { return this.blockID; }
 
 	private static final int[][] DIRS = {{0,-1,0},{0,1,0},{0,0,-1},{0,0,1},{-1,0,0},{1,0,0}};
 
@@ -68,7 +58,7 @@ public class Retronism_BlockGasPipe extends BlockContainer {
 		int id = world.getBlockId(x, y, z);
 		if (id == this.blockID || id == mod_Retronism.megaPipeBlock.blockID) return true;
 		TileEntity te = world.getBlockTileEntity(x, y, z);
-		return te instanceof Retronism_IGasHandler;
+		return te instanceof IInventory;
 	}
 
 	public boolean isNeighborMachine(IBlockAccess world, int nx, int ny, int nz) {
@@ -82,13 +72,13 @@ public class Retronism_BlockGasPipe extends BlockContainer {
 		if (!canConnectTo(world, nx, ny, nz)) return false;
 		TileEntity myTe = world.getBlockTileEntity(myX, myY, myZ);
 		if (myTe instanceof Retronism_ISideConfigurable) {
-			int mode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) myTe).getSideConfig(), side, Retronism_SideConfig.TYPE_GAS);
+			int mode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) myTe).getSideConfig(), side, Retronism_SideConfig.TYPE_ITEM);
 			if (mode == Retronism_SideConfig.MODE_NONE) return false;
 		}
 		TileEntity nTe = world.getBlockTileEntity(nx, ny, nz);
 		if (nTe instanceof Retronism_ISideConfigurable) {
 			int opp = Retronism_SideConfig.oppositeSide(side);
-			int mode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) nTe).getSideConfig(), opp, Retronism_SideConfig.TYPE_GAS);
+			int mode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) nTe).getSideConfig(), opp, Retronism_SideConfig.TYPE_ITEM);
 			if (mode == Retronism_SideConfig.MODE_NONE) return false;
 		}
 		return true;

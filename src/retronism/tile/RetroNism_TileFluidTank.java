@@ -3,7 +3,7 @@ package retronism.tile;
 import net.minecraft.src.*;
 import retronism.api.*;
 
-public class Retronism_TileFluidTank extends TileEntity implements Retronism_IFluidHandler, IInventory, Retronism_ISideConfigurable {
+public class Retronism_TileFluidTank extends TileEntity implements Retronism_IFluidHandler, IInventory, Retronism_ISideConfigurable, Retronism_ISlotAccess {
 	private ItemStack[] tankItems = new ItemStack[1];
 	private int fluidAmount = 0;
 
@@ -20,11 +20,21 @@ public class Retronism_TileFluidTank extends TileEntity implements Retronism_IFl
 
 	public int[] getSideConfig() { return sideConfig; }
 	public void setSideMode(int side, int type, int mode) {
-		if (supportsType(type)) Retronism_SideConfig.set(sideConfig, side, type, mode);
+		if (!supportsType(type)) return;
+		int[] allowed = getAllowedModes(type);
+		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
 		return type == Retronism_SideConfig.TYPE_FLUID || type == Retronism_SideConfig.TYPE_ITEM;
 	}
+	public int[] getAllowedModes(int type) {
+		if (type == Retronism_SideConfig.TYPE_FLUID) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
+		if (type == Retronism_SideConfig.TYPE_ITEM) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
+		return new int[]{Retronism_SideConfig.MODE_NONE};
+	}
+
+	public int[] getInsertSlots() { return new int[]{0}; }
+	public int[] getExtractSlots() { return new int[]{0}; }
 
 	public int receiveFluid(int fluidType, int amountMB) {
 		if (fluidType != Retronism_FluidType.WATER) return 0;
