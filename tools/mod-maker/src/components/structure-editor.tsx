@@ -14,10 +14,11 @@ export function StructureEditor() {
     renderer: THREE.WebGLRenderer
     raycaster: THREE.Raycaster
     meshes: Map<string, THREE.Mesh>
-    grid: THREE.Group
+    gridGroup: THREE.Group
     animId: number
-    orbitState: { dragging: boolean; lastX: number; lastY: number; theta: number; phi: number; radius: number }
+    orbitState: { dragging: boolean; panning: boolean; lastX: number; lastY: number; theta: number; phi: number; radius: number }
     target: THREE.Vector3
+    spaceDown: boolean
   } | null>(null)
 
   const blocks = useStore((s) => s.blocks)
@@ -46,12 +47,14 @@ export function StructureEditor() {
     dirLight.position.set(5, 8, 5)
     scene.add(dirLight)
 
-    const grid = new THREE.Group()
-    scene.add(grid)
+    // Ground grid (populated by dimensions effect)
+    const gridGroup = new THREE.Group()
+    scene.add(gridGroup)
 
     const { w, h, d } = useStore.getState().dimensions
-    const target = new THREE.Vector3(w / 2, h / 2, d / 2)
-    const orbitState = { dragging: false, lastX: 0, lastY: 0, theta: 0.6, phi: 0.8, radius: 8 }
+    const target = new THREE.Vector3(w / 2 - 0.5, h / 2 - 0.5, d / 2 - 0.5)
+    const orbitState = { dragging: false, panning: false, lastX: 0, lastY: 0, theta: 0.6, phi: 0.8, radius: 8 }
+    let spaceDown = false
 
     function updateCamera() {
       camera.position.set(
@@ -63,16 +66,43 @@ export function StructureEditor() {
     }
     updateCamera()
 
-    // Orbit controls
+    // Keyboard: space for pan mode
     const canvas = renderer.domElement
+    canvas.tabIndex = 0
+    function onKeyDown(e: KeyboardEvent) { if (e.code === 'Space') { spaceDown = true; e.preventDefault() } }
+    function onKeyUp(e: KeyboardEvent) { if (e.code === 'Space') { spaceDown = false } }
+    canvas.addEventListener('keydown', onKeyDown)
+    canvas.addEventListener('keyup', onKeyUp)
+
+    // Mouse controls: orbit (alt+drag / middle), pan (space+drag), right-click select
     canvas.addEventListener('mousedown', (e) => {
       if (e.altKey || e.button === 1) {
         orbitState.dragging = true
         orbitState.lastX = e.clientX
         orbitState.lastY = e.clientY
+      } else if (spaceDown && e.button === 0) {
+        orbitState.panning = true
+        orbitState.lastX = e.clientX
+        orbitState.lastY = e.clientY
       }
     })
     canvas.addEventListener('mousemove', (e) => {
+      if (orbitState.panning) {
+        // Pan: move target in camera-local XY plane
+        const dx = (e.clientX - orbitState.lastX) * 0.005 * orbitState.radius
+        const dy = (e.clientY - orbitState.lastY) * 0.005 * orbitState.radius
+        const right = new THREE.Vector3()
+        const up = new THREE.Vector3()
+        camera.getWorldDirection(new THREE.Vector3())
+        right.crossVectors(camera.up, new THREE.Vector3().subVectors(camera.position, target).normalize()).normalize()
+        up.copy(camera.up)
+        target.add(right.multiplyScalar(-dx))
+        target.add(up.multiplyScalar(dy))
+        orbitState.lastX = e.clientX
+        orbitState.lastY = e.clientY
+        updateCamera()
+        return
+      }
       if (!orbitState.dragging) return
       orbitState.theta += (e.clientX - orbitState.lastX) * 0.008
       orbitState.phi = Math.max(0.1, Math.min(Math.PI - 0.1, orbitState.phi - (e.clientY - orbitState.lastY) * 0.008))
@@ -80,59 +110,63 @@ export function StructureEditor() {
       orbitState.lastY = e.clientY
       updateCamera()
     })
-    canvas.addEventListener('mouseup', () => { orbitState.dragging = false })
+    canvas.addEventListener('mouseup', () => { orbitState.dragging = false; orbitState.panning = false })
     canvas.addEventListener('wheel', (e) => {
       orbitState.radius = Math.max(3, Math.min(30, orbitState.radius + e.deltaY * 0.01))
       updateCamera()
     })
 
-    // Click to place/select
+    // Raycast helper
     const raycaster = new THREE.Raycaster()
-    canvas.addEventListener('click', (e) => {
-      if (e.altKey) return
+    function raycastBlocks(e: MouseEvent) {
       const rect = canvas.getBoundingClientRect()
       const mouse = new THREE.Vector2(
         ((e.clientX - rect.left) / rect.width) * 2 - 1,
         -((e.clientY - rect.top) / rect.height) * 2 + 1,
       )
       raycaster.setFromCamera(mouse, camera)
-
-      const store = useStore.getState()
       const meshArray = Array.from(sceneRef.current?.meshes.values() || [])
-      const hits = raycaster.intersectObjects(meshArray)
+      return raycaster.intersectObjects(meshArray)
+    }
 
-      if (e.button === 2 || e.ctrlKey) {
-        // Right-click: select
-        if (hits.length > 0) {
-          const key = hits[0].object.userData.key as string
-          store.setSelectedBlock(key)
-        }
-      } else {
-        // Left-click: place on face
-        if (hits.length > 0) {
-          const hit = hits[0]
-          const normal = hit.face?.normal
-          if (normal) {
-            const pos = hit.object.userData.key.split(',').map(Number)
-            const nx = pos[0] + Math.round(normal.x)
-            const ny = pos[1] + Math.round(normal.y)
-            const nz = pos[2] + Math.round(normal.z)
-            const { w, h, d } = store.dimensions
-            if (nx >= 0 && nx < w && ny >= 0 && ny < h && nz >= 0 && nz < d) {
-              store.placeBlock(nx, ny, nz, store.selectedTool)
-            }
+    // Left-click: place block on face
+    canvas.addEventListener('click', (e) => {
+      if (e.altKey || spaceDown) return
+      const hits = raycastBlocks(e)
+      if (hits.length > 0) {
+        const hit = hits[0]
+        const normal = hit.face?.normal
+        if (normal) {
+          const store = useStore.getState()
+          const pos = hit.object.userData.key.split(',').map(Number)
+          const nx = pos[0] + Math.round(normal.x)
+          const ny = pos[1] + Math.round(normal.y)
+          const nz = pos[2] + Math.round(normal.z)
+          const { w, h, d } = store.dimensions
+          if (nx >= 0 && nx < w && ny >= 0 && ny < h && nz >= 0 && nz < d) {
+            store.placeBlock(nx, ny, nz, store.selectedTool)
           }
         }
       }
     })
-    canvas.addEventListener('contextmenu', (e) => e.preventDefault())
+
+    // Right-click: select block
+    canvas.addEventListener('contextmenu', (e) => {
+      e.preventDefault()
+      if (e.altKey || spaceDown) return
+      const hits = raycastBlocks(e)
+      if (hits.length > 0) {
+        const key = hits[0].object.userData.key as string
+        useStore.getState().setSelectedBlock(key)
+      }
+    })
 
     const animId = requestAnimationFrame(function animate() {
       sceneRef.current!.animId = requestAnimationFrame(animate)
       renderer.render(scene, camera)
     })
 
-    sceneRef.current = { scene, camera, renderer, raycaster, meshes: new Map(), grid, animId, orbitState, target }
+    sceneRef.current = { scene, camera, renderer, raycaster, meshes: new Map(), gridGroup, animId, orbitState, target, spaceDown }
 
     // Load real block textures from terrain.png + custom assets
     loadTextures().then((ok) => {
@@ -157,6 +191,8 @@ export function StructureEditor() {
     return () => {
       cancelAnimationFrame(animId)
       resizeObs.disconnect()
+      canvas.removeEventListener('keydown', onKeyDown)
+      canvas.removeEventListener('keyup', onKeyUp)
       renderer.dispose()
       container.removeChild(renderer.domElement)
       sceneRef.current = null
@@ -220,14 +256,47 @@ export function StructureEditor() {
     }
   }, [blocks, selectedBlock, layerFilter])
 
-  // Update camera target and auto-fit when dimensions change
+  // Update camera target, grid, and auto-fit when dimensions change
   useEffect(() => {
     if (sceneRef.current) {
       const { w, h, d } = dimensions
-      sceneRef.current.target.set(w / 2, h / 2, d / 2)
+      sceneRef.current.target.set(w / 2 - 0.5, h / 2 - 0.5, d / 2 - 0.5)
       // Auto-fit: radius based on the largest dimension
       const maxDim = Math.max(w, h, d)
       sceneRef.current.orbitState.radius = Math.max(5, maxDim * 2)
+
+      // Rebuild ground grid
+      const gg = sceneRef.current.gridGroup
+      while (gg.children.length) gg.remove(gg.children[0])
+      const gridW = Math.max(w, 5) + 4
+      const gridD = Math.max(d, 5) + 4
+      const mainMat = new THREE.LineBasicMaterial({ color: 0x333333 })
+      for (let x = 0; x <= gridW; x++) {
+        const gx = x - (gridW - w) / 2 - 0.5
+        const geom = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(gx, -0.5, -(gridD - d) / 2 - 0.5),
+          new THREE.Vector3(gx, -0.5, d + (gridD - d) / 2 - 0.5),
+        ])
+        gg.add(new THREE.Line(geom, mainMat))
+      }
+      for (let z = 0; z <= gridD; z++) {
+        const gz = z - (gridD - d) / 2 - 0.5
+        const geom = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(-(gridW - w) / 2 - 0.5, -0.5, gz),
+          new THREE.Vector3(w + (gridW - w) / 2 - 0.5, -0.5, gz),
+        ])
+        gg.add(new THREE.Line(geom, mainMat))
+      }
+      // Build area border
+      const areaMat = new THREE.LineBasicMaterial({ color: 0x666666 })
+      const areaGeom = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(-0.5, -0.5, -0.5),
+        new THREE.Vector3(w - 0.5, -0.5, -0.5),
+        new THREE.Vector3(w - 0.5, -0.5, d - 0.5),
+        new THREE.Vector3(-0.5, -0.5, d - 0.5),
+        new THREE.Vector3(-0.5, -0.5, -0.5),
+      ])
+      gg.add(new THREE.Line(areaGeom, areaMat))
     }
   }, [dimensions])
 

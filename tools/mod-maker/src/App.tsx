@@ -46,7 +46,7 @@ export default function App() {
             {activeTab === 'gui' && <GuiBuilder />}
           </div>
           <div className="flex items-center justify-between px-3 py-1.5 border-t border-border text-xs text-muted-foreground">
-            <span>Click to place blocks. Right-click to select. Alt+drag to orbit.</span>
+            <span>Click: place | Right-click: select | Alt+drag: orbit | Space+drag: pan | Scroll: zoom</span>
             <div className="flex items-center gap-3">
               <span className={`flex items-center gap-1 ${mcpConnected ? 'text-green-400' : 'text-muted-foreground'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${mcpConnected ? 'bg-green-400' : 'bg-muted-foreground'}`} />
