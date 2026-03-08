@@ -8,8 +8,11 @@ import { GuiBuilder } from '@/components/gui-builder'
 import { Tabs } from '@/components/ui/tabs'
 import { useStore, type SerializedMultiblock } from '@/hooks/use-store'
 
-const TAB_ITEMS = [
+const MULTIBLOCK_TABS = [
   { id: 'structure', label: '3D Structure' },
+  { id: 'gui', label: 'GUI Builder' },
+]
+const SINGLE_TABS = [
   { id: 'gui', label: 'GUI Builder' },
 ]
 
@@ -17,6 +20,8 @@ export default function App() {
   const activeTab = useStore((s) => s.activeTab)
   const blocks = useStore((s) => s.blocks)
   const mcpConnected = useStore((s) => s.mcpConnected)
+  const projectType = useStore((s) => s.projectType)
+  const isMultiblock = projectType === 'multiblock'
 
   // Listen for MCP WebSocket messages from Electron main process
   useEffect(() => {
@@ -76,27 +81,33 @@ export default function App() {
       <div className="flex flex-1 overflow-hidden">
         <LeftPanel />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <Tabs
-            tabs={TAB_ITEMS}
-            active={activeTab}
-            onChange={(id) => useStore.getState().setActiveTab(id as any)}
-          />
+          {isMultiblock && (
+            <Tabs
+              tabs={MULTIBLOCK_TABS}
+              active={activeTab}
+              onChange={(id) => useStore.getState().setActiveTab(id as any)}
+            />
+          )}
           <div className="flex-1 flex flex-col overflow-hidden">
-            {activeTab === 'structure' && <StructureEditor />}
-            {activeTab === 'gui' && <GuiBuilder />}
+            {isMultiblock && activeTab === 'structure' && <StructureEditor />}
+            {(!isMultiblock || activeTab === 'gui') && <GuiBuilder />}
           </div>
           <div className="flex items-center justify-between px-3 py-1.5 border-t border-border text-xs text-muted-foreground">
-            <span>Click: select | Shift+click / Right-click: place | Alt+drag: orbit | Space+drag: pan | Scroll: zoom</span>
+            {isMultiblock ? (
+              <span>Click: select | Shift+click / Right-click: place | Alt+drag: orbit | Space+drag: pan | Scroll: zoom</span>
+            ) : (
+              <span>Single block machine — configure GUI layout</span>
+            )}
             <div className="flex items-center gap-3">
               <span className={`flex items-center gap-1 ${mcpConnected ? 'text-green-400' : 'text-muted-foreground'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${mcpConnected ? 'bg-green-400' : 'bg-muted-foreground'}`} />
                 MCP {mcpConnected ? 'Connected' : 'Idle'}
               </span>
-              <span>Blocks: {blocks.size}</span>
+              {isMultiblock && <span>Blocks: {blocks.size}</span>}
             </div>
           </div>
         </div>
-        <RightPanel />
+        {isMultiblock && <RightPanel />}
       </div>
       <Toaster theme="dark" position="bottom-center" />
     </div>

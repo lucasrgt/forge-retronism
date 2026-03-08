@@ -23,22 +23,167 @@ const MC = {
   ENERGY_B: [54, 227, 138] as const,
   FLUID: [40, 80, 220] as const,
   GAS: [170, 170, 170] as const,
+  GAUGE: [86, 0, 1] as const,
 }
 
 type Color = readonly [number, number, number]
 
 function rgb(c: Color) { return `rgb(${c[0]},${c[1]},${c[2]})` }
 
-const PALETTE_ITEMS: { type: GuiComponentType; icon: string; cls: string }[] = [
-  { type: 'slot', icon: 'Slot', cls: 'bg-[#8b8b8b] border border-[#373737]' },
-  { type: 'big_slot', icon: 'Big Slot', cls: 'bg-[#8b8b8b] border-2 border-[#373737]' },
-  { type: 'energy_bar', icon: 'Energy', cls: 'bg-gradient-to-t from-[#3bfb98] to-[#36e38a] border border-[#373737]' },
-  { type: 'progress_arrow', icon: 'Arrow', cls: 'bg-[#c6c6c6]' },
-  { type: 'flame', icon: 'Flame', cls: 'bg-gradient-to-t from-[#e44] to-[#fa0]' },
-  { type: 'fluid_tank', icon: 'Fluid', cls: 'bg-[#48f] border border-[#373737]' },
-  { type: 'gas_tank', icon: 'Gas', cls: 'bg-[#aaa] border border-[#373737]' },
-  { type: 'separator', icon: 'Sep', cls: 'bg-[#555] !h-0.5 self-center' },
+const PALETTE_ITEMS: GuiComponentType[] = [
+  'slot', 'big_slot', 'energy_bar', 'progress_arrow', 'flame',
+  'fluid_tank', 'gas_tank', 'fluid_tank_small', 'gas_tank_small', 'separator',
 ]
+
+// Pixel-art icons for the palette toolbar (drawn on a tiny canvas)
+const ICON_SCALE = 2 // each pixel = 2 CSS px
+function PaletteIcon({ type }: { type: GuiComponentType }) {
+  const ref = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const c = ref.current; if (!c) return
+    const ctx = c.getContext('2d')!
+    const S = ICON_SCALE
+    ctx.imageSmoothingEnabled = false
+    ctx.clearRect(0, 0, c.width, c.height)
+
+    const px = (x: number, y: number, col: string) => { ctx.fillStyle = col; ctx.fillRect(x * S, y * S, S, S) }
+    const rect = (x: number, y: number, w: number, h: number, col: string) => { ctx.fillStyle = col; ctx.fillRect(x * S, y * S, w * S, h * S) }
+
+    switch (type) {
+      case 'slot': {
+        // 9x9 slot: dark border top-left, white border bottom-right, gray fill
+        rect(0, 0, 9, 9, '#8b8b8b')
+        // top + left edge dark
+        rect(0, 0, 9, 1, '#373737'); rect(0, 0, 1, 9, '#373737')
+        // bottom + right edge white
+        rect(0, 8, 9, 1, '#fff'); rect(8, 0, 1, 9, '#fff')
+        break
+      }
+      case 'big_slot': {
+        // 11x11 big slot
+        rect(0, 0, 11, 11, '#8b8b8b')
+        rect(0, 0, 11, 1, '#373737'); rect(0, 0, 1, 11, '#373737')
+        rect(0, 10, 11, 1, '#fff'); rect(10, 0, 1, 11, '#fff')
+        // inner border
+        rect(1, 1, 9, 1, '#555'); rect(1, 1, 1, 9, '#555')
+        break
+      }
+      case 'energy_bar': {
+        // 5x11 energy bar with green gradient
+        rect(0, 0, 5, 11, '#373737')
+        rect(1, 1, 3, 9, '#555')
+        // green fill from bottom
+        for (let i = 0; i < 7; i++) {
+          const g = 150 + Math.floor(105 * (1 - i / 7))
+          rect(1, 3 + i, 3, 1, `rgb(59,${g},100)`)
+        }
+        break
+      }
+      case 'progress_arrow': {
+        // 12x9 arrow — simplified furnace.png sprite
+        const bg = '#2a2a3a' // transparent on dark bg
+        rect(0, 0, 12, 9, bg)
+        // shaft: rows 3-5, cols 0-6
+        rect(0, 3, 7, 3, '#8b8b8b')
+        // head: triangle from col 7, narrowing right
+        for (let i = 0; i < 5; i++) {
+          const h = 9 - i * 2
+          const y = i
+          rect(7 + i, y, 1, h, '#8b8b8b')
+        }
+        break
+      }
+      case 'flame': {
+        // 7x7 flame — simplified furnace.png shape
+        const flamePoints: [number, number][] = [
+          [1,0], [5,0],
+          [1,1], [3,1], [5,1],
+          [1,2], [4,2], [5,2],
+          [0,3], [1,3], [3,3], [4,3], [5,3], [6,3],
+          [0,4], [1,4], [3,4], [5,4], [6,4],
+          [0,5], [1,5], [3,5], [4,5], [5,5], [6,5],
+          [0,6], [1,6], [2,6], [3,6], [4,6], [5,6], [6,6],
+        ]
+        for (const [x, y] of flamePoints) px(x, y, '#8b8b8b')
+        break
+      }
+      case 'fluid_tank': {
+        // 7x11 tank with blue gauge
+        rect(0, 0, 7, 11, '#8b8b8b')
+        rect(0, 0, 7, 1, '#373737'); rect(0, 0, 1, 11, '#373737')
+        rect(0, 10, 7, 1, '#fff'); rect(6, 0, 1, 11, '#fff')
+        // gauge strips bordeaux
+        for (let row = 1; row < 10; row++) {
+          const full = ((10 - row) % 5 === 0)
+          const w = full ? 5 : 3
+          const x = full ? 1 : 2
+          rect(x, row, w, 1, '#560001')
+        }
+        break
+      }
+      case 'gas_tank': {
+        // 7x11 tank with gray gauge
+        rect(0, 0, 7, 11, '#8b8b8b')
+        rect(0, 0, 7, 1, '#373737'); rect(0, 0, 1, 11, '#373737')
+        rect(0, 10, 7, 1, '#fff'); rect(6, 0, 1, 11, '#fff')
+        for (let row = 1; row < 10; row++) {
+          const full = ((10 - row) % 5 === 0)
+          const w = full ? 5 : 3
+          const x = full ? 1 : 2
+          rect(x, row, w, 1, '#560001')
+        }
+        break
+      }
+      case 'fluid_tank_small': {
+        // 7x7 small tank blue
+        rect(0, 0, 7, 7, '#8b8b8b')
+        rect(0, 0, 7, 1, '#373737'); rect(0, 0, 1, 7, '#373737')
+        rect(0, 6, 7, 1, '#fff'); rect(6, 0, 1, 7, '#fff')
+        for (let row = 1; row < 6; row++) {
+          const full = ((6 - row) % 5 === 0)
+          rect(full ? 1 : 2, row, full ? 5 : 3, 1, '#560001')
+        }
+        break
+      }
+      case 'gas_tank_small': {
+        // 7x7 small tank gray
+        rect(0, 0, 7, 7, '#8b8b8b')
+        rect(0, 0, 7, 1, '#373737'); rect(0, 0, 1, 7, '#373737')
+        rect(0, 6, 7, 1, '#fff'); rect(6, 0, 1, 7, '#fff')
+        for (let row = 1; row < 6; row++) {
+          const full = ((6 - row) % 5 === 0)
+          rect(full ? 1 : 2, row, full ? 5 : 3, 1, '#560001')
+        }
+        break
+      }
+      case 'separator': {
+        // 11x3 separator line
+        rect(0, 0, 11, 1, '#555')
+        rect(0, 1, 11, 1, '#fff')
+        break
+      }
+    }
+  }, [type])
+
+  const sizes: Record<GuiComponentType, [number, number]> = {
+    slot: [9, 9], big_slot: [11, 11], energy_bar: [5, 11],
+    progress_arrow: [12, 9], flame: [7, 7],
+    fluid_tank: [7, 11], gas_tank: [7, 11],
+    fluid_tank_small: [7, 7], gas_tank_small: [7, 7],
+    separator: [11, 2],
+  }
+  const [w, h] = sizes[type]
+  return <canvas ref={ref} width={w * ICON_SCALE} height={h * ICON_SCALE}
+    style={{ width: w * ICON_SCALE, height: h * ICON_SCALE, imageRendering: 'pixelated' }} />
+}
+
+const PALETTE_LABELS: Record<GuiComponentType, string> = {
+  slot: 'Slot', big_slot: 'Big Slot', energy_bar: 'Energy',
+  progress_arrow: 'Arrow', flame: 'Flame',
+  fluid_tank: 'Fluid', gas_tank: 'Gas',
+  fluid_tank_small: 'Fluid S', gas_tank_small: 'Gas S',
+  separator: 'Sep',
+}
 
 export function GuiBuilder() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -93,6 +238,21 @@ export function GuiBuilder() {
       }
     }
 
+    // Tank gauge overlay: bordeaux strips (half-width normal, full-width every 5th)
+    const drawTankGauge = (gx: number, gy: number, gw: number, gh: number) => {
+      const totalLines = Math.floor(gh / 5) - 1
+      if (totalLines < 1) return
+      const halfW = Math.floor(gw / 2)
+      for (let i = 1; i <= totalLines; i++) {
+        const ly = gy + Math.floor(gh * i / (totalLines + 1))
+        if (i % 5 === 0) {
+          hLine(gx, ly, gw, MC.GAUGE)
+        } else {
+          hLine(gx, ly, halfW, MC.GAUGE)
+        }
+      }
+    }
+
     // Player inventory
     const drawSlot = (sx: number, sy: number, sw: number, sh: number) => {
       hLine(sx, sy, sw - 1, MC.SD); vLine(sx, sy, sh - 1, MC.SD)
@@ -138,28 +298,52 @@ export function GuiBuilder() {
           { const ioLabel = comp.ioMode === 'input' ? 'NRG↓' : comp.ioMode === 'output' ? 'NRG↑' : 'NRG'
             ctx.fillStyle = '#3fb'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText(ioLabel, comp.x * s, (comp.y - 4) * s) }
           break
-        case 'progress_arrow':
-          fill(comp.x, comp.y + 3, 17, 11, MC.SL)
-          for (let ai = 0; ai < 8; ai++) vLine(comp.x + 17 + ai, comp.y + 8 - ai, 1 + ai * 2, MC.SL)
-          ctx.fillStyle = '#ccc'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText('ARROW', (comp.x + 4) * s, (comp.y - 4) * s)
+        case 'progress_arrow': {
+          // Empty arrow (24x17) — pixel-exact from furnace.png (79,34)
+          // 0x8b = SL (139), background = c6 (198)
+          const ax = comp.x, ay = comp.y
+          // Shaft: rows 7-9, cols 1-14
+          fill(ax + 1, ay + 7, 14, 3, MC.SL)
+          // Head triangle: col 15 starts at row 1, narrows 1px per row each side
+          for (let i = 0; i < 8; i++) vLine(ax + 15 + i, ay + 1 + i, 15 - i * 2, MC.SL)
+          ctx.fillStyle = '#ccc'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText('ARROW', (ax + 2) * s, (ay - 4) * s)
           break
-        case 'flame':
-          fill(comp.x + 2, comp.y + 4, 10, 10, MC.SL)
-          fill(comp.x + 4, comp.y + 1, 6, 3, MC.SL)
-          ctx.fillStyle = '#fa0'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText('FIRE', comp.x * s, (comp.y - 4) * s)
+        }
+        case 'flame': {
+          // Empty flame (14x14) — pixel-exact from furnace.png (56,36)
+          // All non-background pixels are 0x8b = SL (139)
+          const fx = comp.x, fy = comp.y
+          const flamePixels: [number, number][] = [
+            [2,1], [12,1],
+            [2,2], [12,2],
+            [3,3], [7,3], [11,3],
+            [3,4], [7,4], [11,4],
+            [2,5], [3,5], [8,5], [11,5], [12,5],
+            [2,6], [3,6], [8,6], [11,6], [12,6],
+            [1,7], [2,7], [3,7], [7,7], [8,7], [11,7], [12,7], [13,7],
+            [1,8], [2,8], [7,8], [8,8], [12,8], [13,8],
+            [1,9], [2,9], [6,9], [7,9], [8,9], [12,9], [13,9],
+            [1,10], [2,10], [3,10], [6,10], [7,10], [11,10], [12,10], [13,10],
+            [2,11], [3,11], [6,11], [7,11], [11,11], [12,11],
+            [2,12], [3,12], [6,12], [7,12], [8,12], [11,12], [12,12],
+            [1,13], [2,13], [3,13], [6,13], [7,13], [8,13], [11,13], [12,13], [13,13],
+          ]
+          for (const [dx, dy] of flamePixels) pixel(fx + dx, fy + dy, MC.SL)
+          ctx.fillStyle = '#fa0'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText('FIRE', fx * s, (fy - 4) * s)
           break
+        }
         case 'fluid_tank':
+        case 'fluid_tank_small':
           drawSlot(comp.x, comp.y, comp.w, comp.h)
-          for (let py = comp.y + 1 + Math.floor(comp.h * 0.2); py < comp.y + comp.h - 1; py++)
-            hLine(comp.x + 1, py, comp.w - 2, MC.FLUID)
-          { const ioLabel = comp.ioMode === 'input' ? 'FLD↓' : comp.ioMode === 'output' ? 'FLD↑' : 'FLUID'
+          drawTankGauge(comp.x + 1, comp.y + 1, comp.w - 2, comp.h - 2)
+          { const ioLabel = comp.ioMode === 'input' ? 'FLD↓' : comp.ioMode === 'output' ? 'FLD↑' : comp.type === 'fluid_tank_small' ? 'FLD' : 'FLUID'
             ctx.fillStyle = '#48f'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText(ioLabel, comp.x * s, (comp.y - 4) * s) }
           break
         case 'gas_tank':
+        case 'gas_tank_small':
           drawSlot(comp.x, comp.y, comp.w, comp.h)
-          for (let py = comp.y + 1 + Math.floor(comp.h * 0.2); py < comp.y + comp.h - 1; py++)
-            hLine(comp.x + 1, py, comp.w - 2, MC.GAS)
-          { const ioLabel = comp.ioMode === 'input' ? 'GAS↓' : comp.ioMode === 'output' ? 'GAS↑' : 'GAS'
+          drawTankGauge(comp.x + 1, comp.y + 1, comp.w - 2, comp.h - 2)
+          { const ioLabel = comp.ioMode === 'input' ? 'GAS↓' : comp.ioMode === 'output' ? 'GAS↑' : comp.type === 'gas_tank_small' ? 'GAS' : 'GAS'
             ctx.fillStyle = '#aaa'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText(ioLabel, comp.x * s, (comp.y - 4) * s) }
           break
         case 'separator':
@@ -281,15 +465,15 @@ export function GuiBuilder() {
       {/* Toolbar */}
       <div className="flex items-center justify-between px-2 py-1.5 bg-card border-b border-border flex-wrap gap-1">
         <div className="flex gap-1 flex-wrap">
-          {PALETTE_ITEMS.map((item) => (
+          {PALETTE_ITEMS.map((t) => (
             <button
-              key={item.type}
+              key={t}
               draggable
-              onDragStart={(e) => { e.dataTransfer.setData('text/plain', item.type); e.dataTransfer.effectAllowed = 'copy' }}
+              onDragStart={(e) => { e.dataTransfer.setData('text/plain', t); e.dataTransfer.effectAllowed = 'copy' }}
               className="flex items-center gap-1.5 bg-secondary text-foreground border border-border px-2 py-1 rounded text-[11px] cursor-grab active:cursor-grabbing hover:border-blue-400 hover:bg-secondary/80 select-none"
             >
-              <span className={`w-3.5 h-3.5 rounded-sm ${item.cls}`} />
-              {item.icon}
+              <PaletteIcon type={t} />
+              {PALETTE_LABELS[t]}
             </button>
           ))}
         </div>

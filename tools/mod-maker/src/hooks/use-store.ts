@@ -8,6 +8,7 @@ const GUI_H = 166
 
 // Serialized JSON format (matches MCP server output)
 export interface SerializedMultiblock {
+  projectType?: ProjectType
   name: string
   structType: StructureType
   dimensions: [number, number, number]
@@ -42,7 +43,12 @@ export interface HighlightCommand {
   duration: number
 }
 
+export type ProjectType = 'single' | 'multiblock'
+
 interface MultiblockStore {
+  // Project type
+  projectType: ProjectType
+
   // Structure config
   name: string
   structType: StructureType
@@ -74,6 +80,9 @@ interface MultiblockStore {
   // MCP UI commands (consumed by structure-editor)
   pendingCamera: CameraCommand | null
   pendingHighlight: HighlightCommand | null
+
+  // Actions: project
+  setProjectType: (type: ProjectType) => void
 
   // Actions: config
   setName: (name: string) => void
@@ -133,6 +142,7 @@ function snap(val: number, enabled: boolean, gridSize: number): number {
 
 export const useStore = create<MultiblockStore>((set, get) => ({
   // Initial state
+  projectType: 'multiblock',
   name: 'MegaCrusher',
   structType: 'machine',
   dimensions: { w: 3, h: 3, d: 3 },
@@ -153,6 +163,9 @@ export const useStore = create<MultiblockStore>((set, get) => ({
   activeTab: 'structure',
   pendingCamera: null,
   pendingHighlight: null,
+
+  // Project
+  setProjectType: (projectType) => set({ projectType }),
 
   // Config
   setName: (name) => set({ name }),
@@ -367,6 +380,7 @@ export const useStore = create<MultiblockStore>((set, get) => ({
     const customBlocks = [...blockRegistry.values()].filter(b => !b.builtIn)
 
     return {
+      projectType: s.projectType,
       name: s.name,
       structType: s.structType,
       dimensions: [w, h, d] as [number, number, number],
@@ -425,6 +439,7 @@ export const useStore = create<MultiblockStore>((set, get) => ({
     }
 
     set({
+      projectType: data.projectType || 'multiblock',
       name: data.name,
       structType: data.structType,
       dimensions: { w: data.dimensions[0], h: data.dimensions[1], d: data.dimensions[2] },
@@ -473,6 +488,7 @@ export const useStore = create<MultiblockStore>((set, get) => ({
 
   // Reset to defaults
   newProject: () => set({
+    projectType: 'multiblock',
     name: 'Unnamed',
     structType: 'machine',
     dimensions: { w: 3, h: 3, d: 3 },

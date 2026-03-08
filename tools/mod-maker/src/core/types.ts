@@ -6,7 +6,7 @@ export type PortMode = 'input' | 'output' | 'input_output'
 export type IOType = 'energy' | 'fluid' | 'gas' | 'item'
 export type SlotRole = 'input' | 'output' | 'fuel'
 export type IoMode = 'input' | 'output' | 'display'
-export type GuiComponentType = 'slot' | 'big_slot' | 'energy_bar' | 'progress_arrow' | 'flame' | 'fluid_tank' | 'gas_tank' | 'separator'
+export type GuiComponentType = 'slot' | 'big_slot' | 'energy_bar' | 'progress_arrow' | 'flame' | 'fluid_tank' | 'gas_tank' | 'fluid_tank_small' | 'gas_tank_small' | 'separator'
 export type BlockCategory = 'controller' | 'mod' | 'vanilla' | 'custom'
 
 export interface BlockDef {
@@ -67,7 +67,9 @@ export const GUI_COMP_DEFS: Record<GuiComponentType, { w: number; h: number; lab
   energy_bar:     { w: 8,  h: 54, label: 'Energy Bar', resizable: true, ioMode: 'display' },
   progress_arrow: { w: 24, h: 17, label: 'Progress Arrow', resizable: false, ioMode: 'display' },
   flame:          { w: 14, h: 14, label: 'Flame', resizable: false, ioMode: 'display' },
-  fluid_tank:     { w: 18, h: 54, label: 'Fluid Tank', resizable: true, ioMode: 'input' },
-  gas_tank:       { w: 18, h: 54, label: 'Gas Tank', resizable: true, ioMode: 'input' },
-  separator:      { w: 162, h: 2, label: 'Separator', resizable: true, ioMode: 'display' },
+  fluid_tank:       { w: 18, h: 54, label: 'Fluid Tank', resizable: true, ioMode: 'input' },
+  gas_tank:         { w: 18, h: 54, label: 'Gas Tank', resizable: true, ioMode: 'input' },
+  fluid_tank_small: { w: 18, h: 27, label: 'Fluid S', resizable: true, ioMode: 'input' },
+  gas_tank_small:   { w: 18, h: 27, label: 'Gas S', resizable: true, ioMode: 'input' },
+  separator:        { w: 162, h: 2, label: 'Separator', resizable: true, ioMode: 'display' },
 }

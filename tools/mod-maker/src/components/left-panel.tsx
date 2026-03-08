@@ -8,44 +8,56 @@ import { useStore } from '@/hooks/use-store'
 
 export function LeftPanel() {
   const s = useStore()
+  const isMultiblock = s.projectType === 'multiblock'
 
   return (
     <div className="w-60 bg-background border-r border-border overflow-y-auto p-3 space-y-3 shrink-0">
       <Card>
-        <CardTitle>Structure</CardTitle>
+        <CardTitle>Project</CardTitle>
         <Label>Name</Label>
-        <Input value={s.name} onChange={(e) => s.setName(e.target.value)} placeholder="e.g. MegaCrusher" />
-        <Label>Type</Label>
+        <Input value={s.name} onChange={(e) => s.setName(e.target.value)} placeholder="e.g. Crusher" />
+        <Label>Project Type</Label>
+        <Select value={s.projectType} onChange={(e) => s.setProjectType(e.target.value as any)}>
+          <option value="single">Single Block</option>
+          <option value="multiblock">Multiblock</option>
+        </Select>
+        <Label>Machine Type</Label>
         <Select value={s.structType} onChange={(e) => s.setStructType(e.target.value as any)}>
           <option value="machine">Machine (processes items)</option>
           <option value="tank">Tank (stores fluid/gas)</option>
           <option value="reactor">Reactor (generates energy)</option>
           <option value="custom">Custom</option>
         </Select>
-        <div className="flex gap-1.5">
-          <div>
-            <Label>W</Label>
-            <Input type="number" value={s.dimensions.w} min={3} max={9} step={2}
-              onChange={(e) => s.setDimensions(+e.target.value, s.dimensions.h, s.dimensions.d)} />
-          </div>
-          <div>
-            <Label>H</Label>
-            <Input type="number" value={s.dimensions.h} min={3} max={9}
-              onChange={(e) => s.setDimensions(s.dimensions.w, +e.target.value, s.dimensions.d)} />
-          </div>
-          <div>
-            <Label>D</Label>
-            <Input type="number" value={s.dimensions.d} min={3} max={9} step={2}
-              onChange={(e) => s.setDimensions(s.dimensions.w, s.dimensions.h, +e.target.value)} />
-          </div>
-        </div>
-        <Button variant="outline" size="sm" className="w-full" onClick={() => {
-          s.clearBlocks()
-          s.fillShell()
-        }}>
-          Apply & Fill Shell
-        </Button>
       </Card>
+
+      {isMultiblock && (
+        <Card>
+          <CardTitle>Dimensions</CardTitle>
+          <div className="flex gap-1.5">
+            <div>
+              <Label>W</Label>
+              <Input type="number" value={s.dimensions.w} min={3} max={9} step={2}
+                onChange={(e) => s.setDimensions(+e.target.value, s.dimensions.h, s.dimensions.d)} />
+            </div>
+            <div>
+              <Label>H</Label>
+              <Input type="number" value={s.dimensions.h} min={3} max={9}
+                onChange={(e) => s.setDimensions(s.dimensions.w, +e.target.value, s.dimensions.d)} />
+            </div>
+            <div>
+              <Label>D</Label>
+              <Input type="number" value={s.dimensions.d} min={3} max={9} step={2}
+                onChange={(e) => s.setDimensions(s.dimensions.w, s.dimensions.h, +e.target.value)} />
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="w-full" onClick={() => {
+            s.clearBlocks()
+            s.fillShell()
+          }}>
+            Apply & Fill Shell
+          </Button>
+        </Card>
+      )}
 
       <Card>
         <CardTitle>IO Types</CardTitle>
