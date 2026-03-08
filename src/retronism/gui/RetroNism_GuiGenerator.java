@@ -1,6 +1,7 @@
 package retronism.gui;
 
 import net.minecraft.src.*;
+import retronism.*;
 import retronism.tile.*;
 import retronism.container.*;
 import org.lwjgl.opengl.GL11;
@@ -14,7 +15,7 @@ public class Retronism_GuiGenerator extends GuiContainer {
 	public Retronism_GuiGenerator(InventoryPlayer playerInv, Retronism_TileGenerator generator) {
 		super(new Retronism_ContainerGenerator(playerInv, generator));
 		this.generator = generator;
-		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(generator, mod_Retronism.generatorBlock.blockID);
+		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(generator, Retronism_Registry.generatorBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {
@@ -76,18 +77,7 @@ public class Retronism_GuiGenerator extends GuiContainer {
 		int y = (this.height - this.ySize) / 2;
 		this.drawTexturedModalRect(x, y, 0, 0, this.xSize, this.ySize);
 
-		// Energy bar fill (striped, inside the bar drawn in the texture)
-		int barX = x + 162;
-		int barY = y + 17;
-		int barW = 6;
-		int barH = 52;
-		int energyScaled = this.generator.getEnergyScaled(barH);
-		if (energyScaled > 0) {
-			int fillTop = barY + barH - energyScaled;
-			for (int sy = fillTop; sy < barY + barH; sy++) {
-				int color = (sy % 2 == 0) ? 0xFF3BFB98 : 0xFF36E38A;
-				drawRect(barX, sy, barX + barW, sy + 1, color);
-			}
-		}
+		// Energy bar fill
+		Retronism_GuiUtils.drawEnergyBar(x + 162, y + 17, 6, 52, Retronism_GuiUtils.getEnergyScaled(this.generator.storedEnergy, Retronism_TileGenerator.MAX_ENERGY, 52));
 	}
 }

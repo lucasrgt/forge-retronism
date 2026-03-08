@@ -51,10 +51,32 @@
 - Always kill existing java proccesses and then start the game again after updating the code 
 
 ## Agents (on-demand context loading)
-- When generating GUI textures, or the user mentions GUI/textura, READ `ai/agents/gui_builder.md` FIRST — it has the full API, palette, coordinates and workflow
-- When creating 3D models for machines, READ `ai/agents/model_builder.md` FIRST — Blockbench constraints, design philosophy, UV rules, render integration
-- When creating a new machine end-to-end (structure → model → code → test), READ `ai/agents/machine_builder.md` FIRST — full pipeline orchestrator
+- When generating GUI textures, or the user mentions GUI/textura, READ `ai/agents/gui_builder.md` FIRST
+- **Single-block machines** (crusher, pump, generator, etc.):
+  - Full pipeline: READ `ai/agents/machine_builder.md`
+  - 3D model only: READ `ai/agents/model_builder.md`
+- **Multiblock machines** (casing + controller + ports):
+  - Full pipeline: READ `ai/agents/multiblock_builder.md`
+  - Formed 3D model only: READ `ai/agents/multiblock_model_builder.md`
+- Blockbench MCP is REQUIRED for all 3D models. Do NOT generate JSON manually.
 - Always use `tools/gui_builder.py` — never hand-draw pixels
+
+## Mod Maker as Source of Truth
+- Every multiblock machine MUST have its definition saved in `multiblocks/{Name}.json`
+- NEVER edit multiblock Java structure code (checkStructure, STRUCTURE array, etc) directly — always go through mod-maker MCP tools
+- When modifying an existing multiblock: `load_project` → make changes via MCP tools → `build_and_export`
+- The JSON in `multiblocks/` is the canonical definition — Java code is DERIVED from it
+- If the Java code and JSON disagree, the JSON wins
+- `export_to_mod` and `build_and_export` auto-save to `multiblocks/` before exporting
+
+## MCP Servers Required
+- `retronism-mod-maker` — multiblock designer, GUI builder, code generator (configured in `.mcp.json`)
+- `blockbench` — 3D model creation, texture painting, UV mapping (MUST be configured separately)
+  - If Blockbench MCP is not available, STOP and ask the user to set it up before proceeding with modeling
+  - Setup: Blockbench → File → Plugins → install "MCP Server" → start server → add to `.mcp.json`:
+    ```json
+    "blockbench": { "url": "http://localhost:3000/sse" }
+    ```
 
 ## Language
 - User communicates in Portuguese (BR). Respond in Portuguese.

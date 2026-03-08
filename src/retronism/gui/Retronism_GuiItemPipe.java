@@ -1,6 +1,7 @@
 package retronism.gui;
 
 import net.minecraft.src.*;
+import retronism.*;
 import retronism.tile.*;
 import retronism.container.*;
 import retronism.api.*;
@@ -27,7 +28,7 @@ public class Retronism_GuiItemPipe extends GuiContainer {
 	public Retronism_GuiItemPipe(InventoryPlayer playerInv, Retronism_TileItemPipe pipe) {
 		super(new Retronism_ContainerItemPipe(playerInv, pipe));
 		this.pipe = pipe;
-		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(pipe, mod_Retronism.itemPipeBlock.blockID);
+		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(pipe, Retronism_Registry.itemPipeBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {

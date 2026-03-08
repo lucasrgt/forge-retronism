@@ -1,6 +1,7 @@
 package retronism.block;
 
 import net.minecraft.src.*;
+import retronism.*;
 import retronism.api.*;
 import retronism.tile.*;
 import retronism.gui.*;
@@ -51,7 +52,7 @@ public class Retronism_BlockFluidPipe extends BlockContainer {
 
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {
 		ItemStack held = player.getCurrentEquippedItem();
-		if (held != null && held.itemID == mod_Retronism.wrench.shiftedIndex) {
+		if (held != null && held.itemID == Retronism_Registry.wrench.shiftedIndex) {
 			if (!hasMachineNeighbor(world, x, y, z)) return false;
 			if (world.multiplayerWorld) return true;
 			TileEntity te = world.getBlockTileEntity(x, y, z);
@@ -74,14 +75,14 @@ public class Retronism_BlockFluidPipe extends BlockContainer {
 
 	public boolean canConnectTo(IBlockAccess world, int x, int y, int z) {
 		int id = world.getBlockId(x, y, z);
-		if (id == this.blockID || id == mod_Retronism.megaPipeBlock.blockID) return true;
+		if (id == this.blockID || id == Retronism_Registry.megaPipeBlock.blockID) return true;
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		return te instanceof Retronism_IFluidHandler;
 	}
 
 	public boolean isNeighborMachine(IBlockAccess world, int nx, int ny, int nz) {
 		int id = world.getBlockId(nx, ny, nz);
-		if (id == this.blockID || id == mod_Retronism.megaPipeBlock.blockID) return false;
+		if (id == this.blockID || id == Retronism_Registry.megaPipeBlock.blockID) return false;
 		return canConnectTo(world, nx, ny, nz);
 	}
 

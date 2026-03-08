@@ -16,7 +16,7 @@ public class Retronism_BlockMegaCrusherCore extends BlockContainer {
 	}
 
 	public int idDropped(int metadata, Random random) {
-		return mod_Retronism.testBlock.blockID;
+		return Retronism_Registry.testBlock.blockID;
 	}
 
 	public int getBlockTextureFromSide(int side) {

@@ -57,7 +57,7 @@ public class Retronism_ContainerGasTank extends Container {
 			result = slotStack.copy();
 			if (slotIndex == 0) {
 				this.func_28125_a(slotStack, 1, 37, true);
-			} else if (slotStack.itemID == mod_Retronism.gasCellEmpty.shiftedIndex) {
+			} else if (slotStack.itemID == Retronism_Registry.gasCellEmpty.shiftedIndex) {
 				this.func_28125_a(slotStack, 0, 1, false);
 			} else if (slotIndex >= 1 && slotIndex < 28) {
 				this.func_28125_a(slotStack, 28, 37, false);

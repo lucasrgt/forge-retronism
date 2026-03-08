@@ -5,6 +5,7 @@ import { blockRegistry } from '@/core/types'
 import { loadTextures, isTexturesReady, getBlockMaterial, clearMaterialCache } from '@/core/textures'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { BuildGuide } from '@/components/build-guide'
 
 export function StructureEditor() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -357,6 +358,30 @@ export function StructureEditor() {
 
       {/* Three.js viewport */}
       <div ref={containerRef} className="flex-1 bg-[#111] cursor-crosshair" />
+
+      {/* Build Guide collapsible */}
+      <BuildGuideDropdown />
+    </div>
+  )
+}
+
+function BuildGuideDropdown() {
+  const showBuildGuide = useStore((s) => s.showBuildGuide)
+
+  return (
+    <div className="border-t border-border bg-background">
+      <button
+        onClick={() => useStore.getState().setShowBuildGuide(!showBuildGuide)}
+        className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+      >
+        <span className="font-semibold">Build Guide</span>
+        <span>{showBuildGuide ? '\u25B2' : '\u25BC'}</span>
+      </button>
+      {showBuildGuide && (
+        <div className="max-h-64 overflow-auto border-t border-border">
+          <BuildGuide />
+        </div>
+      )}
     </div>
   )
 }

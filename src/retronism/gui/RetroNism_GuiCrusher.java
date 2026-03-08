@@ -1,6 +1,7 @@
 package retronism.gui;
 
 import net.minecraft.src.*;
+import retronism.*;
 import retronism.tile.*;
 import retronism.container.*;
 import org.lwjgl.opengl.GL11;
@@ -14,7 +15,7 @@ public class Retronism_GuiCrusher extends GuiContainer {
 	public Retronism_GuiCrusher(InventoryPlayer playerInv, Retronism_TileCrusher crusher) {
 		super(new Retronism_ContainerCrusher(playerInv, crusher));
 		this.crusherInventory = crusher;
-		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(crusher, mod_Retronism.crusherBlock.blockID);
+		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(crusher, Retronism_Registry.crusherBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {
@@ -70,18 +71,7 @@ public class Retronism_GuiCrusher extends GuiContainer {
 			this.drawTexturedModalRect(x + 82, y + 34, 176, 14, cookScale + 1, 17);
 		}
 
-		// Energy bar fill (striped green, same style as Generator)
-		int barX = x + 162;
-		int barY = y + 17;
-		int barW = 6;
-		int barH = 52;
-		int energyScaled = this.crusherInventory.getEnergyScaled(barH);
-		if (energyScaled > 0) {
-			int fillTop = barY + barH - energyScaled;
-			for (int sy = fillTop; sy < barY + barH; sy++) {
-				int color = (sy % 2 == 0) ? 0xFF3BFB98 : 0xFF36E38A;
-				drawRect(barX, sy, barX + barW, sy + 1, color);
-			}
-		}
+		// Energy bar fill
+		Retronism_GuiUtils.drawEnergyBar(x + 162, y + 17, 6, 52, Retronism_GuiUtils.getEnergyScaled(this.crusherInventory, 52));
 	}
 }

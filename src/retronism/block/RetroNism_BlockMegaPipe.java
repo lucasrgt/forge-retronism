@@ -35,7 +35,7 @@ public class Retronism_BlockMegaPipe extends BlockContainer {
 
 	public boolean blockActivated(World world, int x, int y, int z, EntityPlayer player) {
 		ItemStack held = player.getCurrentEquippedItem();
-		if (held != null && held.itemID == mod_Retronism.wrench.shiftedIndex) {
+		if (held != null && held.itemID == Retronism_Registry.wrench.shiftedIndex) {
 			if (world.multiplayerWorld) return true;
 			TileEntity te = world.getBlockTileEntity(x, y, z);
 			if (te instanceof Retronism_ISideConfigurable) {
@@ -50,10 +50,10 @@ public class Retronism_BlockMegaPipe extends BlockContainer {
 	public boolean isNeighborMachine(IBlockAccess world, int nx, int ny, int nz) {
 		int id = world.getBlockId(nx, ny, nz);
 		if (id == this.blockID
-			|| id == mod_Retronism.cableBlock.blockID
-			|| id == mod_Retronism.fluidPipeBlock.blockID
-			|| id == mod_Retronism.gasPipeBlock.blockID
-			|| id == mod_Retronism.itemPipeBlock.blockID) return false;
+			|| id == Retronism_Registry.cableBlock.blockID
+			|| id == Retronism_Registry.fluidPipeBlock.blockID
+			|| id == Retronism_Registry.gasPipeBlock.blockID
+			|| id == Retronism_Registry.itemPipeBlock.blockID) return false;
 		return canConnectTo(world, nx, ny, nz);
 	}
 
@@ -65,10 +65,10 @@ public class Retronism_BlockMegaPipe extends BlockContainer {
 		if (te instanceof Retronism_IGasHandler) return true;
 		if (te instanceof IInventory) return true;
 		int id = world.getBlockId(x, y, z);
-		return id == mod_Retronism.cableBlock.blockID
-			|| id == mod_Retronism.fluidPipeBlock.blockID
-			|| id == mod_Retronism.gasPipeBlock.blockID
-			|| id == mod_Retronism.itemPipeBlock.blockID
+		return id == Retronism_Registry.cableBlock.blockID
+			|| id == Retronism_Registry.fluidPipeBlock.blockID
+			|| id == Retronism_Registry.gasPipeBlock.blockID
+			|| id == Retronism_Registry.itemPipeBlock.blockID
 			|| id == this.blockID;
 	}
 

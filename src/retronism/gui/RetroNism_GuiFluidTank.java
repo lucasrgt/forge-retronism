@@ -1,6 +1,7 @@
 package retronism.gui;
 
 import net.minecraft.src.*;
+import retronism.*;
 import retronism.tile.*;
 import retronism.container.*;
 import org.lwjgl.opengl.GL11;
@@ -14,7 +15,7 @@ public class Retronism_GuiFluidTank extends GuiContainer {
 	public Retronism_GuiFluidTank(InventoryPlayer playerInv, Retronism_TileFluidTank tank) {
 		super(new Retronism_ContainerFluidTank(playerInv, tank));
 		this.tank = tank;
-		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(tank, mod_Retronism.fluidTankBlock.blockID);
+		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(tank, Retronism_Registry.fluidTankBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {

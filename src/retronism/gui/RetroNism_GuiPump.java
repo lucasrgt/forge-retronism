@@ -1,6 +1,7 @@
 package retronism.gui;
 
 import net.minecraft.src.*;
+import retronism.*;
 import retronism.tile.*;
 import retronism.container.*;
 import org.lwjgl.opengl.GL11;
@@ -14,7 +15,7 @@ public class Retronism_GuiPump extends GuiContainer {
 	public Retronism_GuiPump(InventoryPlayer playerInv, Retronism_TilePump pump) {
 		super(new Retronism_ContainerPump(playerInv, pump));
 		this.pump = pump;
-		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(pump, mod_Retronism.pumpBlock.blockID);
+		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(pump, Retronism_Registry.pumpBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {
@@ -80,19 +81,8 @@ public class Retronism_GuiPump extends GuiContainer {
 		drawLiquidTank(fluidX, fluidY, fluidW, fluidH, fluidScaled, Block.waterMoving.blockIndexInTexture);
 		drawTankGauge(fluidX, fluidY, fluidW, fluidH);
 
-		// Energy bar fill (striped green, right)
-		int barX = x + 162;
-		int barY = y + 17;
-		int barW = 6;
-		int barH = 52;
-		int energyScaled = this.pump.getEnergyScaled(barH);
-		if (energyScaled > 0) {
-			int fillTop = barY + barH - energyScaled;
-			for (int sy = fillTop; sy < barY + barH; sy++) {
-				int color = (sy % 2 == 0) ? 0xFF3BFB98 : 0xFF36E38A;
-				drawRect(barX, sy, barX + barW, sy + 1, color);
-			}
-		}
+		// Energy bar fill
+		Retronism_GuiUtils.drawEnergyBar(x + 162, y + 17, 6, 52, Retronism_GuiUtils.getEnergyScaled(this.pump, 52));
 	}
 
 	private void drawLiquidTank(int x, int y, int w, int h, int fillHeight, int textureIndex) {

@@ -166,7 +166,7 @@ public class Retronism_TileMegaCrusher extends TileEntity implements IInventory,
 					} else if (bx == xCoord && by == yCoord && bz == zCoord) {
 						continue;
 					} else {
-						if (worldObj.getBlockId(bx, by, bz) != mod_Retronism.testBlock.blockID) return false;
+						if (worldObj.getBlockId(bx, by, bz) != Retronism_Registry.testBlock.blockID) return false;
 					}
 				}
 			}
@@ -201,7 +201,7 @@ public class Retronism_TileMegaCrusher extends TileEntity implements IInventory,
 			}
 		}
 
-		worldObj.setBlockWithNotify(xCoord, yCoord, zCoord, mod_Retronism.testBlock.blockID);
+		worldObj.setBlockWithNotify(xCoord, yCoord, zCoord, Retronism_Registry.testBlock.blockID);
 		isInvalidating = false;
 	}
 

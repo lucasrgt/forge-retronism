@@ -15,6 +15,7 @@ find "$SRC" -name "*.java" | while read -r file; do
     sed \
         -e 's/^package retronism\(\.[a-z]*\)\?;/package net.minecraft.src;/' \
         -e '/^import retronism\./d' \
+        -e '/^import static retronism\./d' \
         -e '/^import net\.minecraft\.src\.\*;/d' \
         "$file" > "$DEST/$filename"
 done

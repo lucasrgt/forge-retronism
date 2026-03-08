@@ -1,6 +1,7 @@
 package retronism.gui;
 
 import net.minecraft.src.*;
+import retronism.*;
 import retronism.api.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -128,7 +129,7 @@ public class Retronism_GuiSideConfigHelper extends Gui {
 			new ItemStack(machineBlockId, 1, 0),
 			guiLeft + (TAB_W - 16) / 2, iconY);
 		itemRenderer.renderItemIntoGUI(font, renderEngine,
-			new ItemStack(mod_Retronism.wrench, 1, 0),
+			new ItemStack(Retronism_Registry.wrench, 1, 0),
 			guiLeft + TAB_W + 2 + (TAB_W - 16) / 2, iconY);
 
 		GL11.glPopMatrix();

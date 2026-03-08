@@ -270,6 +270,15 @@ server.tool(
   'Generate and write all files to the RetroNism mod project directory. This writes Java source, JSON, and GUI script.',
   {},
   async () => {
+    // Auto-save project before exporting
+    let saveResult = '';
+    try {
+      const savedPath = saveProjectFile();
+      saveResult = `Auto-saved project: ${savedPath}\n\n`;
+    } catch (err: any) {
+      saveResult = `Warning: auto-save failed: ${err.message}\n\n`;
+    }
+
     const files = generateAllFiles();
     // Find project root (tools/mod-maker-mcp/../../ = project root)
     const projectRoot = path.resolve(import.meta.dirname, '..', '..', '..');
@@ -286,7 +295,7 @@ server.tool(
       }
     }
 
-    return { content: [{ type: 'text', text: `Exported ${files.length} files:\n\n${results.join('\n')}` }] };
+    return { content: [{ type: 'text', text: `${saveResult}Exported ${files.length} files:\n\n${results.join('\n')}` }] };
   },
 );
 
@@ -798,6 +807,83 @@ server.tool(
   },
 );
 
+// ===========================================================================
+// PROJECT PERSISTENCE
+// ===========================================================================
+
+const MULTIBLOCKS_DIR = path.resolve(import.meta.dirname, '..', '..', '..', 'multiblocks');
+
+function ensureMultiblocksDir(): void {
+  if (!fs.existsSync(MULTIBLOCKS_DIR)) fs.mkdirSync(MULTIBLOCKS_DIR, { recursive: true });
+}
+
+function saveProjectFile(name?: string): string {
+  ensureMultiblocksDir();
+  const data = serialize();
+  const projectName = name || data.name;
+  const filePath = path.join(MULTIBLOCKS_DIR, `${projectName}.json`);
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+  return filePath;
+}
+
+// Tool: save_project
+server.tool(
+  'save_project',
+  'Save the current multiblock definition to multiblocks/{name}.json. This is the source of truth for the machine.',
+  {
+    name: z.string().optional().describe('Project name (default: current state name)'),
+  },
+  async (args) => {
+    try {
+      const filePath = saveProjectFile(args.name);
+      return { content: [{ type: 'text', text: `Saved to ${filePath}\n\n${getStateSummary()}` }] };
+    } catch (err: any) {
+      return { content: [{ type: 'text', text: `Error saving: ${err.message}` }] };
+    }
+  },
+);
+
+// Tool: load_project
+server.tool(
+  'load_project',
+  'Load a multiblock definition from multiblocks/{name}.json. Replaces current state.',
+  {
+    name: z.string().describe('Project name (without .json extension)'),
+  },
+  async (args) => {
+    ensureMultiblocksDir();
+    const filePath = path.join(MULTIBLOCKS_DIR, `${args.name}.json`);
+    try {
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      const data = JSON.parse(raw);
+      deserialize(data);
+      return { content: [{ type: 'text', text: `Loaded "${args.name}" from ${filePath}\n\n${getStateSummary()}` }] };
+    } catch (err: any) {
+      return { content: [{ type: 'text', text: `Error loading: ${err.message}` }] };
+    }
+  },
+);
+
+// Tool: list_projects
+server.tool(
+  'list_projects',
+  'List all saved multiblock projects in the multiblocks/ directory.',
+  {},
+  async () => {
+    ensureMultiblocksDir();
+    try {
+      const files = fs.readdirSync(MULTIBLOCKS_DIR).filter(f => f.endsWith('.json'));
+      const names = files.map(f => f.replace('.json', ''));
+      if (names.length === 0) {
+        return { content: [{ type: 'text', text: 'No saved projects found in multiblocks/' }] };
+      }
+      return { content: [{ type: 'text', text: `Saved projects (${names.length}):\n${names.map(n => `  - ${n}`).join('\n')}` }] };
+    } catch (err: any) {
+      return { content: [{ type: 'text', text: `Error listing: ${err.message}` }] };
+    }
+  },
+);
+
 // Tool: export_model_context
 server.tool(
   'export_model_context',
@@ -891,10 +977,21 @@ ${modelInfo}
 
 ## Notes for Blockbench
 
-- The controller block is the visual centerpiece — give it a distinct front face
-- Port blocks should have subtle visual indicators (colored dots, arrows, or vents)
-- Glass blocks should be transparent/translucent
-- The model uses \`setBlockBounds\` + \`renderStandardBlock\` for world rendering (axis-aligned boxes only)
+### For multiblock structures:
+- The Blockbench model represents the ENTIRE FORMED STRUCTURE, not just the controller block
+- Use the \`<modelSize>\` dimensions above as the Blockbench canvas size (e.g., 48x64x48 pixels for a 3x3x4 structure)
+- Design as one unified industrial machine — NOT a collection of separate casing blocks
+- When the multiblock forms in-game, casing blocks become invisible and this model renders at the controller's position
+- The controller stores its offset within the structure (\`structOffX/Y/Z\`) to align the model correctly
+- The FORMED_PARTS array uses structure-space pixel coordinates (0 to modelSize width/height/depth)
+
+### For single-block machines:
+- Coordinates range 0-16 per axis (one block = 16 pixels)
+- 8-15 elements for visual richness
+
+### Render system (both types):
+- Uses \`setBlockBounds\` + \`renderStandardBlock\` (axis-aligned boxes only, no rotations)
+- \`setBlockBounds\` CAN go beyond 0.0-1.0 for multiblock formed models
 - Inventory rendering uses Tessellator with 6-face manual draw per box part
 - Texture is a single 16x16 atlas referenced by all faces
 - Each element maps to a \`float[] {fromX, fromY, fromZ, toX, toY, toZ}\` in the Java PARTS array
@@ -923,6 +1020,15 @@ server.tool(
   'Full build pipeline: generate all code, write to mod project, and run gui_builder.py to create the GUI texture PNG.',
   {},
   async () => {
+    // Auto-save project before building
+    let saveResult = '';
+    try {
+      const savedPath = saveProjectFile();
+      saveResult = `Auto-saved project: ${savedPath}\n\n`;
+    } catch (err: any) {
+      saveResult = `Warning: auto-save failed: ${err.message}\n\n`;
+    }
+
     const files = generateAllFiles();
     const projectRoot = path.resolve(import.meta.dirname, '..', '..', '..');
     const results: string[] = [];
@@ -951,7 +1057,7 @@ server.tool(
       }
     }
 
-    return { content: [{ type: 'text', text: `Build complete — ${files.length} files exported:\n\n${results.join('\n')}${guiResult}` }] };
+    return { content: [{ type: 'text', text: `${saveResult}Build complete — ${files.length} files exported:\n\n${results.join('\n')}${guiResult}` }] };
   },
 );
 

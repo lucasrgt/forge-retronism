@@ -10,7 +10,7 @@ public class Retronism_SlotGasTankCell extends Slot {
 	}
 
 	public boolean isItemValid(ItemStack stack) {
-		return stack != null && stack.itemID == mod_Retronism.gasCellEmpty.shiftedIndex;
+		return stack != null && stack.itemID == Retronism_Registry.gasCellEmpty.shiftedIndex;
 	}
 
 	public int getSlotStackLimit() {

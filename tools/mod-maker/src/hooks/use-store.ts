@@ -50,6 +50,7 @@ interface MultiblockStore {
 
   // UI
   activeTab: 'structure' | 'gui'
+  showBuildGuide: boolean
   mcpConnected: boolean
 
   // Actions: config
@@ -85,6 +86,7 @@ interface MultiblockStore {
 
   // Actions: UI
   setActiveTab: (tab: 'structure' | 'gui') => void
+  setShowBuildGuide: (v: boolean) => void
   setMcpConnected: (v: boolean) => void
 
   // Actions: serialize/deserialize
@@ -234,6 +236,8 @@ export const useStore = create<MultiblockStore>((set, get) => ({
 
   // UI
   setActiveTab: (activeTab) => set({ activeTab }),
+  showBuildGuide: false,
+  setShowBuildGuide: (showBuildGuide) => set({ showBuildGuide }),
   mcpConnected: false,
   setMcpConnected: (mcpConnected) => set({ mcpConnected }),
 

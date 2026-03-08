@@ -34,7 +34,18 @@
       "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 9741 -ErrorAction SilentlyContinue | Format-Table LocalPort,State,OwningProcess\")",
       "Bash(tasklist)",
       "mcp__retronism-mod-maker__export_json",
-      "mcp__retronism-mod-maker__create_multiblock"
+      "mcp__retronism-mod-maker__create_multiblock",
+      "Bash(npx tsc --noEmit)",
+      "mcp__blockbench__create_project",
+      "mcp__blockbench__add_group",
+      "mcp__blockbench__create_texture",
+      "mcp__blockbench__place_cube",
+      "mcp__blockbench__paint_with_brush",
+      "Bash(bash scripts/transpile.sh)",
+      "mcp__blockbench__set_camera_angle",
+      "mcp__blockbench__modify_cube",
+      "mcp__blockbench__list_outline",
+      "mcp__retronism-mod-maker__generate_code"
     ]
   }
 }

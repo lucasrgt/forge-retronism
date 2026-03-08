@@ -1,6 +1,7 @@
 package retronism.gui;
 
 import net.minecraft.src.*;
+import retronism.*;
 import retronism.tile.*;
 import retronism.container.*;
 import retronism.api.*;
@@ -15,7 +16,7 @@ public class Retronism_GuiElectrolysis extends GuiContainer {
 	public Retronism_GuiElectrolysis(InventoryPlayer playerInv, Retronism_TileElectrolysis tile) {
 		super(new Retronism_ContainerElectrolysis(playerInv, tile));
 		this.tile = tile;
-		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(tile, mod_Retronism.electrolysisBlock.blockID);
+		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(tile, Retronism_Registry.electrolysisBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {
@@ -77,19 +78,8 @@ public class Retronism_GuiElectrolysis extends GuiContainer {
 		int y = (this.height - this.ySize) / 2;
 		this.drawTexturedModalRect(x, y, 0, 0, this.xSize, this.ySize);
 
-		// Energy bar fill (striped green, far left)
-		int barX = x + 8;
-		int barY = y + 17;
-		int barW = 6;
-		int barH = 52;
-		int energyScaled = tile.getEnergyScaled(barH);
-		if (energyScaled > 0) {
-			int fillTop = barY + barH - energyScaled;
-			for (int sy = fillTop; sy < barY + barH; sy++) {
-				int color = (sy % 2 == 0) ? 0xFF3BFB98 : 0xFF36E38A;
-				drawRect(barX, sy, barX + barW, sy + 1, color);
-			}
-		}
+		// Energy bar fill
+		Retronism_GuiUtils.drawEnergyBar(x + 8, y + 17, 6, 52, Retronism_GuiUtils.getEnergyScaled(tile, 52));
 
 		// Water tank (textured water)
 		drawLiquidTank(x + 57, y + 17, 14, 52, tile.getWaterScaled(52), Block.waterMoving.blockIndexInTexture);

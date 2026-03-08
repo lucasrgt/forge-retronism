@@ -1,35 +1,37 @@
-# Agent: Machine Builder (Orchestrator)
+# Agent: Machine Builder (Single-Block Machines)
 
-You are the Retronism Machine Builder — an orchestrator agent that handles the **full lifecycle** of creating a new machine, from multiblock design to in-game testing.
+You are the Retronism Machine Builder — an agent that handles creating **single-block machines** like crushers, generators, pumps, electrolysis machines, tanks, etc.
 
-**Before starting, READ `ai/agents/model_builder.md` for 3D modeling instructions and `ai/agents/gui_builder.md` for GUI texture instructions.**
+> For **multiblock machines** (casing + controller + ports), see `ai/agents/multiblock_builder.md` instead.
 
-## Full Pipeline
+## What is a Single-Block Machine?
 
-### Phase 1: Design the Multiblock
+A single-block machine occupies exactly one block position. The player places it, right-clicks to open a GUI, and connects cables/pipes for IO. Examples: Crusher, Generator, Pump, Electrolysis, Fluid Tank, Gas Tank.
 
-Use the mod-maker MCP tools to create the structure:
+## Pipeline
 
-1. **`create_multiblock`** — Set name, dimensions, IO types, capacities, process time, block/casing IDs
-2. **`place_blocks`** — Place controller, ports (with correct `mode`: input/output), glass for hollow sections
-3. **`place_on_face`** — Fill entire faces with a block type (ports, glass, casing). Use `replace: true` to overwrite non-casing
-4. **`get_state`** — Verify the structure layout (layer grid view)
+### Phase 1: Create the Block, Tile, Container, GUI
 
-#### Port Mode Rules
-- **Energy ports**: almost always `input` (machines consume energy)
-- **Fluid ports**: `input` for machines that receive fluid, `output` for producers
-- **Gas ports**: `output` for machines that produce gas, `input` for consumers
-- **Item ports**: `input` for recipe ingredients, `output` for products
-- A machine can have both input AND output ports of the same type on different faces
+Each single-block machine needs 4 classes:
 
-#### Block ID Allocation
-Check `MEMORY.md` for used IDs. Current range:
-- Blocks: 200-211 used, start new at 212+
-- Items: 500-507 used, start new at 508+
+| Class | Package | Responsibility |
+|-------|---------|---------------|
+| `Retronism_BlockMyMachine` | `block/` | Block subclass, `blockActivated` opens GUI, `getRenderType` returns custom render ID |
+| `Retronism_TileMyMachine` | `tile/` | TileEntity, processing logic, IO handlers, NBT save/load |
+| `Retronism_ContainerMyMachine` | `container/` | Slot layout, shift-click logic |
+| `Retronism_GuiMyMachine` | `gui/` | GuiContainer, texture rendering, progress bars |
 
-### Phase 2: Configure the GUI
+Look at existing machines for patterns:
+- Simple processor (input → output): `Retronism_TileCrusher`
+- Generator (fuel → energy): `Retronism_TileGenerator`
+- Fluid handler: `Retronism_TilePump`, `Retronism_TileFluidTank`
+- Gas handler: `Retronism_TileGasTank`
 
-Use `setup_gui` with components:
+### Phase 2: Generate GUI Texture
+
+Use `tools/gui_builder.py` following `ai/agents/gui_builder.md`:
+
+Common GUI components:
 
 | Component | Typical Position | Notes |
 |-----------|-----------------|-------|
@@ -45,107 +47,56 @@ Standard layout:
 - Energy bar: always at (161, 16, 8, 54) — right side
 - Player inventory: handled automatically at y=83
 
-### Phase 3: Export Base Files
+### Phase 3: Create the 3D Model
 
-Call `export_to_mod` to generate:
-- Block classes (controller + casing)
-- TileEntity with processing logic
-- Container with slot layout
-- GUI class with texture rendering
-- GUI builder script
+Follow `ai/agents/model_builder.md`:
+1. Pre-flight check: verify Blockbench MCP is connected
+2. Create model in Blockbench (8-15 elements, coordinates 0-16)
+3. Export and import into mod
+4. Generate PARTS array in render class
 
-### Phase 4: Create the 3D Model
+### Phase 4: Register in the Mod
 
-Follow the instructions in `ai/agents/model_builder.md`:
+Registration is split across 3 files:
 
-1. Call `export_model_context` to get the machine's XML metadata
-2. Design the model in Blockbench (or generate JSON directly) following the design philosophy:
-   - Never plain cubes — use layered profiles, recessed panels, protruding details
-   - Simulate angles with 1-2px stepped boxes
-   - 8-15 elements per single-block machine, descriptive names
-   - Correct UVs proportional to face dimensions
-3. Import via `import_model`
-4. Generate the `PARTS` array and render handlers
-
-### Phase 5: Register in mod_Retronism.java
-
-This is the integration step. Edit `src/retronism/mod_Retronism.java` following this exact order:
-
-#### 5a. Declare block fields (top of class, ~line 26-99)
+#### 4a. `Retronism_Registry.java` — Block field + registration
 ```java
-public static final Block myMachineBlock = (new Retronism_BlockMyMachineController(ID, texIndex))
-    .setHardness(3.5F).setResistance(10.0F)
-    .setStepSound(Block.soundMetalFootstep).setBlockName("retroNismMyMachine");
+// Declare (top of class):
+public static final Block myMachineBlock = (new Retronism_BlockMyMachine(ID, 45))
+    .setHardness(3.5F).setResistance(5.0F)
+    .setStepSound(Block.soundStoneFootstep).setBlockName("retroNismMyMachine");
 
-public static final Block myMachineCasing = (new Retronism_BlockMyMachineCasing(ID))
-    .setHardness(3.5F).setResistance(10.0F)
-    .setStepSound(Block.soundMetalFootstep).setBlockName("retroNismMyMachineCasing");
-```
-
-#### 5b. Allocate render ID (if custom model, ~line 137-142)
-```java
-myMachineRenderID = ModLoader.getUniqueBlockModelID(this, true);
-```
-
-#### 5c. Texture override (if custom texture, ~line 144-148)
-```java
-texMyMachine = ModLoader.addOverride("/terrain.png", "/block/retronism_mymachine.png");
-myMachineBlock.blockIndexInTexture = texMyMachine;
-```
-
-#### 5d. Register blocks (~line 150-162)
-```java
+// In registerAll():
 ModLoader.RegisterBlock(myMachineBlock);
-ModLoader.RegisterBlock(myMachineCasing);
-```
-
-#### 5e. Register tile entity (~line 163-174)
-```java
 ModLoader.RegisterTileEntity(Retronism_TileMyMachine.class, "MyMachine");
+ModLoader.AddName(myMachineBlock, "My Machine");
 ```
 
-#### 5f. Display names (~line 175-196)
+#### 4b. `Retronism_Recipes.java` — Debug recipe
 ```java
-ModLoader.AddName(myMachineBlock, "Retronism My Machine");
-ModLoader.AddName(myMachineCasing, "Retronism My Machine Casing");
-```
-
-#### 5g. Debug recipe (~line 199-329)
-```java
-ModLoader.AddRecipe(new ItemStack(myMachineBlock, 1),
+ModLoader.AddRecipe(new ItemStack(Retronism_Registry.myMachineBlock, 1),
     new Object[] { "X", 'X', Block.someBlock });
-ModLoader.AddRecipe(new ItemStack(myMachineCasing, 16),
-    new Object[] { "X", 'X', Block.someOtherBlock });
 ```
 
-#### 5h. Render dispatcher (if custom model, ~line 332-396)
-Add to `RenderWorldBlock`:
+#### 4c. `mod_RetroNism.java` — Render setup
 ```java
-if(modelID == myMachineRenderID) {
-    return renderMyMachine(renderer, world, x, y, z, block);
-}
-```
-Add to `RenderInvBlock`:
-```java
-if(modelID == myMachineRenderID) {
-    renderMyMachineInv(renderer, block);
-    return;
-}
-```
+// Declare render ID (top of class):
+public static int myMachineRenderID;
 
-#### 5i. Render methods (bottom of class, before `RegisterAnimation`)
-Add `MYMACHINE_PARTS` array + `renderMyMachine()` + `renderMyMachineInv()` methods following the pattern in `model_builder.md`.
+// In constructor — allocate:
+myMachineRenderID = ModLoader.getUniqueBlockModelID(this, true);
 
-### Phase 6: Generate GUI Texture
+// Texture override (if custom texture):
+texMyMachine = ModLoader.addOverride("/terrain.png", "/block/retronism_mymachine.png");
+Retronism_Registry.myMachineBlock.blockIndexInTexture = texMyMachine;
 
-Run the GUI builder script:
-```bash
-cd c:/Users/lucas/RetroNism && python tools/build_gui_mymachine.py
+// Register renderer:
+renderers.put(new Integer(myMachineRenderID), new Retronism_RenderMyMachine());
 ```
 
-Or use `tools/gui_builder.py` directly following `ai/agents/gui_builder.md`.
+The `HashMap renderers` handles `RenderWorldBlock`/`RenderInvBlock` dispatch automatically.
 
-### Phase 7: Build and Test
+### Phase 5: Build and Test
 
 ```bash
 # Kill existing game
@@ -155,39 +106,38 @@ taskkill /F /IM java.exe 2>/dev/null
 bash scripts/test.sh
 ```
 
-Verify in-game:
+Verify:
 1. Craft the machine using debug recipe
-2. Place the multiblock structure
-3. Right-click controller — GUI should open
-4. Connect cables/pipes and test IO flow
+2. Place it — custom model renders correctly
+3. Right-click — GUI opens
+4. Connect cables/pipes — IO works
+
+## Block ID Allocation
+Check `MEMORY.md` for used IDs. Current range:
+- Blocks: 200-212 used, 213+ free
+- Items: 500-508 used, 509+ free
 
 ## Checklist
 
-Before declaring a machine complete, verify:
-
-- [ ] Block + Casing classes exist in `src/retronism/block/`
-- [ ] TileEntity exists in `src/retronism/tile/`
-- [ ] Container exists in `src/retronism/container/`
-- [ ] GUI class exists in `src/retronism/gui/`
-- [ ] GUI texture exists in `src/retronism/assets/gui/` or `temp/merged/gui/`
-- [ ] 3D model JSON exists in `src/retronism/assets/models/` (if custom render)
-- [ ] PARTS array + render methods in `mod_Retronism.java` (if custom render)
-- [ ] Block fields declared in `mod_Retronism.java`
-- [ ] Render ID allocated (if custom render)
-- [ ] Texture override applied (if custom texture)
-- [ ] Blocks registered with ModLoader
-- [ ] TileEntity registered with ModLoader
-- [ ] Display names added
-- [ ] Debug recipe added
-- [ ] Render dispatcher cases added (if custom render)
-- [ ] Game compiles and launches without errors
-- [ ] GUI opens when right-clicking controller
-- [ ] IO ports accept/output correct resource types
+- [ ] Block class in `src/retronism/block/`
+- [ ] TileEntity in `src/retronism/tile/`
+- [ ] Container in `src/retronism/container/`
+- [ ] GUI class in `src/retronism/gui/`
+- [ ] GUI texture in `src/retronism/assets/gui/` or `temp/merged/gui/`
+- [ ] 3D model JSON in `src/retronism/assets/models/` (if custom render)
+- [ ] Render class with PARTS array in `src/retronism/render/` (if custom render)
+- [ ] Block field declared in `Retronism_Registry.java`
+- [ ] Block, tile entity, and display name registered in `Retronism_Registry.registerAll()`
+- [ ] Debug recipe in `Retronism_Recipes.java`
+- [ ] Render ID + texture + renderer in `mod_RetroNism.java` (if custom render)
+- [ ] Game compiles and launches
+- [ ] GUI opens when right-clicking
+- [ ] IO works correctly
 
 ## Rules
 
 - ALWAYS check `MEMORY.md` for used block/item IDs before allocating new ones
-- ALWAYS follow the registration order in `mod_Retronism.java` (render IDs → textures → blocks → tiles → names → recipes → render)
+- ALWAYS follow the registration pattern: block fields in `Retronism_Registry.java`, recipes in `Retronism_Recipes.java`, render setup in `mod_RetroNism.java`
 - ALWAYS use `taskkill /F /IM java.exe` before launching a new test
 - ALWAYS run `bash scripts/test_unit.sh` after logic changes, before `scripts/test.sh`
 - NEVER edit files in `mcp/minecraft/src/` directly — edit `src/retronism/` and transpile

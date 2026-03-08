@@ -75,14 +75,14 @@ public class Retronism_TileGasTank extends TileEntity implements Retronism_IGasH
 		if (this.worldObj.multiplayerWorld) return;
 
 		if (tankItems[0] != null
-			&& tankItems[0].itemID == mod_Retronism.gasCellEmpty.shiftedIndex
+			&& tankItems[0].itemID == Retronism_Registry.gasCellEmpty.shiftedIndex
 			&& gasAmount >= CELL_AMOUNT
 			&& (gasType == Retronism_GasType.HYDROGEN || gasType == Retronism_GasType.OXYGEN)) {
 			gasAmount -= CELL_AMOUNT;
 			if (gasType == Retronism_GasType.HYDROGEN) {
-				tankItems[0] = new ItemStack(mod_Retronism.gasCellHydrogen);
+				tankItems[0] = new ItemStack(Retronism_Registry.gasCellHydrogen);
 			} else {
-				tankItems[0] = new ItemStack(mod_Retronism.gasCellOxygen);
+				tankItems[0] = new ItemStack(Retronism_Registry.gasCellOxygen);
 			}
 			if (gasAmount == 0) gasType = Retronism_GasType.NONE;
 			this.onInventoryChanged();

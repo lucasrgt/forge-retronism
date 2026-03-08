@@ -50,7 +50,7 @@ public class Retronism_BlockTest extends Block {
 			for (int dy = -2; dy <= 2; dy++) {
 				for (int dz = -2; dz <= 2; dz++) {
 					int bx = x + dx, by = y + dy, bz = z + dz;
-					if (world.getBlockId(bx, by, bz) == mod_Retronism.megaCrusherCoreBlock.blockID) {
+					if (world.getBlockId(bx, by, bz) == Retronism_Registry.megaCrusherCoreBlock.blockID) {
 						TileEntity te = world.getBlockTileEntity(bx, by, bz);
 						if (te instanceof Retronism_TileMegaCrusher) {
 							Retronism_TileMegaCrusher core = (Retronism_TileMegaCrusher) te;
@@ -72,7 +72,7 @@ public class Retronism_BlockTest extends Block {
 			for (int oy = y - 2; oy <= y; oy++) {
 				for (int oz = z - 2; oz <= z; oz++) {
 					if (isValidStructure(world, ox, oy, oz)) {
-						world.setBlockWithNotify(x, y, z, mod_Retronism.megaCrusherCoreBlock.blockID);
+						world.setBlockWithNotify(x, y, z, Retronism_Registry.megaCrusherCoreBlock.blockID);
 						TileEntity te = world.getBlockTileEntity(x, y, z);
 						if (te instanceof Retronism_TileMegaCrusher) {
 							Retronism_TileMegaCrusher core = (Retronism_TileMegaCrusher) te;

@@ -15,7 +15,7 @@ public class Retronism_GuiMegaCrusher extends GuiContainer {
 	public Retronism_GuiMegaCrusher(InventoryPlayer playerInv, Retronism_TileMegaCrusher megaCrusher) {
 		super(new Retronism_ContainerMegaCrusher(playerInv, megaCrusher));
 		this.megaCrusher = megaCrusher;
-		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(megaCrusher, mod_Retronism.megaCrusherCoreBlock.blockID);
+		this.sideConfigHelper = new Retronism_GuiSideConfigHelper(megaCrusher, Retronism_Registry.megaCrusherCoreBlock.blockID);
 	}
 
 	protected void drawGuiContainerForegroundLayer() {
@@ -73,18 +73,7 @@ public class Retronism_GuiMegaCrusher extends GuiContainer {
 			}
 		}
 
-		// Energy bar fill (striped green)
-		int barX = x + 162;
-		int barY = y + 17;
-		int barW = 6;
-		int barH = 52;
-		int energyScaled = this.megaCrusher.getEnergyScaled(barH);
-		if (energyScaled > 0) {
-			int fillTop = barY + barH - energyScaled;
-			for (int sy = fillTop; sy < barY + barH; sy++) {
-				int color = (sy % 2 == 0) ? 0xFF3BFB98 : 0xFF36E38A;
-				drawRect(barX, sy, barX + barW, sy + 1, color);
-			}
-		}
+		// Energy bar fill
+		Retronism_GuiUtils.drawEnergyBar(x + 162, y + 17, 6, 52, Retronism_GuiUtils.getEnergyScaled(this.megaCrusher, 52));
 	}
 }
