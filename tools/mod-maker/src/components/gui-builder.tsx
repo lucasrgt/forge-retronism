@@ -32,7 +32,39 @@ function rgb(c: Color) { return `rgb(${c[0]},${c[1]},${c[2]})` }
 
 const PALETTE_ITEMS: GuiComponentType[] = [
   'slot', 'big_slot', 'energy_bar', 'progress_arrow', 'flame',
-  'fluid_tank', 'gas_tank', 'fluid_tank_small', 'gas_tank_small', 'separator',
+  'fluid_tank', 'fluid_tank_small', 'gas_tank', 'gas_tank_small', 'separator',
+]
+
+// 7x7 pixel grids sampled from terrain.png / furnace.png
+// Fire: terrain.png tile (14,14) — orange/yellow/red
+const FIRE_7x7: string[][] = [
+  ['#fc5700','#fc5700','#fc0000','#fc0000','#fc5700','#fc5700','#fc0000'],
+  ['#fc0000','#fc0000','#fc5700','#fcfc00','#fc5700','#fc5700','#fc5700'],
+  ['#fc0000','#fcfc00','#fc5700','#fc0000','#fc0000','#fca100','#fc5700'],
+  ['#cd0000','#fc5700','#fc5700','#cd0000','#fc5700','#cd0000','#fca100'],
+  ['#fc0000','#fc5700','#fc5700','#fc0000','#fcfc00','#cd0000','#fc0000'],
+  ['#fca100','#fc5700','#fca100','#fc0000','#fc0000','#fc5700','#fcfc00'],
+  ['#fc5700','#fc5700','#fc5700','#fc0000','#fc5700','#fc5700','#fc5700'],
+]
+// Water: terrain.png tile (13,12) — blue tones
+const WATER_7x7: string[][] = [
+  ['#265cff','#3d6dff','#3d6dff','#3d6dff','#3d6dff','#265cff','#265cff'],
+  ['#3d6dff','#265cff','#3d6dff','#3d6dff','#1f55ff','#1f55ff','#1f55ff'],
+  ['#265cff','#1f55ff','#265cff','#265cff','#1f55ff','#1f55ff','#3d6dff'],
+  ['#265cff','#3d6dff','#265cff','#265cff','#265cff','#3d6dff','#265cff'],
+  ['#1f55ff','#1f55ff','#1f55ff','#3d6dff','#3d6dff','#3d6dff','#265cff'],
+  ['#1f55ff','#1f55ff','#1f55ff','#1f55ff','#1f55ff','#1f55ff','#1f55ff'],
+  ['#1f55ff','#1f55ff','#265cff','#3d6dff','#3d6dff','#3d6dff','#265cff'],
+]
+// Glowstone: terrain.png tile (9,6) — amber/golden glow for gas
+const GLOW_7x7: string[][] = [
+  ['#ffffff','#4f3810','#ffbc5e','#ffffff','#726f49','#7a5b2c','#ffffff'],
+  ['#4f3810','#ffbc5e','#7a5b2c','#4f3810','#ffbc5e','#726f49','#4f3810'],
+  ['#7a5b2c','#f9d49c','#f9d49c','#726f49','#ffffff','#4f3810','#ffbc5e'],
+  ['#726f49','#4f3810','#7a5b2c','#726f49','#726f49','#7a5b2c','#7a5b2c'],
+  ['#ffffff','#4f3810','#4f3810','#ffbc5e','#c08f46','#c08f46','#726f49'],
+  ['#4f3810','#7a5b2c','#726f49','#ffbc5e','#4f3810','#4f3810','#7a5b2c'],
+  ['#ffbc5e','#ffffff','#4f3810','#4f3810','#4f3810','#ffbc5e','#ffffff'],
 ]
 
 // Pixel-art icons for the palette toolbar (drawn on a tiny canvas)
@@ -48,31 +80,25 @@ function PaletteIcon({ type }: { type: GuiComponentType }) {
 
     const px = (x: number, y: number, col: string) => { ctx.fillStyle = col; ctx.fillRect(x * S, y * S, S, S) }
     const rect = (x: number, y: number, w: number, h: number, col: string) => { ctx.fillStyle = col; ctx.fillRect(x * S, y * S, w * S, h * S) }
+    const draw7x7 = (grid: string[][]) => { for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++) px(x, y, grid[y][x]) }
 
     switch (type) {
       case 'slot': {
-        // 9x9 slot: dark border top-left, white border bottom-right, gray fill
         rect(0, 0, 9, 9, '#8b8b8b')
-        // top + left edge dark
         rect(0, 0, 9, 1, '#373737'); rect(0, 0, 1, 9, '#373737')
-        // bottom + right edge white
         rect(0, 8, 9, 1, '#fff'); rect(8, 0, 1, 9, '#fff')
         break
       }
       case 'big_slot': {
-        // 11x11 big slot
         rect(0, 0, 11, 11, '#8b8b8b')
         rect(0, 0, 11, 1, '#373737'); rect(0, 0, 1, 11, '#373737')
         rect(0, 10, 11, 1, '#fff'); rect(10, 0, 1, 11, '#fff')
-        // inner border
         rect(1, 1, 9, 1, '#555'); rect(1, 1, 1, 9, '#555')
         break
       }
       case 'energy_bar': {
-        // 5x11 energy bar with green gradient
         rect(0, 0, 5, 11, '#373737')
         rect(1, 1, 3, 9, '#555')
-        // green fill from bottom
         for (let i = 0; i < 7; i++) {
           const g = 150 + Math.floor(105 * (1 - i / 7))
           rect(1, 3 + i, 3, 1, `rgb(59,${g},100)`)
@@ -80,84 +106,30 @@ function PaletteIcon({ type }: { type: GuiComponentType }) {
         break
       }
       case 'progress_arrow': {
-        // 12x9 arrow — simplified furnace.png sprite
-        const bg = '#2a2a3a' // transparent on dark bg
-        rect(0, 0, 12, 9, bg)
-        // shaft: rows 3-5, cols 0-6
+        // shaft rows 3-5, cols 0-6
         rect(0, 3, 7, 3, '#8b8b8b')
-        // head: triangle from col 7, narrowing right
-        for (let i = 0; i < 5; i++) {
-          const h = 9 - i * 2
-          const y = i
-          rect(7 + i, y, 1, h, '#8b8b8b')
-        }
+        // head triangle narrowing right
+        for (let i = 0; i < 5; i++) rect(7 + i, i, 1, 9 - i * 2, '#8b8b8b')
         break
       }
       case 'flame': {
-        // 7x7 flame — simplified furnace.png shape
-        const flamePoints: [number, number][] = [
-          [1,0], [5,0],
-          [1,1], [3,1], [5,1],
-          [1,2], [4,2], [5,2],
-          [0,3], [1,3], [3,3], [4,3], [5,3], [6,3],
-          [0,4], [1,4], [3,4], [5,4], [6,4],
-          [0,5], [1,5], [3,5], [4,5], [5,5], [6,5],
-          [0,6], [1,6], [2,6], [3,6], [4,6], [5,6], [6,6],
-        ]
-        for (const [x, y] of flamePoints) px(x, y, '#8b8b8b')
+        // Fire texture from terrain.png
+        draw7x7(FIRE_7x7)
         break
       }
-      case 'fluid_tank': {
-        // 7x11 tank with blue gauge
-        rect(0, 0, 7, 11, '#8b8b8b')
-        rect(0, 0, 7, 1, '#373737'); rect(0, 0, 1, 11, '#373737')
-        rect(0, 10, 7, 1, '#fff'); rect(6, 0, 1, 11, '#fff')
-        // gauge strips bordeaux
-        for (let row = 1; row < 10; row++) {
-          const full = ((10 - row) % 5 === 0)
-          const w = full ? 5 : 3
-          const x = full ? 1 : 2
-          rect(x, row, w, 1, '#560001')
-        }
-        break
-      }
-      case 'gas_tank': {
-        // 7x11 tank with gray gauge
-        rect(0, 0, 7, 11, '#8b8b8b')
-        rect(0, 0, 7, 1, '#373737'); rect(0, 0, 1, 11, '#373737')
-        rect(0, 10, 7, 1, '#fff'); rect(6, 0, 1, 11, '#fff')
-        for (let row = 1; row < 10; row++) {
-          const full = ((10 - row) % 5 === 0)
-          const w = full ? 5 : 3
-          const x = full ? 1 : 2
-          rect(x, row, w, 1, '#560001')
-        }
-        break
-      }
+      case 'fluid_tank':
       case 'fluid_tank_small': {
-        // 7x7 small tank blue
-        rect(0, 0, 7, 7, '#8b8b8b')
-        rect(0, 0, 7, 1, '#373737'); rect(0, 0, 1, 7, '#373737')
-        rect(0, 6, 7, 1, '#fff'); rect(6, 0, 1, 7, '#fff')
-        for (let row = 1; row < 6; row++) {
-          const full = ((6 - row) % 5 === 0)
-          rect(full ? 1 : 2, row, full ? 5 : 3, 1, '#560001')
-        }
+        // Water texture from terrain.png
+        draw7x7(WATER_7x7)
         break
       }
+      case 'gas_tank':
       case 'gas_tank_small': {
-        // 7x7 small tank gray
-        rect(0, 0, 7, 7, '#8b8b8b')
-        rect(0, 0, 7, 1, '#373737'); rect(0, 0, 1, 7, '#373737')
-        rect(0, 6, 7, 1, '#fff'); rect(6, 0, 1, 7, '#fff')
-        for (let row = 1; row < 6; row++) {
-          const full = ((6 - row) % 5 === 0)
-          rect(full ? 1 : 2, row, full ? 5 : 3, 1, '#560001')
-        }
+        // Glowstone texture from terrain.png
+        draw7x7(GLOW_7x7)
         break
       }
       case 'separator': {
-        // 11x3 separator line
         rect(0, 0, 11, 1, '#555')
         rect(0, 1, 11, 1, '#fff')
         break
@@ -168,7 +140,7 @@ function PaletteIcon({ type }: { type: GuiComponentType }) {
   const sizes: Record<GuiComponentType, [number, number]> = {
     slot: [9, 9], big_slot: [11, 11], energy_bar: [5, 11],
     progress_arrow: [12, 9], flame: [7, 7],
-    fluid_tank: [7, 11], gas_tank: [7, 11],
+    fluid_tank: [7, 7], gas_tank: [7, 7],
     fluid_tank_small: [7, 7], gas_tank_small: [7, 7],
     separator: [11, 2],
   }
