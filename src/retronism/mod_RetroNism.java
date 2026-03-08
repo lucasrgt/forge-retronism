@@ -14,6 +14,8 @@ public class mod_Retronism extends BaseMod {
 	public static int megaPipeRenderID;
 	public static int itemPipeRenderID;
 	public static int crusherRenderID;
+	public static int megaElectrolysisRenderID;
+	public static int megaElectrolysisCasingRenderID;
 	public static final int GAS_OVERLAY_INDEX = 175;
 
 	public static int texCrusher;
@@ -28,6 +30,8 @@ public class mod_Retronism extends BaseMod {
 		megaPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
 		itemPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
 		crusherRenderID = ModLoader.getUniqueBlockModelID(this, true);
+		megaElectrolysisRenderID = ModLoader.getUniqueBlockModelID(this, true);
+		megaElectrolysisCasingRenderID = ModLoader.getUniqueBlockModelID(this, true);
 
 		// Texture overrides
 		Retronism_Registry.wrench.setIconIndex(ModLoader.addOverride("/gui/items.png", "/item/retronism_wrench.png"));
@@ -47,6 +51,8 @@ public class mod_Retronism extends BaseMod {
 		renderers.put(new Integer(megaPipeRenderID), new Retronism_RenderMegaPipe());
 		renderers.put(new Integer(itemPipeRenderID), new Retronism_RenderItemPipe());
 		renderers.put(new Integer(crusherRenderID), new Retronism_RenderCrusher());
+		renderers.put(new Integer(megaElectrolysisRenderID), new Retronism_RenderMegaElectrolysis());
+		renderers.put(new Integer(megaElectrolysisCasingRenderID), new Retronism_RenderMegaElectrolysisCasing());
 	}
 
 	public boolean RenderWorldBlock(RenderBlocks renderer, IBlockAccess world, int x, int y, int z, Block block, int modelID) {

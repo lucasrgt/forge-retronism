@@ -5,6 +5,8 @@ export interface DefaultBlockDef {
   color: number;
   char: string;
   portType?: string;
+  mcId?: number;
+  terrainIndex?: number;
 }
 
 export declare const DEFAULT_BLOCKS: DefaultBlockDef[];

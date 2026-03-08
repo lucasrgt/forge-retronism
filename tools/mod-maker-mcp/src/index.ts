@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { execSync } from 'child_process';
-// WebSocket import kept for future use but sync is file-based now
+import WebSocket from 'ws';
 
 import {
   configureMultiblock, placeBlock, removeBlock, fillShell, clearBlocks,
@@ -18,6 +18,7 @@ import {
   mirrorStructure, rotateStructure,
   placeOnFace, placeRing,
   getBlockAt, listBlocksByType,
+  setPortType, setController,
   applyTemplate,
   importBlockbenchModel, getModel, clearModel,
   setOnChangeListener,
@@ -28,8 +29,23 @@ import type { StructureType, IOType, PortMode, GuiComponentType, SlotType, IoMod
 import type { Face, TemplateName } from './state.js';
 
 // ---------------------------------------------------------------------------
-// File-based sync for real-time updates to Multiblock Designer UI
+// WebSocket client — connects to Mod Maker Electron app (WS server on :19400)
 // ---------------------------------------------------------------------------
+const WS_URL = 'ws://127.0.0.1:19400';
+let wsConnection: WebSocket | null = null;
+let wsReconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
+function wsSend(msg: object): void {
+  if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+    wsConnection.send(JSON.stringify(msg));
+  }
+}
+
+function syncStateViaWs(): void {
+  wsSend({ type: 'state', payload: serialize() });
+}
+
+// Also keep file-based sync as fallback
 const SYNC_FILE = path.resolve(import.meta.dirname, '..', '..', '..', 'temp', 'mcp_state.json');
 
 function syncStateToFile(): void {
@@ -37,13 +53,55 @@ function syncStateToFile(): void {
     const dir = path.dirname(SYNC_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(SYNC_FILE, JSON.stringify(serialize(), null, 2), 'utf-8');
+  } catch (_) {}
+}
+
+// Register change listener — send via WebSocket + write file
+setOnChangeListener(() => {
+  syncStateViaWs();
+  syncStateToFile();
+});
+
+function connectToModMaker(): void {
+  if (wsConnection) {
+    try { wsConnection.close(); } catch (_) {}
+    wsConnection = null;
+  }
+
+  try {
+    const ws = new WebSocket(WS_URL);
+
+    ws.on('open', () => {
+      wsConnection = ws;
+      // Send current state on connect so the UI is immediately in sync
+      wsSend({ type: 'state', payload: serialize() });
+    });
+
+    ws.on('close', () => {
+      wsConnection = null;
+      // Auto-reconnect every 3s — the Electron app may not be open yet
+      if (!wsReconnectTimer) {
+        wsReconnectTimer = setTimeout(() => {
+          wsReconnectTimer = null;
+          connectToModMaker();
+        }, 3000);
+      }
+    });
+
+    ws.on('error', () => {
+      // 'close' event will fire and handle reconnect
+    });
   } catch (_) {
-    // Silently ignore write errors
+    if (!wsReconnectTimer) {
+      wsReconnectTimer = setTimeout(() => {
+        wsReconnectTimer = null;
+        connectToModMaker();
+      }, 3000);
+    }
   }
 }
 
-// Register change listener — writes state file after every mutation
-setOnChangeListener(syncStateToFile);
+connectToModMaker();
 
 const server = new McpServer({
   name: 'retronism-mod-maker',
@@ -60,7 +118,7 @@ const blockIdSchema = (desc?: string) => z.string().superRefine((val, ctx) => {
       message: `Unknown block ID "${val}". Valid: ${blockRegistry.getIds().join(', ')}`,
     });
   }
-}).describe(desc || 'Block ID (e.g., casing, controller, energy_port, fluid_port, gas_port, item_port, glass, or any custom registered block)');
+}).describe(desc || 'Block ID (e.g., casing, controller, glass, iron_block, stone, or any registered block)');
 
 // ---------------------------------------------------------------------------
 // Tool: create_multiblock
@@ -81,8 +139,8 @@ server.tool(
     processTime: z.number().int().default(200).describe('Processing time in ticks'),
     energyPerTick: z.number().int().default(32).describe('Energy consumed per tick'),
     blockId: z.number().int().min(200).max(255).default(213),
-    casingId: z.number().int().min(200).max(255).default(214),
-    fillWithCasing: z.boolean().default(true).describe('Auto-fill outer shell with casing blocks'),
+    defaultShellBlock: z.string().default('iron_block').describe('Block ID to use for shell filling (e.g. iron_block, stone, cobblestone)'),
+    fillShell: z.boolean().default(true).describe('Auto-fill outer shell with default shell block'),
   },
   async (args) => {
     resetState();
@@ -95,13 +153,13 @@ server.tool(
       processTime: args.processTime,
       energyPerTick: args.energyPerTick,
       blockId: args.blockId,
-      casingId: args.casingId,
+      defaultShellBlock: args.defaultShellBlock,
     });
 
     let msg = `Created multiblock "${args.name}" (${args.w}x${args.h}x${args.d} ${args.structType})`;
-    if (args.fillWithCasing) {
+    if (args.fillShell) {
       const count = fillShell();
-      msg += `\nFilled shell with ${count} casing blocks.`;
+      msg += `\nFilled shell with ${count} ${args.defaultShellBlock} blocks.`;
     }
     msg += '\n\n' + getStateSummary();
     return { content: [{ type: 'text', text: msg }] };
@@ -145,11 +203,11 @@ server.tool(
 // ---------------------------------------------------------------------------
 server.tool(
   'fill_shell',
-  'Fill the outer shell of the structure with casing blocks (does not overwrite existing blocks).',
+  'Fill the outer shell of the structure with the default shell block (does not overwrite existing blocks).',
   {},
   async () => {
     const count = fillShell();
-    return { content: [{ type: 'text', text: `Filled ${count} positions with casing.\n\n${getStateSummary()}` }] };
+    return { content: [{ type: 'text', text: `Filled ${count} positions with default shell block.\n\n${getStateSummary()}` }] };
   },
 );
 
@@ -171,9 +229,9 @@ server.tool(
 // ---------------------------------------------------------------------------
 server.tool(
   'setup_gui',
-  'Set up the machine GUI. Can load a preset and/or add individual components. Presets: processor, dual_input, single_slot, tank.',
+  'Set up the machine GUI. Load a preset based on real mod machines, then optionally add/modify components. Presets: processor (crusher-style), triple_processor (mega crusher 3-lane), dual_input (2 in → 1 big out), generator (fuel + flame), pump (fluid tank + bucket), fluid_to_gas (electrolysis-style), single_slot, tank, fluid_processor (fluid in → items → fluid out).',
   {
-    preset: z.enum(['processor', 'dual_input', 'single_slot', 'tank', 'none']).default('none').describe('Load a preset layout first'),
+    preset: z.enum(['processor', 'triple_processor', 'dual_input', 'generator', 'pump', 'fluid_to_gas', 'single_slot', 'tank', 'fluid_processor', 'none']).default('none').describe('Load a preset layout based on real mod machines'),
     components: z.array(z.object({
       type: z.enum(['slot', 'big_slot', 'energy_bar', 'progress_arrow', 'flame', 'fluid_tank', 'gas_tank', 'separator']),
       x: z.number().int().min(0).max(175),
@@ -322,6 +380,59 @@ server.tool(
 );
 
 // ---------------------------------------------------------------------------
+// Tool: set_port
+// ---------------------------------------------------------------------------
+server.tool(
+  'set_port',
+  'Set or clear port metadata on an existing block. Ports are IO config overlays — the block type stays the same. Set portType to configure as port, or omit to clear port config.',
+  {
+    x: z.number().int(),
+    y: z.number().int(),
+    z: z.number().int(),
+    portType: z.enum(['energy', 'fluid', 'gas', 'item']).optional().describe('Port IO type. Omit to clear port config.'),
+    mode: z.enum(['input', 'output', 'input_output']).optional().describe('Port direction (default: input_output)'),
+  },
+  async (args) => {
+    const block = getBlockAt(args.x, args.y, args.z);
+    if (!block) {
+      return { content: [{ type: 'text', text: `No block at (${args.x}, ${args.y}, ${args.z}).` }] };
+    }
+    if (setPortType(args.x, args.y, args.z, args.portType as IOType | undefined, args.mode as PortMode | undefined)) {
+      const action = args.portType ? `Set as ${args.portType} port (${args.mode || 'input_output'})` : 'Cleared port config';
+      return { content: [{ type: 'text', text: `${action} on block at (${args.x}, ${args.y}, ${args.z}).\n\n${getStateSummary()}` }] };
+    }
+    return { content: [{ type: 'text', text: `Failed to set port at (${args.x}, ${args.y}, ${args.z}).` }] };
+  },
+);
+
+// ---------------------------------------------------------------------------
+// Tool: set_controller
+// ---------------------------------------------------------------------------
+server.tool(
+  'set_controller',
+  'Place a controller block at a position. Replaces whatever was there. Only one controller per structure. Pass coordinates + blockType to set, or clear=true to remove.',
+  {
+    x: z.number().int().optional(),
+    y: z.number().int().optional(),
+    z: z.number().int().optional(),
+    blockType: z.string().optional().describe('Controller block ID (e.g. mega_crusher, mega_elec_ctrl). Defaults to first available controller.'),
+    clear: z.boolean().optional().describe('Clear the current controller'),
+  },
+  async (args) => {
+    if (args.clear) {
+      setController(null);
+      return { content: [{ type: 'text', text: `Controller cleared.\n\n${getStateSummary()}` }] };
+    }
+    if (args.x === undefined || args.y === undefined || args.z === undefined) {
+      return { content: [{ type: 'text', text: 'Provide x, y, z coordinates or clear=true.' }] };
+    }
+    const key = `${args.x},${args.y},${args.z}`;
+    setController(key, args.blockType);
+    return { content: [{ type: 'text', text: `Set controller at (${args.x}, ${args.y}, ${args.z}).\n\n${getStateSummary()}` }] };
+  },
+);
+
+// ---------------------------------------------------------------------------
 // Tool: update_config
 // ---------------------------------------------------------------------------
 server.tool(
@@ -337,7 +448,7 @@ server.tool(
     processTime: z.number().int().optional().describe('Processing time in ticks'),
     energyPerTick: z.number().int().optional().describe('Energy consumed per tick'),
     blockId: z.number().int().min(200).max(255).optional(),
-    casingId: z.number().int().min(200).max(255).optional(),
+    defaultShellBlock: z.string().optional().describe('Block ID for shell filling (e.g. iron_block, stone)'),
   },
   async (args) => {
     updateConfig({
@@ -350,7 +461,7 @@ server.tool(
       processTime: args.processTime,
       energyPerTick: args.energyPerTick,
       blockId: args.blockId,
-      casingId: args.casingId,
+      defaultShellBlock: args.defaultShellBlock,
     });
     return { content: [{ type: 'text', text: `Config updated.\n\n${getStateSummary()}` }] };
   },
@@ -692,12 +803,14 @@ server.tool(
   'Register a new custom block type for use in multiblock structures. The block becomes available in all placement tools immediately.',
   {
     id: z.string().regex(/^[a-z][a-z0-9_]*$/).describe('Unique block ID in snake_case (e.g., steel_casing, hv_energy_port)'),
-    category: z.enum(['casing', 'controller', 'port', 'glass', 'custom']).describe('Block category — determines behavior in structure validation and codegen'),
+    category: z.enum(['mod', 'vanilla', 'custom']).describe('Block category — determines behavior in structure validation and codegen'),
     label: z.string().describe('Display label (e.g., "Steel Casing")'),
     color: z.number().int().describe('Hex color for 3D preview (e.g., 0xAABBCC)'),
     char: z.string().max(1).optional().describe('Single char for serialization (auto-assigned if omitted)'),
-    portType: z.enum(['energy', 'fluid', 'gas', 'item']).optional().describe('Port IO type (required for category "port")'),
+    portType: z.enum(['energy', 'fluid', 'gas', 'item']).optional().describe('Port IO type (if this block acts as a default port type)'),
     tier: z.number().int().optional().describe('Optional tier number'),
+    mcId: z.number().int().optional().describe('Minecraft block ID (required for vanilla blocks, used in checkStructure validation)'),
+    terrainIndex: z.number().int().optional().describe('Tile index in terrain.png (16x16 grid) for texture in 3D editor'),
   },
   async (args) => {
     const char = args.char || blockRegistry.nextAvailableChar();
@@ -714,6 +827,8 @@ server.tool(
         portType: args.portType as any,
         tier: args.tier,
         builtIn: false,
+        mcId: args.mcId,
+        terrainIndex: args.terrainIndex,
       });
       const all = blockRegistry.getAll();
       return { content: [{ type: 'text', text: `Registered block "${args.id}" (${args.category}, char='${char}').\n\nRegistry now has ${all.length} block types: ${all.map(b => b.id).join(', ')}` }] };
@@ -753,6 +868,8 @@ server.tool(
       let line = `  ${b.id} — ${b.label} [${b.category}] char='${b.char}' color=0x${b.color.toString(16).padStart(6, '0')}`;
       if (b.portType) line += ` portType=${b.portType}`;
       if (b.tier !== undefined) line += ` tier=${b.tier}`;
+      if (b.mcId !== undefined) line += ` mcId=${b.mcId}`;
+      if (b.terrainIndex !== undefined) line += ` terrain=${b.terrainIndex}`;
       if (b.builtIn) line += ' (built-in)';
       return line;
     });
@@ -900,9 +1017,8 @@ server.tool(
     const portDetails: { blockId: string; pos: string; mode: PortMode; portType?: string }[] = [];
     for (const [key, block] of state.blocks) {
       counts[block.blockId] = (counts[block.blockId] || 0) + 1;
-      const def = blockRegistry.get(block.blockId);
-      if (def?.category === 'port') {
-        portDetails.push({ blockId: block.blockId, pos: key, mode: block.mode, portType: def.portType });
+      if (block.portType) {
+        portDetails.push({ blockId: block.blockId, pos: key, mode: block.mode, portType: block.portType });
       }
     }
 
@@ -1058,6 +1174,95 @@ server.tool(
     }
 
     return { content: [{ type: 'text', text: `${saveResult}Build complete — ${files.length} files exported:\n\n${results.join('\n')}${guiResult}` }] };
+  },
+);
+
+// ---------------------------------------------------------------------------
+// UI CONTROL TOOLS (WebSocket commands to Mod Maker app)
+// ---------------------------------------------------------------------------
+
+server.tool(
+  'set_camera',
+  'Set the 3D camera position in the Mod Maker viewer. Use preset angles or manual theta/phi/radius.',
+  {
+    preset: z.enum(['front', 'back', 'left', 'right', 'top', 'bottom', 'isometric']).optional()
+      .describe('Named camera angle preset'),
+    theta: z.number().optional().describe('Horizontal orbit angle in radians'),
+    phi: z.number().optional().describe('Vertical orbit angle in radians (0=top, PI=bottom)'),
+    radius: z.number().optional().describe('Distance from target'),
+  },
+  async ({ preset, theta, phi, radius }) => {
+    const cam: Record<string, number> = {};
+    if (preset) {
+      switch (preset) {
+        case 'front':      cam.theta = 0; cam.phi = Math.PI / 2; break;
+        case 'back':       cam.theta = Math.PI; cam.phi = Math.PI / 2; break;
+        case 'left':       cam.theta = -Math.PI / 2; cam.phi = Math.PI / 2; break;
+        case 'right':      cam.theta = Math.PI / 2; cam.phi = Math.PI / 2; break;
+        case 'top':        cam.theta = 0; cam.phi = 0.15; break;
+        case 'bottom':     cam.theta = 0; cam.phi = Math.PI - 0.15; break;
+        case 'isometric':  cam.theta = 0.6; cam.phi = 0.8; break;
+      }
+    }
+    if (theta !== undefined) cam.theta = theta;
+    if (phi !== undefined) cam.phi = phi;
+    if (radius !== undefined) cam.radius = radius;
+    wsSend({ type: 'camera', payload: cam });
+    return { content: [{ type: 'text', text: `Camera set: ${JSON.stringify(cam)}` }] };
+  },
+);
+
+server.tool(
+  'set_tab',
+  'Switch the active tab in the Mod Maker UI (structure editor or GUI builder).',
+  {
+    tab: z.enum(['structure', 'gui']).describe('Tab to activate'),
+  },
+  async ({ tab }) => {
+    wsSend({ type: 'tab', payload: { tab } });
+    return { content: [{ type: 'text', text: `Switched to ${tab} tab` }] };
+  },
+);
+
+server.tool(
+  'select_block',
+  'Select (highlight) a block position in the 3D structure editor.',
+  {
+    x: z.number().describe('X coordinate'),
+    y: z.number().describe('Y coordinate'),
+    z: z.number().describe('Z coordinate'),
+  },
+  async ({ x, y, z: bz }) => {
+    wsSend({ type: 'select_block', payload: { key: `${x},${y},${bz}` } });
+    return { content: [{ type: 'text', text: `Selected block at ${x},${y},${bz}` }] };
+  },
+);
+
+server.tool(
+  'set_layer',
+  'Set the layer filter in the 3D structure editor. Use -1 to show all layers.',
+  {
+    layer: z.number().describe('Layer Y index (-1 = show all)'),
+  },
+  async ({ layer }) => {
+    wsSend({ type: 'set_layer', payload: { layer } });
+    return { content: [{ type: 'text', text: `Layer filter set to ${layer === -1 ? 'all' : layer}` }] };
+  },
+);
+
+server.tool(
+  'highlight_blocks',
+  'Temporarily highlight specific blocks in the 3D viewer (flash effect).',
+  {
+    positions: z.array(z.object({
+      x: z.number(), y: z.number(), z: z.number(),
+    })).describe('List of block positions to highlight'),
+    duration_ms: z.number().optional().default(1500).describe('Highlight duration in milliseconds'),
+  },
+  async ({ positions, duration_ms }) => {
+    const keys = positions.map(p => `${p.x},${p.y},${p.z}`);
+    wsSend({ type: 'highlight', payload: { keys, duration: duration_ms } });
+    return { content: [{ type: 'text', text: `Highlighting ${keys.length} blocks for ${duration_ms}ms` }] };
   },
 );
 

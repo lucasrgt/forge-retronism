@@ -23,6 +23,8 @@ public class Retronism_Recipes {
 		ModLoader.AddRecipe(new ItemStack(Retronism_Registry.itemPipeBlock, 16), new Object[] { "C", 'C', Block.chest });
 		ModLoader.AddRecipe(new ItemStack(Retronism_Registry.megaPipeBlock, 16), new Object[] { "D", 'D', Item.diamond });
 		ModLoader.AddRecipe(new ItemStack(Retronism_Registry.wrench, 1), new Object[] { "S", 'S', Item.stick });
+		ModLoader.AddRecipe(new ItemStack(Retronism_Registry.megaElectrolysisController, 1), new Object[] { "E", 'E', Block.sponge });
+		ModLoader.AddRecipe(new ItemStack(Retronism_Registry.megaElectrolysisCasing, 16), new Object[] { "L", 'L', Item.leather });
 
 		// Crusher recipes: ore -> 2 dust
 		Retronism_RecipesCrusher.crushing().addCrushing(Block.oreIron.blockID, new ItemStack(Retronism_Registry.ironDust, 2));

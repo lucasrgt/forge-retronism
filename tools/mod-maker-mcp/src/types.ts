@@ -1,7 +1,7 @@
 import { DEFAULT_BLOCKS } from '../../shared/block-defaults.js';
 
 // Block category determines behavior in codegen and structure validation
-export type BlockCategory = 'casing' | 'controller' | 'port' | 'glass' | 'custom';
+export type BlockCategory = 'controller' | 'mod' | 'vanilla' | 'custom';
 export type StructureType = 'machine' | 'tank' | 'reactor' | 'custom';
 export type PortMode = 'input' | 'output' | 'input_output';
 export type IOType = 'energy' | 'fluid' | 'gas' | 'item';
@@ -32,11 +32,14 @@ export interface BlockDef {
   portType?: IOType;
   tier?: number;
   builtIn: boolean;
+  mcId?: number;
+  terrainIndex?: number;
 }
 
 export interface BlockEntry {
   blockId: string;
   mode: PortMode;
+  portType?: IOType;
 }
 
 export interface GuiComponent {
@@ -77,10 +80,12 @@ export interface MultiblockState {
   processTime: number;
   energyPerTick: number;
   blockId: number;
-  casingId: number;
+  defaultShellBlock: string;
   guiComponents: GuiComponent[];
   model: BlockModel | null;
 }
+
+// Note: casingId is deprecated — use defaultShellBlock instead
 
 export interface GeneratedFile {
   name: string;
@@ -102,20 +107,24 @@ export interface SerializedMultiblock {
   processTime: number;
   energyPerTick: number;
   blockId: number;
-  casingId: number;
+  defaultShellBlock?: string;
+  controllerPos?: string;
   structure: StructureLayer[];
   legend: Record<string, string>;
   portModes: Record<string, PortMode>;
+  portTypes?: Record<string, IOType>;
   guiComponents: GuiComponent[];
   model?: BlockModel;
   registry?: BlockDef[];
+  /** @deprecated Legacy field — ignored on load */
+  casingId?: number;
 }
 
 // ---------------------------------------------------------------------------
 // Block Registry
 // ---------------------------------------------------------------------------
 
-const CHAR_POOL = 'ABDHJLMNOPQRSTUVXYZ0123456789';
+const CHAR_POOL = 'iklmnopqrstuvwxyzZ0123456789';
 
 export class BlockRegistry {
   private blocks = new Map<string, BlockDef>();
@@ -135,6 +144,8 @@ export class BlockRegistry {
         char: b.char,
         portType: b.portType as IOType | undefined,
         builtIn: true,
+        mcId: b.mcId,
+        terrainIndex: b.terrainIndex,
       });
     }
   }

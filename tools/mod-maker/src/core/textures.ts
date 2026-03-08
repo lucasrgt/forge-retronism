@@ -1,23 +1,20 @@
 import * as THREE from 'three'
-import { getBlockInfo } from './types'
+import { getBlockInfo, blockRegistry } from './types'
 
 const TILE_SIZE = 16
 const ATLAS_TILES = 16
 
-// Terrain.png tile index mapping for each block type
-// Index = row * 16 + col in the 16x16 terrain atlas
-const BLOCK_TEXTURE_DEFS: Record<string, {
-  terrain?: number
-  custom?: string    // relative path from project root
-  overlay?: string   // hex color for port indicator
-}> = {
-  casing:      { terrain: 22 },  // iron block
-  controller:  { custom: 'src/retronism/assets/block/retronism_crusher.png' },
-  energy_port: { terrain: 22, overlay: '#eeee00' },
-  fluid_port:  { terrain: 22, overlay: '#4488ff' },
-  gas_port:    { terrain: 22, overlay: '#bbbbbb' },
-  item_port:   { terrain: 22, overlay: '#ff8800' },
-  glass:       { terrain: 49 },  // glass
+// Custom texture paths for specific mod blocks
+const CUSTOM_TEXTURES: Record<string, string> = {
+  controller: 'src/retronism/assets/block/retronism_crusher.png',
+}
+
+// Port overlay colors
+const PORT_OVERLAYS: Record<string, string> = {
+  energy_port: '#eeee00',
+  fluid_port:  '#4488ff',
+  gas_port:    '#bbbbbb',
+  item_port:   '#ff8800',
 }
 
 let terrainCanvas: HTMLCanvasElement | null = null
@@ -110,13 +107,11 @@ export async function loadTextures(): Promise<boolean> {
     }
 
     // Load custom block textures
-    for (const [type, def] of Object.entries(BLOCK_TEXTURE_DEFS)) {
-      if (def.custom) {
-        const b64 = await api.readFileBase64(`${root}/${def.custom}`)
-        if (b64) {
-          const canvas = await loadImageFromBase64(b64)
-          if (canvas) customCache.set(type, canvas)
-        }
+    for (const [type, path] of Object.entries(CUSTOM_TEXTURES)) {
+      const b64 = await api.readFileBase64(`${root}/${path}`)
+      if (b64) {
+        const canvas = await loadImageFromBase64(b64)
+        if (canvas) customCache.set(type, canvas)
       }
     }
 
@@ -132,23 +127,33 @@ export function isTexturesReady(): boolean {
   return ready
 }
 
+/**
+ * Extract a 16x16 tile from terrain.png as a data URL for use in UI (palette icons).
+ * Returns null if terrain textures aren't loaded yet.
+ */
+export function getTileDataUrl(terrainIndex: number): string | null {
+  if (!ready) return null
+  const tile = extractTile(terrainIndex)
+  if (!tile) return null
+  return tile.toDataURL()
+}
+
 export function getBlockMaterial(type: string, selected = false): THREE.Material {
   const key = `${type}_${selected ? 'sel' : 'n'}`
   if (materialCache.has(key)) return materialCache.get(key)!
 
-  const def = BLOCK_TEXTURE_DEFS[type]
+  const blockDef = blockRegistry.get(type)
   const isGlass = type === 'glass'
   let tileCanvas: HTMLCanvasElement | null = null
 
-  if (ready && def) {
-    if (def.custom && customCache.has(type)) {
+  if (ready) {
+    // 1. Custom texture (controller, etc.)
+    if (customCache.has(type)) {
       tileCanvas = customCache.get(type)!
-    } else if (def.terrain !== undefined) {
-      tileCanvas = extractTile(def.terrain)
     }
-
-    if (tileCanvas && def.overlay) {
-      tileCanvas = createPortTexture(tileCanvas, def.overlay)
+    // 2. terrainIndex from block registry (all blocks with terrain textures)
+    else if (blockDef?.terrainIndex !== undefined) {
+      tileCanvas = extractTile(blockDef.terrainIndex)
     }
   }
 

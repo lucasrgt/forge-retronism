@@ -71,16 +71,8 @@ export function LeftPanel() {
 
       <Card>
         <CardTitle>IDs</CardTitle>
-        <div className="flex gap-1.5">
-          <div>
-            <Label>Block ID</Label>
-            <Input type="number" value={s.blockId} min={200} max={255} onChange={(e) => s.setBlockId(+e.target.value)} />
-          </div>
-          <div>
-            <Label>Casing ID</Label>
-            <Input type="number" value={s.casingId} min={200} max={255} onChange={(e) => s.setCasingId(+e.target.value)} />
-          </div>
-        </div>
+        <Label>Block ID</Label>
+        <Input type="number" value={s.blockId} min={200} max={255} onChange={(e) => s.setBlockId(+e.target.value)} />
       </Card>
     </div>
   )

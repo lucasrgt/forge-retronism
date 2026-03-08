@@ -61,6 +61,31 @@
 - Blockbench MCP is REQUIRED for all 3D models. Do NOT generate JSON manually.
 - Always use `tools/gui_builder.py` — never hand-draw pixels
 
+### Triggers (atalhos do usuário)
+When the user includes one of these triggers in their message, load the corresponding agents BEFORE doing anything else:
+- **%multiblock%** → READ `ai/agents/multiblock_builder.md` + `ai/agents/multiblock_model_builder.md`. Full multiblock pipeline (structure + GUI + model + code + textura).
+- **%singleblock_with_model%** → READ `ai/agents/machine_builder.md` + `ai/agents/model_builder.md`. Single-block machine with custom 3D model (Blockbench required).
+- **%singleblock_no_model%** → READ `ai/agents/machine_builder.md`. Single-block machine using default Minecraft cube (no Blockbench needed, skip model etapas).
+
+### Pipeline Progress Protocol
+When executing any machine/model pipeline, you MUST announce each phase with a numbered tag before starting it:
+```
+[ETAPA 1: Descrição da fase]
+[ETAPA 2: Descrição da fase]
+...
+```
+Use the phase names from the agent doc being followed. Example for multiblock_builder:
+```
+[ETAPA 1: Design da Estrutura Multiblock (Mod Maker MCP)]
+[ETAPA 2: Configuração da GUI]
+[ETAPA 3: Exportar Arquivos Base]
+[ETAPA 4: Criar Modelo 3D Formed (Blockbench)]
+[ETAPA 5: Registrar no Mod]
+[ETAPA 6: Gerar Textura GUI]
+[ETAPA 7: Build e Teste]
+```
+This is mandatory — NEVER skip the announcement. The user needs to track progress visually.
+
 ## Mod Maker as Source of Truth
 - Every multiblock machine MUST have its definition saved in `multiblocks/{Name}.json`
 - NEVER edit multiblock Java structure code (checkStructure, STRUCTURE array, etc) directly — always go through mod-maker MCP tools

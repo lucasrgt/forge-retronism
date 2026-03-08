@@ -27,25 +27,23 @@ Look at existing machines for patterns:
 - Fluid handler: `Retronism_TilePump`, `Retronism_TileFluidTank`
 - Gas handler: `Retronism_TileGasTank`
 
-### Phase 2: Generate GUI Texture
+### Phase 2: Configure GUI via Mod Maker MCP
 
-Use `tools/gui_builder.py` following `ai/agents/gui_builder.md`:
+Call `setup_gui` with a preset based on the machine type. Presets have pixel-perfect positions from real mod machines — **do NOT manually specify coordinates unless customizing**.
 
-Common GUI components:
+| Preset | Description | Based On |
+|--------|-------------|----------|
+| `processor` | 1 input → arrow → 1 output + energy bar | Crusher |
+| `triple_processor` | 3 parallel input→output lanes + energy bar | Mega Crusher |
+| `dual_input` | 2 inputs → arrow → 1 big output + energy bar | — |
+| `generator` | Fuel slot + flame + energy bar | Generator |
+| `pump` | Fluid tank + bucket slot + energy bar | Water Pump |
+| `fluid_to_gas` | Energy + fluid in → arrow → 2 gas tanks out | Electrolysis |
+| `fluid_processor` | Energy + fluid in + slot → arrow → slot out + fluid out | — |
+| `single_slot` | 1 slot center + energy bar | — |
+| `tank` | Large fluid tank + energy bar | Fluid Tank |
 
-| Component | Typical Position | Notes |
-|-----------|-----------------|-------|
-| `slot` (input) | (55, 34) | 18x18, for recipe inputs |
-| `big_slot` (output) | (115, 30) | 26x26, for recipe outputs |
-| `progress_arrow` | (76, 34) | 24x17, between input→output |
-| `flame` | (56, 16) | 14x14, fuel indicator |
-| `energy_bar` | (161, 16) | 8x54, ALWAYS same position |
-| `fluid_tank` | (30, 16) | variable size, liquid display |
-| `gas_tank` | (116, 16) | variable size, gas display |
-
-Standard layout:
-- Energy bar: always at (161, 16, 8, 54) — right side
-- Player inventory: handled automatically at y=83
+After loading a preset, you can add extra components with the `components` parameter if needed.
 
 ### Phase 3: Create the 3D Model
 

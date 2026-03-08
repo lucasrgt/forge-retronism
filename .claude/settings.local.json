@@ -45,7 +45,13 @@
       "mcp__blockbench__set_camera_angle",
       "mcp__blockbench__modify_cube",
       "mcp__blockbench__list_outline",
-      "mcp__retronism-mod-maker__generate_code"
+      "mcp__retronism-mod-maker__generate_code",
+      "mcp__retronism-mod-maker__build_and_export",
+      "mcp__blockbench__draw_shape_tool",
+      "Bash(npm run build)",
+      "Bash(npm install)",
+      "Bash(npx tsc --project tsconfig.electron.json)",
+      "Bash(npx vite build)"
     ]
   }
 }

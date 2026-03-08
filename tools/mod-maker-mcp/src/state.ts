@@ -19,7 +19,7 @@ export function createDefaultState(): MultiblockState {
     processTime: 200,
     energyPerTick: 32,
     blockId: 213,
-    casingId: 214,
+    defaultShellBlock: 'iron_block',
     guiComponents: [],
     model: null,
   };
@@ -54,7 +54,7 @@ export function configureMultiblock(opts: {
   processTime?: number;
   energyPerTick?: number;
   blockId?: number;
-  casingId?: number;
+  defaultShellBlock?: string;
 }): void {
   if (opts.name) state.name = opts.name;
   if (opts.structType) state.structType = opts.structType;
@@ -66,18 +66,71 @@ export function configureMultiblock(opts: {
   if (opts.processTime) state.processTime = opts.processTime;
   if (opts.energyPerTick) state.energyPerTick = opts.energyPerTick;
   if (opts.blockId) state.blockId = opts.blockId;
-  if (opts.casingId) state.casingId = opts.casingId;
+  if (opts.defaultShellBlock) state.defaultShellBlock = opts.defaultShellBlock;
   notifyChange();
 }
 
-export function placeBlock(x: number, y: number, z: number, type: string, mode: PortMode = 'input_output'): boolean {
+export function placeBlock(x: number, y: number, z: number, type: string, mode: PortMode = 'input_output', portType?: IOType): boolean {
   const { w, h, d } = state.dimensions;
   if (x < 0 || x >= w || y < 0 || y >= h || z < 0 || z >= d) return false;
-  state.blocks.set(`${x},${y},${z}`, { blockId: type, mode });
-  // Auto-link: placing a port auto-activates its IO type
-  const def = blockRegistry.get(type);
-  if (def?.portType && !state.ioTypes.includes(def.portType)) {
-    state.ioTypes.push(def.portType);
+
+  // Only one controller block allowed (any block with category 'controller')
+  const key = `${x},${y},${z}`;
+  const placingDef = blockRegistry.get(type);
+  if (placingDef?.category === 'controller') {
+    for (const [k, block] of state.blocks) {
+      if (k === key) continue;
+      const existingDef = blockRegistry.get(block.blockId);
+      if (existingDef?.category === 'controller') return false;
+    }
+  }
+
+  const entry: BlockEntry = { blockId: type, mode };
+  if (portType) {
+    entry.portType = portType;
+    if (!state.ioTypes.includes(portType)) {
+      state.ioTypes.push(portType);
+    }
+  }
+  state.blocks.set(key, entry);
+
+  notifyChange();
+  return true;
+}
+
+export function setPortType(x: number, y: number, z: number, portType: IOType | undefined, mode?: PortMode): boolean {
+  const key = `${x},${y},${z}`;
+  const block = state.blocks.get(key);
+  if (!block) return false;
+
+  if (portType) {
+    block.portType = portType;
+    if (mode) block.mode = mode;
+    if (!state.ioTypes.includes(portType)) {
+      state.ioTypes.push(portType);
+    }
+  } else {
+    delete block.portType;
+    block.mode = 'input_output';
+  }
+  notifyChange();
+  return true;
+}
+
+export function setController(key: string | null, blockType?: string): boolean {
+  // Clear any existing controller-category block
+  for (const [k, block] of state.blocks) {
+    const def = blockRegistry.get(block.blockId);
+    if (def?.category === 'controller') {
+      state.blocks.delete(k);
+    }
+  }
+  // Place controller block at new position
+  if (key) {
+    // Use specified type, or find first controller-category block in registry
+    const type = blockType || blockRegistry.getAll().find(d => d.category === 'controller')?.id;
+    if (!type) return false;
+    state.blocks.set(key, { blockId: type, mode: 'input_output' });
   }
   notifyChange();
   return true;
@@ -99,7 +152,7 @@ export function fillShell(): number {
         if (isEdge) {
           const key = `${x},${y},${z}`;
           if (!state.blocks.has(key)) {
-            state.blocks.set(key, { blockId: 'casing', mode: 'input_output' });
+            state.blocks.set(key, { blockId: state.defaultShellBlock, mode: 'input_output' });
             count++;
           }
         }
@@ -142,26 +195,87 @@ export function clearGui(): void {
 export function loadGuiPreset(preset: string): void {
   clearGui();
   switch (preset) {
+    // === Functional templates (based on real mod machines) ===
+
+    // Crusher-style: 1 input → arrow → 1 output, energy bar right
+    // Reference: Retronism_GuiCrusher — input(56,35), arrow(82,34), output(116,35), energy(162,17)
     case 'processor':
-      addGuiComponent('slot', 55, 34, { slotType: 'input' });
+      addGuiComponent('slot', 55, 34, { slotType: 'input', ioMode: 'input' });
       addGuiComponent('progress_arrow', 79, 35);
-      addGuiComponent('slot', 115, 34, { slotType: 'output' });
-      addGuiComponent('energy_bar', 10, 16);
-      break;
-    case 'dual_input':
-      addGuiComponent('slot', 45, 25, { slotType: 'input' });
-      addGuiComponent('slot', 45, 47, { slotType: 'input' });
-      addGuiComponent('progress_arrow', 73, 35);
-      addGuiComponent('big_slot', 107, 30, { slotType: 'output' });
-      addGuiComponent('energy_bar', 10, 16);
-      break;
-    case 'single_slot':
-      addGuiComponent('slot', 79, 34, { slotType: 'input' });
+      addGuiComponent('slot', 115, 34, { slotType: 'output', ioMode: 'output' });
       addGuiComponent('energy_bar', 161, 16);
       break;
-    case 'tank':
-      addGuiComponent('fluid_tank', 80, 16);
+
+    // MegaCrusher-style: 3 parallel processing lanes, energy bar right
+    // Reference: Retronism_GuiMegaCrusher — 3x (input→arrow→output) at y=17,39,61
+    case 'triple_processor':
+      addGuiComponent('slot', 55, 16, { slotType: 'input', ioMode: 'input' });
+      addGuiComponent('progress_arrow', 79, 17);
+      addGuiComponent('slot', 115, 16, { slotType: 'output', ioMode: 'output' });
+      addGuiComponent('slot', 55, 38, { slotType: 'input', ioMode: 'input' });
+      addGuiComponent('progress_arrow', 79, 39);
+      addGuiComponent('slot', 115, 38, { slotType: 'output', ioMode: 'output' });
+      addGuiComponent('slot', 55, 60, { slotType: 'input', ioMode: 'input' });
+      addGuiComponent('progress_arrow', 79, 61);
+      addGuiComponent('slot', 115, 60, { slotType: 'output', ioMode: 'output' });
+      addGuiComponent('energy_bar', 161, 16);
+      break;
+
+    // 2 inputs → arrow → 1 big output, energy bar left
+    case 'dual_input':
+      addGuiComponent('slot', 45, 25, { slotType: 'input', ioMode: 'input' });
+      addGuiComponent('slot', 45, 47, { slotType: 'input', ioMode: 'input' });
+      addGuiComponent('progress_arrow', 73, 35);
+      addGuiComponent('big_slot', 107, 30, { slotType: 'output', ioMode: 'output' });
       addGuiComponent('energy_bar', 10, 16);
+      break;
+
+    // Generator-style: 1 fuel slot center, energy bar right
+    // Reference: Retronism_GuiGenerator — fuel(80,35), energy(162,17)
+    case 'generator':
+      addGuiComponent('slot', 79, 34, { slotType: 'fuel', ioMode: 'input' });
+      addGuiComponent('flame', 80, 16);
+      addGuiComponent('energy_bar', 161, 16);
+      break;
+
+    // Pump-style: fluid tank left, bucket slot center, energy bar right
+    // Reference: Retronism_GuiPump — fluid(8,17), bucket(80,35), energy(162,17)
+    case 'pump':
+      addGuiComponent('fluid_tank', 7, 16, { w: 14, h: 52, ioMode: 'output' });
+      addGuiComponent('slot', 79, 34, { slotType: 'input', ioMode: 'input' });
+      addGuiComponent('energy_bar', 161, 16);
+      break;
+
+    // Electrolysis-style: energy left, fluid in, arrow, 2 gas tanks out
+    // Reference: Retronism_GuiElectrolysis — energy(8,17), water(57,17), arrow(80,35), H2(113,17), O2(137,17)
+    case 'fluid_to_gas':
+      addGuiComponent('energy_bar', 7, 16);
+      addGuiComponent('fluid_tank', 56, 16, { w: 14, h: 52, ioMode: 'input' });
+      addGuiComponent('progress_arrow', 79, 35);
+      addGuiComponent('gas_tank', 112, 16, { w: 14, h: 52, ioMode: 'output' });
+      addGuiComponent('gas_tank', 136, 16, { w: 14, h: 52, ioMode: 'output' });
+      break;
+
+    // Simple: 1 slot center, energy bar right
+    case 'single_slot':
+      addGuiComponent('slot', 79, 34, { slotType: 'input', ioMode: 'input' });
+      addGuiComponent('energy_bar', 161, 16);
+      break;
+
+    // Tank-style: large fluid tank center, energy bar left
+    case 'tank':
+      addGuiComponent('fluid_tank', 80, 16, { ioMode: 'display' });
+      addGuiComponent('energy_bar', 10, 16);
+      break;
+
+    // Fluid processor: fluid in → slot → arrow → slot out → fluid out
+    case 'fluid_processor':
+      addGuiComponent('energy_bar', 7, 16);
+      addGuiComponent('fluid_tank', 26, 16, { w: 14, h: 52, ioMode: 'input' });
+      addGuiComponent('slot', 55, 34, { slotType: 'input', ioMode: 'input' });
+      addGuiComponent('progress_arrow', 79, 35);
+      addGuiComponent('slot', 115, 34, { slotType: 'output', ioMode: 'output' });
+      addGuiComponent('fluid_tank', 148, 16, { w: 14, h: 52, ioMode: 'output' });
       break;
   }
 }
@@ -195,10 +309,21 @@ export function serialize(): SerializedMultiblock {
   }
 
   const portModes: Record<string, PortMode> = {};
+  const portTypes: Record<string, IOType> = {};
+  for (const [key, block] of state.blocks) {
+    if (block.portType) {
+      portModes[key] = block.mode;
+      portTypes[key] = block.portType;
+    }
+  }
+
+  // Find controller position (any block with category 'controller')
+  let controllerPos: string | undefined;
   for (const [key, block] of state.blocks) {
     const def = blockRegistry.get(block.blockId);
-    if (def && def.category === 'port') {
-      portModes[key] = block.mode;
+    if (def?.category === 'controller') {
+      controllerPos = key;
+      break;
     }
   }
 
@@ -213,10 +338,12 @@ export function serialize(): SerializedMultiblock {
     processTime: state.processTime,
     energyPerTick: state.energyPerTick,
     blockId: state.blockId,
-    casingId: state.casingId,
+    defaultShellBlock: state.defaultShellBlock,
+    ...(controllerPos ? { controllerPos } : {}),
     structure: layers,
     legend,
     portModes,
+    ...(Object.keys(portTypes).length > 0 ? { portTypes } : {}),
     guiComponents: state.guiComponents,
     ...(state.model ? { model: state.model } : {}),
     ...(customBlocks.length > 0 ? { registry: customBlocks } : {}),
@@ -264,7 +391,7 @@ export function updateConfig(opts: {
   processTime?: number;
   energyPerTick?: number;
   blockId?: number;
-  casingId?: number;
+  defaultShellBlock?: string;
 }): void {
   if (opts.name !== undefined) state.name = opts.name;
   if (opts.structType !== undefined) state.structType = opts.structType;
@@ -275,7 +402,7 @@ export function updateConfig(opts: {
   if (opts.processTime !== undefined) state.processTime = opts.processTime;
   if (opts.energyPerTick !== undefined) state.energyPerTick = opts.energyPerTick;
   if (opts.blockId !== undefined) state.blockId = opts.blockId;
-  if (opts.casingId !== undefined) state.casingId = opts.casingId;
+  if (opts.defaultShellBlock !== undefined) state.defaultShellBlock = opts.defaultShellBlock;
   notifyChange();
 }
 
@@ -319,7 +446,7 @@ export function deserialize(data: SerializedMultiblock): void {
   state.processTime = data.processTime;
   state.energyPerTick = data.energyPerTick;
   state.blockId = data.blockId;
-  state.casingId = data.casingId;
+  state.defaultShellBlock = data.defaultShellBlock || 'iron_block';
   state.guiComponents = data.guiComponents ? data.guiComponents.map(c => ({
     ...c,
     ioMode: c.ioMode || GUI_COMP_DEFS[c.type]?.ioMode || 'display',
@@ -329,21 +456,38 @@ export function deserialize(data: SerializedMultiblock): void {
   state.blocks.clear();
   const charToType: Record<string, string> = {};
   for (const [ch, type] of Object.entries(data.legend)) {
-    charToType[ch] = type;
+    // Legacy compat: map old 'casing'/'controller' to defaultShellBlock
+    if (type === 'casing') {
+      charToType[ch] = state.defaultShellBlock;
+    } else if (type === 'controller') {
+      charToType[ch] = state.defaultShellBlock;
+    } else {
+      charToType[ch] = type;
+    }
   }
   for (const layer of data.structure) {
     for (let z = 0; z < layer.pattern.length; z++) {
       for (let x = 0; x < layer.pattern[z].length; x++) {
         const ch = layer.pattern[z][x];
-        const type = charToType[ch];
+        let type = charToType[ch];
         if (type && type !== 'air') {
           const key = `${x},${layer.layer},${z}`;
           const mode = data.portModes?.[key] || 'input_output';
-          state.blocks.set(key, { blockId: type, mode: mode as PortMode });
+          const entry: BlockEntry = { blockId: type, mode: mode as PortMode };
+
+          // Load portType metadata
+          if (data.portTypes?.[key]) {
+            entry.portType = data.portTypes[key];
+          }
+
+          state.blocks.set(key, entry);
         }
       }
     }
   }
+
+  // controllerPos is informational — the controller block type is already in the legend
+
   notifyChange();
 }
 
@@ -487,8 +631,8 @@ export function placeOnFace(
   for (const [key, block] of state.blocks) {
     const def = blockRegistry.get(block.blockId);
     if (!def) continue;
-    // By default only replace casing; with replace=true, replace any block
-    if (!replace && def.category !== 'casing') continue;
+    // By default only replace the default shell block; with replace=true, replace any block
+    if (!replace && def.id !== state.defaultShellBlock) continue;
     const [x, y, z] = key.split(',').map(Number);
     let onFace = false;
     switch (face) {
@@ -578,12 +722,13 @@ export function applyTemplate(template: TemplateName): void {
         ioTypes: ['energy', 'item'],
         capacity: { energy: 64000 },
         processTime: 200, energyPerTick: 32,
-        blockId: 213, casingId: 214,
+        blockId: 213, defaultShellBlock: 'iron_block',
       });
       fillShell();
-      placeBlock(1, 1, 0, 'controller');
-      placeBlock(2, 1, 1, 'energy_port', 'input');
-      placeBlock(0, 1, 1, 'item_port', 'input_output');
+      // Mark controller and ports as metadata
+      setController('1,1,0');
+      setPortType(2, 1, 1, 'energy', 'input');
+      setPortType(0, 1, 1, 'item', 'input_output');
       loadGuiPreset('processor');
       break;
 
@@ -594,7 +739,7 @@ export function applyTemplate(template: TemplateName): void {
         ioTypes: ['energy', 'fluid'],
         capacity: { energy: 256000, fluid: 32000 },
         processTime: 400, energyPerTick: 64,
-        blockId: 215, casingId: 216,
+        blockId: 215, defaultShellBlock: 'iron_block',
       });
       fillShell();
       // Glass top layer center
@@ -603,10 +748,10 @@ export function applyTemplate(template: TemplateName): void {
           placeBlock(x, 4, z, 'glass');
         }
       }
-      placeBlock(2, 2, 0, 'controller');
-      placeBlock(4, 2, 2, 'energy_port', 'output');
-      placeBlock(0, 2, 2, 'fluid_port', 'input');
-      placeBlock(2, 2, 4, 'fluid_port', 'input');
+      setController('2,2,0');
+      setPortType(4, 2, 2, 'energy', 'output');
+      setPortType(0, 2, 2, 'fluid', 'input');
+      setPortType(2, 2, 4, 'fluid', 'input');
       clearGui();
       addGuiComponent('energy_bar', 10, 16);
       addGuiComponent('fluid_tank', 80, 16);
@@ -622,13 +767,13 @@ export function applyTemplate(template: TemplateName): void {
         ioTypes: ['fluid'],
         capacity: { fluid: 64000 },
         processTime: 1, energyPerTick: 0,
-        blockId: 217, casingId: 218,
+        blockId: 217, defaultShellBlock: 'iron_block',
       });
       fillShell();
       // Glass front face center
       placeBlock(1, 1, 0, 'glass');
-      placeBlock(2, 1, 1, 'fluid_port', 'input_output');
-      placeBlock(0, 1, 1, 'fluid_port', 'input_output');
+      setPortType(2, 1, 1, 'fluid', 'input_output');
+      setPortType(0, 1, 1, 'fluid', 'input_output');
       loadGuiPreset('tank');
       break;
 
@@ -639,12 +784,12 @@ export function applyTemplate(template: TemplateName): void {
         ioTypes: ['energy', 'item'],
         capacity: { energy: 48000 },
         processTime: 160, energyPerTick: 24,
-        blockId: 219, casingId: 220,
+        blockId: 219, defaultShellBlock: 'iron_block',
       });
       fillShell();
-      placeBlock(1, 1, 0, 'controller');
-      placeBlock(2, 1, 1, 'energy_port', 'input');
-      placeBlock(0, 1, 1, 'item_port', 'input_output');
+      setController('1,1,0');
+      setPortType(2, 1, 1, 'energy', 'input');
+      setPortType(0, 1, 1, 'item', 'input_output');
       clearGui();
       addGuiComponent('slot', 45, 25, { slotType: 'input' });
       addGuiComponent('slot', 45, 47, { slotType: 'input' });
@@ -693,14 +838,24 @@ export function getStateSummary(): string {
     counts[block.blockId] = (counts[block.blockId] || 0) + 1;
   }
   const slotInfo = getSlotInfo();
+
+  // Build guide: counts are already by real block type (ports are metadata, not block types)
+  const buildGuide = Object.entries(counts)
+    .map(([type, n]) => {
+      const def = blockRegistry.get(type);
+      return `${def?.label || type} ×${n}`;
+    })
+    .join(', ');
+
   return [
     `Name: ${state.name} (${state.structType})`,
     `Dimensions: ${w}x${h}x${d}`,
     `IO: ${state.ioTypes.join(', ')}`,
     `Blocks: ${state.blocks.size} total — ${Object.entries(counts).map(([t, n]) => `${t}:${n}`).join(', ') || 'none'}`,
+    `Build Guide: ${buildGuide || 'none'}`,
     `GUI: ${state.guiComponents.length} components (${slotInfo.inputs.length} input slots, ${slotInfo.outputs.length} output slots)`,
     `Energy: ${state.capacity.energy} RN, Fluid: ${state.capacity.fluid} mB, Gas: ${state.capacity.gas} mB`,
     `Process: ${state.processTime} ticks @ ${state.energyPerTick} RN/tick`,
-    `IDs: block=${state.blockId}, casing=${state.casingId}`,
+    `IDs: block=${state.blockId}, defaultShell=${state.defaultShellBlock}`,
   ].join('\n');
 }

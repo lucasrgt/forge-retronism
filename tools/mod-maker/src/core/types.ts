@@ -1,21 +1,13 @@
-export const BLOCK_TYPES = {
-  casing:      { color: 0x888888, label: 'Casing',      char: 'C' },
-  controller:  { color: 0xee4444, label: 'Controller',  char: 'K' },
-  energy_port: { color: 0xeeee00, label: 'Energy Port', char: 'E' },
-  fluid_port:  { color: 0x4488ff, label: 'Fluid Port',  char: 'F' },
-  gas_port:    { color: 0xaaaaaa, label: 'Gas Port',    char: 'G' },
-  item_port:   { color: 0xff8800, label: 'Item Port',   char: 'I' },
-  glass:       { color: 0x88ddff, label: 'Glass',       char: 'W' },
-} as const
+import { DEFAULT_BLOCKS } from '../../../shared/block-defaults.js'
 
-export type BlockType = keyof typeof BLOCK_TYPES
+export type BlockType = string
 export type StructureType = 'machine' | 'tank' | 'reactor' | 'custom'
 export type PortMode = 'input' | 'output' | 'input_output'
 export type IOType = 'energy' | 'fluid' | 'gas' | 'item'
 export type SlotRole = 'input' | 'output' | 'fuel'
 export type IoMode = 'input' | 'output' | 'display'
 export type GuiComponentType = 'slot' | 'big_slot' | 'energy_bar' | 'progress_arrow' | 'flame' | 'fluid_tank' | 'gas_tank' | 'separator'
-export type BlockCategory = 'casing' | 'controller' | 'port' | 'glass' | 'custom'
+export type BlockCategory = 'controller' | 'mod' | 'vanilla' | 'custom'
 
 export interface BlockDef {
   id: string
@@ -25,33 +17,37 @@ export interface BlockDef {
   char: string
   portType?: IOType
   builtIn: boolean
+  mcId?: number
+  terrainIndex?: number
 }
 
 export interface BlockEntry {
   type: string  // BlockType or custom block id
   mode: PortMode
+  portType?: IOType
 }
 
 // Dynamic registry: starts with built-in blocks, extended by MCP custom blocks
 export const blockRegistry = new Map<string, BlockDef>()
-for (const [id, info] of Object.entries(BLOCK_TYPES)) {
-  const category: BlockCategory = id === 'controller' ? 'controller' : id.endsWith('_port') ? 'port' : id === 'glass' ? 'glass' : 'casing'
-  blockRegistry.set(id, {
-    id,
+for (const b of DEFAULT_BLOCKS) {
+  const category = b.category as BlockCategory
+  blockRegistry.set(b.id, {
+    id: b.id,
     category,
-    label: info.label,
-    color: info.color,
-    char: info.char,
-    portType: id.endsWith('_port') ? id.replace('_port', '') as IOType : undefined,
+    label: b.label,
+    color: b.color,
+    char: b.char,
+    portType: b.portType as IOType | undefined,
     builtIn: true,
+    mcId: b.mcId,
+    terrainIndex: b.terrainIndex,
   })
 }
+
 
 export function getBlockInfo(type: string): { color: number; label: string; char: string } {
   const reg = blockRegistry.get(type)
   if (reg) return reg
-  const builtin = (BLOCK_TYPES as Record<string, { color: number; label: string; char: string }>)[type]
-  if (builtin) return builtin
   return { color: 0xff00ff, label: type, char: '?' }
 }
 

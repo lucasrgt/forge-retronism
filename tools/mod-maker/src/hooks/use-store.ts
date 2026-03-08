@@ -1,6 +1,7 @@
 import { create } from 'zustand'
+import { toast } from 'sonner'
 import type { BlockType, StructureType, IOType, PortMode, BlockEntry, GuiComponent, GuiComponentType, SlotRole, IoMode, BlockDef, BlockCategory } from '@/core/types'
-import { BLOCK_TYPES, GUI_COMP_DEFS, blockRegistry, getBlockInfo } from '@/core/types'
+import { GUI_COMP_DEFS, blockRegistry, getBlockInfo } from '@/core/types'
 
 const GUI_W = 176
 const GUI_H = 166
@@ -15,13 +16,30 @@ export interface SerializedMultiblock {
   processTime: number
   energyPerTick: number
   blockId: number
-  casingId: number
+  defaultShellBlock?: string
+  controllerPos?: string
   structure: { layer: number; pattern: string[][] }[]
   legend: Record<string, string>
   portModes: Record<string, PortMode>
+  portTypes?: Record<string, IOType>
   guiComponents: GuiComponent[]
   model?: { name: string; elements: { name: string; from: [number, number, number]; to: [number, number, number] }[]; textureName: string }
   registry?: BlockDef[]
+  /** @deprecated Legacy field — ignored on load */
+  casingId?: number
+}
+
+// Camera command from MCP WebSocket
+export interface CameraCommand {
+  theta?: number
+  phi?: number
+  radius?: number
+}
+
+// Highlight command from MCP WebSocket
+export interface HighlightCommand {
+  keys: string[]
+  duration: number
 }
 
 interface MultiblockStore {
@@ -34,7 +52,7 @@ interface MultiblockStore {
   processTime: number
   energyPerTick: number
   blockId: number
-  casingId: number
+  defaultShellBlock: string
 
   // Blocks
   blocks: Map<string, BlockEntry>
@@ -53,6 +71,10 @@ interface MultiblockStore {
   showBuildGuide: boolean
   mcpConnected: boolean
 
+  // MCP UI commands (consumed by structure-editor)
+  pendingCamera: CameraCommand | null
+  pendingHighlight: HighlightCommand | null
+
   // Actions: config
   setName: (name: string) => void
   setStructType: (type: StructureType) => void
@@ -63,7 +85,7 @@ interface MultiblockStore {
   setProcessTime: (v: number) => void
   setEnergyPerTick: (v: number) => void
   setBlockId: (v: number) => void
-  setCasingId: (v: number) => void
+  setDefaultShellBlock: (id: string) => void
 
   // Actions: blocks
   placeBlock: (x: number, y: number, z: number, type: string, mode?: PortMode) => void
@@ -72,6 +94,7 @@ interface MultiblockStore {
   clearBlocks: () => void
   setSelectedTool: (tool: string) => void
   setSelectedBlock: (key: string | null) => void
+  setPortType: (key: string, portType: IOType | null) => void
   setLayerFilter: (layer: number) => void
 
   // Actions: GUI
@@ -88,6 +111,12 @@ interface MultiblockStore {
   setActiveTab: (tab: 'structure' | 'gui') => void
   setShowBuildGuide: (v: boolean) => void
   setMcpConnected: (v: boolean) => void
+
+  // Actions: MCP UI commands
+  setCameraCommand: (cmd: CameraCommand) => void
+  consumeCameraCommand: () => CameraCommand | null
+  setHighlightCommand: (cmd: HighlightCommand) => void
+  consumeHighlightCommand: () => HighlightCommand | null
 
   // Actions: serialize/deserialize
   serialize: () => SerializedMultiblock
@@ -112,9 +141,9 @@ export const useStore = create<MultiblockStore>((set, get) => ({
   processTime: 200,
   energyPerTick: 32,
   blockId: 213,
-  casingId: 214,
+  defaultShellBlock: 'iron_block',
   blocks: new Map(),
-  selectedTool: 'casing',
+  selectedTool: 'iron_block',
   selectedBlock: null,
   layerFilter: -1,
   guiComponents: [],
@@ -122,6 +151,8 @@ export const useStore = create<MultiblockStore>((set, get) => ({
   snapEnabled: true,
   gridSize: 9,
   activeTab: 'structure',
+  pendingCamera: null,
+  pendingHighlight: null,
 
   // Config
   setName: (name) => set({ name }),
@@ -137,22 +168,41 @@ export const useStore = create<MultiblockStore>((set, get) => ({
   setProcessTime: (processTime) => set({ processTime }),
   setEnergyPerTick: (energyPerTick) => set({ energyPerTick }),
   setBlockId: (blockId) => set({ blockId }),
-  setCasingId: (casingId) => set({ casingId }),
+  setDefaultShellBlock: (defaultShellBlock) => set({ defaultShellBlock }),
 
   // Blocks
-  placeBlock: (x, y, z, type, mode = 'input_output') => set((s) => {
+  placeBlock: (x, y, z, type, mode = 'input_output') => {
+    const s = get()
     const { w, h, d } = s.dimensions
-    if (x < 0 || x >= w || y < 0 || y >= h || z < 0 || z >= d) return s
+    if (x < 0 || x >= w || y < 0 || y >= h || z < 0 || z >= d) return
+    const key = `${x},${y},${z}`
+
+    // Only one controller block allowed (any block with category 'controller')
+    const placingDef = blockRegistry.get(type)
+    if (placingDef?.category === 'controller') {
+      for (const [k, block] of s.blocks) {
+        if (k === key) continue
+        const existingDef = blockRegistry.get(block.type)
+        if (existingDef?.category === 'controller') {
+          toast.error('Only one controller per structure', {
+            description: `Remove controller at ${k} first`,
+          })
+          return
+        }
+      }
+    }
+
     const blocks = new Map(s.blocks)
-    blocks.set(`${x},${y},${z}`, { type, mode })
+    blocks.set(key, { type, mode })
 
     // Auto-link: placing a port auto-activates its IO type
     const def = blockRegistry.get(type)
     if (def?.portType && !s.ioTypes.includes(def.portType)) {
-      return { blocks, ioTypes: [...s.ioTypes, def.portType] }
+      set({ blocks, ioTypes: [...s.ioTypes, def.portType] })
+    } else {
+      set({ blocks })
     }
-    return { blocks }
-  }),
+  },
   removeBlock: (x, y, z) => set((s) => {
     const blocks = new Map(s.blocks)
     blocks.delete(`${x},${y},${z}`)
@@ -166,13 +216,29 @@ export const useStore = create<MultiblockStore>((set, get) => ({
         for (let x = 0; x < w; x++) {
           const isEdge = x === 0 || x === w - 1 || y === 0 || y === h - 1 || z === 0 || z === d - 1
           if (isEdge && !blocks.has(`${x},${y},${z}`))
-            blocks.set(`${x},${y},${z}`, { type: 'casing', mode: 'input_output' })
+            blocks.set(`${x},${y},${z}`, { type: s.defaultShellBlock, mode: 'input_output' })
         }
     return { blocks }
   }),
   clearBlocks: () => set({ blocks: new Map(), selectedBlock: null }),
   setSelectedTool: (selectedTool) => set({ selectedTool }),
   setSelectedBlock: (selectedBlock) => set({ selectedBlock }),
+  setPortType: (key, portType) => set((s) => {
+    const block = s.blocks.get(key)
+    if (!block) return s
+    const blocks = new Map(s.blocks)
+    if (portType) {
+      blocks.set(key, { ...block, portType })
+      // Auto-activate IO type
+      if (!s.ioTypes.includes(portType)) {
+        return { blocks, ioTypes: [...s.ioTypes, portType] }
+      }
+    } else {
+      const { portType: _, ...rest } = block
+      blocks.set(key, rest as BlockEntry)
+    }
+    return { blocks }
+  }),
   setLayerFilter: (layerFilter) => set({ layerFilter }),
 
   // GUI
@@ -241,6 +307,20 @@ export const useStore = create<MultiblockStore>((set, get) => ({
   mcpConnected: false,
   setMcpConnected: (mcpConnected) => set({ mcpConnected }),
 
+  // MCP UI commands
+  setCameraCommand: (cmd) => set({ pendingCamera: cmd }),
+  consumeCameraCommand: () => {
+    const cmd = get().pendingCamera
+    if (cmd) set({ pendingCamera: null })
+    return cmd
+  },
+  setHighlightCommand: (cmd) => set({ pendingHighlight: cmd }),
+  consumeHighlightCommand: () => {
+    const cmd = get().pendingHighlight
+    if (cmd) set({ pendingHighlight: null })
+    return cmd
+  },
+
   // Serialize: convert store state to JSON format matching MCP server
   serialize: () => {
     const s = get()
@@ -273,12 +353,14 @@ export const useStore = create<MultiblockStore>((set, get) => ({
       layers.push({ layer: y, pattern })
     }
 
+    // Find controller position and port types
+    let controllerPos: string | undefined
     const portModes: Record<string, PortMode> = {}
+    const portTypes: Record<string, IOType> = {}
     for (const [key, block] of s.blocks) {
-      const def = blockRegistry.get(block.type)
-      if (def?.category === 'port' || block.type.endsWith('_port')) {
-        portModes[key] = block.mode
-      }
+      const bDef = blockRegistry.get(block.type)
+      if (bDef?.category === 'controller') controllerPos = key
+      if (block.portType) portTypes[key] = block.portType
     }
 
     // Include custom blocks in registry field
@@ -293,10 +375,12 @@ export const useStore = create<MultiblockStore>((set, get) => ({
       processTime: s.processTime,
       energyPerTick: s.energyPerTick,
       blockId: s.blockId,
-      casingId: s.casingId,
+      defaultShellBlock: s.defaultShellBlock,
+      controllerPos,
       structure: layers,
       legend,
       portModes,
+      portTypes: Object.keys(portTypes).length > 0 ? portTypes : undefined,
       guiComponents: s.guiComponents,
       ...(customBlocks.length > 0 ? { registry: customBlocks } : {}),
     }
@@ -315,7 +399,12 @@ export const useStore = create<MultiblockStore>((set, get) => ({
 
     const charToType: Record<string, string> = {}
     for (const [ch, type] of Object.entries(data.legend)) {
-      charToType[ch] = type
+      // Legacy compat: old 'casing' → defaultShellBlock
+      if (type === 'casing') {
+        charToType[ch] = data.defaultShellBlock || 'iron_block'
+      } else {
+        charToType[ch] = type
+      }
     }
 
     const blocks = new Map<string, BlockEntry>()
@@ -327,7 +416,9 @@ export const useStore = create<MultiblockStore>((set, get) => ({
           if (type && type !== 'air') {
             const key = `${x},${layer.layer},${z}`
             const mode = data.portModes?.[key] || 'input_output'
-            blocks.set(key, { type, mode })
+            const entry: BlockEntry = { type, mode }
+            if (data.portTypes?.[key]) entry.portType = data.portTypes[key]
+            blocks.set(key, entry)
           }
         }
       }
@@ -342,7 +433,7 @@ export const useStore = create<MultiblockStore>((set, get) => ({
       processTime: data.processTime,
       energyPerTick: data.energyPerTick,
       blockId: data.blockId,
-      casingId: data.casingId,
+      defaultShellBlock: data.defaultShellBlock || 'iron_block',
       guiComponents: data.guiComponents ? data.guiComponents.map((c) => ({
         ...c,
         ioMode: c.ioMode || GUI_COMP_DEFS[c.type]?.ioMode || 'display',
@@ -390,12 +481,12 @@ export const useStore = create<MultiblockStore>((set, get) => ({
     processTime: 200,
     energyPerTick: 32,
     blockId: 213,
-    casingId: 214,
+    defaultShellBlock: 'iron_block',
     blocks: new Map(),
     guiComponents: [],
     selectedBlock: null,
     selectedCompIndex: -1,
-    selectedTool: 'casing',
+    selectedTool: 'iron_block',
     layerFilter: -1,
   }),
 }))

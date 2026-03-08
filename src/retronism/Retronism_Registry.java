@@ -82,6 +82,12 @@ public class Retronism_Registry {
 		.setStepSound(Block.soundStoneFootstep)
 		.setBlockName("retroNismMegaCrusherCore");
 
+	public static final Block megaElectrolysisController = (new Retronism_BlockMegaElectrolysisController(213, 45))
+		.setBlockName("retroNismMegaElectrolysis");
+
+	public static final Block megaElectrolysisCasing = (new Retronism_BlockMegaElectrolysisCasing(214, 45))
+		.setBlockName("retroNismMegaElectrolysisCasing");
+
 	public static final Item testItem = (new Retronism_ItemTest(500))
 		.setIconIndex(7 + 3 * 16)
 		.setItemName("retroNismTestItem");
@@ -132,6 +138,8 @@ public class Retronism_Registry {
 		ModLoader.RegisterBlock(megaPipeBlock);
 		ModLoader.RegisterBlock(itemPipeBlock);
 		ModLoader.RegisterBlock(megaCrusherCoreBlock);
+		ModLoader.RegisterBlock(megaElectrolysisController);
+		ModLoader.RegisterBlock(megaElectrolysisCasing);
 
 		// Tile Entities
 		ModLoader.RegisterTileEntity(Retronism_TileCrusher.class, "Crusher");
@@ -146,6 +154,7 @@ public class Retronism_Registry {
 		ModLoader.RegisterTileEntity(Retronism_TileGasTank.class, "GasTank");
 		ModLoader.RegisterTileEntity(Retronism_TileMegaPipe.class, "MegaPipe");
 		ModLoader.RegisterTileEntity(Retronism_TileItemPipe.class, "ItemPipe");
+		ModLoader.RegisterTileEntity(Retronism_TileMegaElectrolysis.class, "MegaElectrolysis");
 
 		// Names - Blocks
 		ModLoader.AddName(testBlock, "Retronism Test Block");
@@ -160,7 +169,9 @@ public class Retronism_Registry {
 		ModLoader.AddName(gasTankBlock, "Gas Tank");
 		ModLoader.AddName(megaPipeBlock, "Mega Pipe");
 		ModLoader.AddName(itemPipeBlock, "Item Pipe");
-		ModLoader.AddName(megaCrusherCoreBlock, "Mega Crusher");
+		ModLoader.AddName(megaCrusherCoreBlock, "Mega Crusher Controller");
+		ModLoader.AddName(megaElectrolysisController, "Mega Electrolysis Controller");
+		ModLoader.AddName(megaElectrolysisCasing, "Mega Electrolysis Casing");
 
 		// Names - Items
 		ModLoader.AddName(testItem, "Retronism Test Item");

@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const WsLib = require('ws')
 
 let mainWindow: any
 
@@ -72,50 +73,80 @@ ipcMain.handle('read-file-base64', async (_event: any, filePath: string) => {
 ipcMain.handle('get-project-root', () => path.resolve(__dirname, '..', '..', '..'))
 
 // ---------------------------------------------------------------------------
-// MCP Live Sync — watch temp/mcp_state.json for real-time updates
+// MCP Live Sync — Electron IS the WebSocket server, MCP connects as client
 // ---------------------------------------------------------------------------
+const WS_PORT = 19400
+let wsServer: any = null
+let mcpClients: Set<any> = new Set()
+
+function startWsServer() {
+  try {
+    wsServer = new WsLib.Server({ port: WS_PORT })
+
+    wsServer.on('connection', (ws: any) => {
+      mcpClients.add(ws)
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('mcp-ws-status', true)
+      }
+
+      ws.on('message', (data: any) => {
+        if (!mainWindow || mainWindow.isDestroyed()) return
+        try {
+          const msg = JSON.parse(data.toString())
+          mainWindow.webContents.send('mcp-ws-message', msg)
+        } catch (_: any) {}
+      })
+
+      ws.on('close', () => {
+        mcpClients.delete(ws)
+        if (mcpClients.size === 0 && mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('mcp-ws-status', false)
+        }
+      })
+
+      ws.on('error', () => {
+        mcpClients.delete(ws)
+      })
+    })
+
+    wsServer.on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`WS port ${WS_PORT} in use — falling back to file sync`)
+      }
+    })
+  } catch (_: any) {}
+}
+
+// File-based fallback for when WS is not available
 const MCP_SYNC_FILE = path.resolve(__dirname, '..', '..', '..', 'temp', 'mcp_state.json')
 let lastSyncContent = ''
 
-function startMcpSync() {
+function startFileFallbackSync() {
   const syncDir = path.dirname(MCP_SYNC_FILE)
   if (!fs.existsSync(syncDir)) {
     fs.mkdirSync(syncDir, { recursive: true })
   }
 
-  // Read initial state if file exists
-  if (fs.existsSync(MCP_SYNC_FILE)) {
-    try {
-      const content = fs.readFileSync(MCP_SYNC_FILE, 'utf-8')
-      lastSyncContent = content
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('mcp-state-update', content)
-      }
-    } catch (_) {}
-  }
-
-  // Watch for changes
   try {
     fs.watch(syncDir, (eventType: string, filename: string | null) => {
-      if (filename === 'mcp_state.json') {
+      if (filename === 'mcp_state.json' && mcpClients.size === 0) {
         try {
           const content = fs.readFileSync(MCP_SYNC_FILE, 'utf-8')
           if (content !== lastSyncContent && content.length > 0) {
             lastSyncContent = content
             if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send('mcp-state-update', content)
+              mainWindow.webContents.send('mcp-ws-message', { type: 'state', payload: JSON.parse(content) })
             }
           }
-        } catch (_) {}
+        } catch (_: any) {}
       }
     })
-  } catch (err: any) {
-    console.error('MCP sync watch failed:', err.message)
-  }
+  } catch (_: any) {}
 }
 
 app.whenReady().then(() => {
-  setTimeout(startMcpSync, 500)
+  startWsServer()
+  startFileFallbackSync()
 })
 
 ipcMain.handle('export-to-mod', async (_event: any, { files }: any) => {

@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Toaster } from 'sonner'
 import { Toolbar } from '@/components/toolbar'
 import { LeftPanel } from '@/components/left-panel'
 import { RightPanel } from '@/components/right-panel'
@@ -17,17 +18,56 @@ export default function App() {
   const blocks = useStore((s) => s.blocks)
   const mcpConnected = useStore((s) => s.mcpConnected)
 
-  // Listen for MCP state updates from Electron main process
+  // Listen for MCP WebSocket messages from Electron main process
   useEffect(() => {
     const api = (window as any).api
-    if (!api?.onMcpStateUpdate) return
-    api.onMcpStateUpdate((content: string) => {
-      try {
-        const data = JSON.parse(content) as SerializedMultiblock
-        useStore.getState().deserialize(data)
-        useStore.getState().setMcpConnected(true)
-      } catch { /* ignore parse errors */ }
-    })
+    if (!api) return
+
+    // WebSocket connection status
+    if (api.onMcpWsStatus) {
+      api.onMcpWsStatus((connected: boolean) => {
+        useStore.getState().setMcpConnected(connected)
+      })
+    }
+
+    // WebSocket messages (typed: state, camera, tab, select_block, set_layer, highlight)
+    if (api.onMcpWsMessage) {
+      api.onMcpWsMessage((msg: { type: string; payload: any }) => {
+        const store = useStore.getState()
+        switch (msg.type) {
+          case 'state':
+            store.deserialize(msg.payload as SerializedMultiblock)
+            store.setMcpConnected(true)
+            break
+          case 'camera':
+            store.setCameraCommand(msg.payload)
+            break
+          case 'tab':
+            store.setActiveTab(msg.payload.tab)
+            break
+          case 'select_block':
+            store.setSelectedBlock(msg.payload.key)
+            break
+          case 'set_layer':
+            store.setLayerFilter(msg.payload.layer)
+            break
+          case 'highlight':
+            store.setHighlightCommand(msg.payload)
+            break
+        }
+      })
+    }
+
+    // Legacy file-based fallback
+    if (api.onMcpStateUpdate) {
+      api.onMcpStateUpdate((content: string) => {
+        try {
+          const data = JSON.parse(content) as SerializedMultiblock
+          useStore.getState().deserialize(data)
+          useStore.getState().setMcpConnected(true)
+        } catch { /* ignore parse errors */ }
+      })
+    }
   }, [])
 
   return (
@@ -58,6 +98,7 @@ export default function App() {
         </div>
         <RightPanel />
       </div>
+      <Toaster theme="dark" position="bottom-center" />
     </div>
   )
 }

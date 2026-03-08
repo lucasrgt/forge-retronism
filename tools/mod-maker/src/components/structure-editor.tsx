@@ -1,10 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import * as THREE from 'three'
 import { useStore } from '@/hooks/use-store'
-import { blockRegistry } from '@/core/types'
-import { loadTextures, isTexturesReady, getBlockMaterial, clearMaterialCache } from '@/core/textures'
+import { blockRegistry, type BlockEntry } from '@/core/types'
+import { loadTextures, isTexturesReady, getBlockMaterial, clearMaterialCache, getTileDataUrl } from '@/core/textures'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { BuildGuide } from '@/components/build-guide'
 
 export function StructureEditor() {
@@ -16,6 +15,7 @@ export function StructureEditor() {
     raycaster: THREE.Raycaster
     meshes: Map<string, THREE.Mesh>
     gridGroup: THREE.Group
+    groundPlane: THREE.Mesh
     animId: number
     orbitState: { dragging: boolean; panning: boolean; lastX: number; lastY: number; theta: number; phi: number; radius: number }
     target: THREE.Vector3
@@ -27,6 +27,8 @@ export function StructureEditor() {
   const selectedTool = useStore((s) => s.selectedTool)
   const selectedBlock = useStore((s) => s.selectedBlock)
   const layerFilter = useStore((s) => s.layerFilter)
+  const pendingCamera = useStore((s) => s.pendingCamera)
+  const pendingHighlight = useStore((s) => s.pendingHighlight)
 
   // Initialize Three.js
   useEffect(() => {
@@ -70,7 +72,17 @@ export function StructureEditor() {
     // Keyboard: space for pan mode
     const canvas = renderer.domElement
     canvas.tabIndex = 0
-    function onKeyDown(e: KeyboardEvent) { if (e.code === 'Space') { spaceDown = true; e.preventDefault() } }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.code === 'Space') { spaceDown = true; e.preventDefault() }
+      if (e.code === 'Delete') {
+        const s = useStore.getState()
+        if (s.selectedBlock) {
+          const [x, y, z] = s.selectedBlock.split(',').map(Number) as [number, number, number]
+          s.removeBlock(x, y, z)
+          s.setSelectedBlock(null)
+        }
+      }
+    }
     function onKeyUp(e: KeyboardEvent) { if (e.code === 'Space') { spaceDown = false } }
     canvas.addEventListener('keydown', onKeyDown)
     canvas.addEventListener('keyup', onKeyUp)
@@ -127,7 +139,28 @@ export function StructureEditor() {
       )
       raycaster.setFromCamera(mouse, camera)
       const meshArray = Array.from(sceneRef.current?.meshes.values() || [])
-      return raycaster.intersectObjects(meshArray)
+      return raycaster.intersectObjects(meshArray, false)
+        .filter(hit => hit.object.userData.key)
+    }
+
+    // Invisible ground plane for placing blocks on empty space (y=0 layer)
+    const groundPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(20, 20),
+      new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide }),
+    )
+    groundPlane.rotation.x = -Math.PI / 2
+    groundPlane.position.set(w / 2 - 0.5, -0.5, d / 2 - 0.5)
+    groundPlane.userData.isGround = true
+    scene.add(groundPlane)
+
+    function raycastGround(e: MouseEvent) {
+      const rect = canvas.getBoundingClientRect()
+      const mouse = new THREE.Vector2(
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1,
+      )
+      raycaster.setFromCamera(mouse, camera)
+      return raycaster.intersectObject(groundPlane)
     }
 
     // Left-click: select existing block, or place on face if clicking empty adjacent
@@ -155,10 +188,23 @@ export function StructureEditor() {
           // Click: select block
           store.setSelectedBlock(key)
         }
+      } else {
+        // Click on empty space: place block on ground plane (y=0)
+        const groundHits = raycastGround(e)
+        if (groundHits.length > 0) {
+          const point = groundHits[0].point
+          const bx = Math.round(point.x)
+          const bz = Math.round(point.z)
+          const store = useStore.getState()
+          const { w, h, d } = store.dimensions
+          if (bx >= 0 && bx < w && bz >= 0 && bz < d) {
+            store.placeBlock(bx, 0, bz, store.selectedTool)
+          }
+        }
       }
     })
 
-    // Right-click: place block on adjacent face
+    // Right-click: place block on adjacent face, or on ground if empty
     canvas.addEventListener('contextmenu', (e) => {
       e.preventDefault()
       if (e.altKey || spaceDown) return
@@ -177,6 +223,19 @@ export function StructureEditor() {
             store.placeBlock(nx, ny, nz, store.selectedTool)
           }
         }
+      } else {
+        // Right-click on empty: place on ground
+        const groundHits = raycastGround(e)
+        if (groundHits.length > 0) {
+          const point = groundHits[0].point
+          const bx = Math.round(point.x)
+          const bz = Math.round(point.z)
+          const store = useStore.getState()
+          const { w, h, d } = store.dimensions
+          if (bx >= 0 && bx < w && bz >= 0 && bz < d) {
+            store.placeBlock(bx, 0, bz, store.selectedTool)
+          }
+        }
       }
     })
 
@@ -185,7 +244,7 @@ export function StructureEditor() {
       renderer.render(scene, camera)
     })
 
-    sceneRef.current = { scene, camera, renderer, raycaster, meshes: new Map(), gridGroup, animId, orbitState, target, spaceDown }
+    sceneRef.current = { scene, camera, renderer, raycaster, meshes: new Map(), gridGroup, groundPlane, animId, orbitState, target, spaceDown }
 
     // Load real block textures from terrain.png + custom assets
     loadTextures().then((ok) => {
@@ -218,6 +277,29 @@ export function StructureEditor() {
     }
   }, [])
 
+  // Port overlay: colored wireframe cube on blocks with portType
+  const PORT_COLORS: Record<string, number> = { energy: 0xfbbf24, fluid: 0x3b82f6, gas: 0xa3a3a3, item: 0xf97316 }
+  function updatePortOverlay(mesh: THREE.Mesh, portType: string | null) {
+    const existing = mesh.children.find(c => c.userData.isPortOverlay)
+    if (existing) mesh.remove(existing)
+    if (!portType || !PORT_COLORS[portType]) return
+    const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(1.0, 1.0, 1.0))
+    const overlay = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: PORT_COLORS[portType], linewidth: 2 }))
+    overlay.userData.isPortOverlay = true
+    mesh.add(overlay)
+  }
+
+  // Controller overlay: red wireframe
+  function updateControllerOverlay(mesh: THREE.Mesh, isController: boolean) {
+    const existing = mesh.children.find(c => c.userData.isControllerOverlay)
+    if (existing) mesh.remove(existing)
+    if (!isController) return
+    const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(1.05, 1.05, 1.05))
+    const overlay = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xff2222, linewidth: 3 }))
+    overlay.userData.isControllerOverlay = true
+    mesh.add(overlay)
+  }
+
   // Sync blocks to meshes
   useEffect(() => {
     const s = sceneRef.current
@@ -246,10 +328,17 @@ export function StructureEditor() {
       }
 
       const isSelected = key === selectedBlock
+      const portType = block.portType || null
+      const blockDef = blockRegistry.get(block.type)
+      const isCtrl = blockDef?.category === 'controller'
       let mesh = s.meshes.get(key)
       const needsNewMaterial = mesh && (
         mesh.userData.blockType !== block.type ||
         mesh.userData.selected !== isSelected
+      )
+      const needsOverlayUpdate = mesh && (
+        mesh.userData.portType !== portType ||
+        mesh.userData.isCtrl !== isCtrl
       )
 
       if (!mesh) {
@@ -260,26 +349,85 @@ export function StructureEditor() {
         mesh.userData.key = key
         mesh.userData.blockType = block.type
         mesh.userData.selected = isSelected
+        mesh.userData.portType = portType
+        mesh.userData.isCtrl = isCtrl
         s.scene.add(mesh)
         s.meshes.set(key, mesh)
+        updatePortOverlay(mesh, portType)
+        updateControllerOverlay(mesh, isCtrl)
       } else {
         mesh.visible = true
         if (needsNewMaterial) {
-          const oldMat = mesh.material as THREE.Material
           mesh.material = getBlockMaterial(block.type, isSelected)
           mesh.userData.blockType = block.type
           mesh.userData.selected = isSelected
-          // Don't dispose cached materials
+        }
+        if (needsNewMaterial || needsOverlayUpdate) {
+          mesh.userData.portType = portType
+          mesh.userData.isCtrl = isCtrl
+          updatePortOverlay(mesh, portType)
+          updateControllerOverlay(mesh, isCtrl)
         }
       }
     }
   }, [blocks, selectedBlock, layerFilter])
+
+  // Handle camera commands from MCP WebSocket
+  useEffect(() => {
+    if (!pendingCamera || !sceneRef.current) return
+    const cmd = useStore.getState().consumeCameraCommand()
+    if (!cmd) return
+    const orbit = sceneRef.current.orbitState
+    if (cmd.theta !== undefined) orbit.theta = cmd.theta
+    if (cmd.phi !== undefined) orbit.phi = cmd.phi
+    if (cmd.radius !== undefined) orbit.radius = cmd.radius
+    // Trigger camera update by modifying position (render loop will pick it up)
+    const { target } = sceneRef.current
+    const camera = sceneRef.current.camera
+    camera.position.set(
+      target.x + orbit.radius * Math.sin(orbit.phi) * Math.cos(orbit.theta),
+      target.y + orbit.radius * Math.cos(orbit.phi),
+      target.z + orbit.radius * Math.sin(orbit.phi) * Math.sin(orbit.theta),
+    )
+    camera.lookAt(target)
+  }, [pendingCamera])
+
+  // Handle highlight commands from MCP WebSocket
+  useEffect(() => {
+    if (!pendingHighlight || !sceneRef.current) return
+    const cmd = useStore.getState().consumeHighlightCommand()
+    if (!cmd) return
+    const { keys, duration } = cmd
+    const meshes = sceneRef.current.meshes
+    const originalMaterials: Map<string, any> = new Map()
+    const highlightMat = new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 0.6 })
+
+    // Apply highlight
+    for (const key of keys) {
+      const mesh = meshes.get(key)
+      if (mesh) {
+        originalMaterials.set(key, mesh.material)
+        mesh.material = highlightMat
+      }
+    }
+
+    // Revert after duration
+    setTimeout(() => {
+      for (const [key, mat] of originalMaterials) {
+        const mesh = meshes.get(key)
+        if (mesh) mesh.material = mat
+      }
+      highlightMat.dispose()
+    }, duration)
+  }, [pendingHighlight])
 
   // Update camera target, grid, and auto-fit when dimensions change
   useEffect(() => {
     if (sceneRef.current) {
       const { w, h, d } = dimensions
       sceneRef.current.target.set(w / 2 - 0.5, h / 2 - 0.5, d / 2 - 0.5)
+      // Update ground plane position
+      sceneRef.current.groundPlane.position.set(w / 2 - 0.5, -0.5, d / 2 - 0.5)
       // Auto-fit: radius based on the largest dimension
       const maxDim = Math.max(w, h, d)
       sceneRef.current.orbitState.radius = Math.max(5, maxDim * 2)
@@ -319,26 +467,43 @@ export function StructureEditor() {
     }
   }, [dimensions])
 
+  const [paletteOpen, setPaletteOpen] = useState(false)
+
+  // Organize blocks by category
+  const mergedCategories = useMemo(() => {
+    const cats: Record<string, (typeof blockRegistry extends Map<string, infer V> ? V : never)[]> = {}
+    for (const def of blockRegistry.values()) {
+      const cat = def.category
+      if (!cats[cat]) cats[cat] = []
+      cats[cat].push(def)
+    }
+    return cats
+  }, [])
+
+  const categoryLabels: Record<string, string> = {
+    controller: 'Controller',
+    mod: 'Mod',
+    vanilla: 'Vanilla',
+    custom: 'Custom',
+  }
+
+  const categoryOrder = ['controller', 'mod', 'vanilla', 'custom']
+
+  const selectedDef = blockRegistry.get(selectedTool)
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Block palette toolbar */}
-      <div className="flex items-center justify-between px-3 py-2 bg-background border-b border-border flex-wrap gap-1">
-        <div className="flex gap-1 flex-wrap">
-          {[...blockRegistry.values()].map((def) => (
-            <Button
-              key={def.id}
-              variant={selectedTool === def.id ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => useStore.getState().setSelectedTool(def.id)}
-              className="gap-1"
-            >
-              <span
-                className="w-3 h-3 rounded-sm border border-white/20"
-                style={{ background: `#${def.color.toString(16).padStart(6, '0')}` }}
-              />
-              {def.label}
-            </Button>
-          ))}
+      {/* Compact toolbar: selected block + palette toggle + layer slider */}
+      <div className="flex items-center justify-between px-3 py-1.5 bg-background border-b border-border gap-2">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setPaletteOpen(!paletteOpen)}
+            className="flex items-center gap-2 px-2 py-1 rounded border border-border hover:bg-muted/50 transition-colors"
+          >
+            <BlockIcon def={selectedDef} size={20} />
+            <span className="text-sm font-medium">{selectedDef?.label || selectedTool}</span>
+            <span className="text-xs text-muted-foreground">{paletteOpen ? '\u25B2' : '\u25BC'}</span>
+          </button>
         </div>
         <div className="flex items-center gap-3 text-xs">
           <label className="flex items-center gap-1.5">
@@ -356,14 +521,72 @@ export function StructureEditor() {
         </div>
       </div>
 
+      {/* Block palette dropdown */}
+      {paletteOpen && (
+        <div className="bg-background border-b border-border px-3 py-2 max-h-72 overflow-auto">
+          {categoryOrder.map((cat) => {
+            const defs = mergedCategories[cat]
+            if (!defs || defs.length === 0) return null
+            return (
+              <div key={cat} className="mb-2">
+                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
+                  {categoryLabels[cat] || cat}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {defs.map((def) => (
+                    <button
+                      key={def.id}
+                      title={`${def.label} (ID: ${def.mcId ?? '?'})`}
+                      onClick={() => {
+                        useStore.getState().setSelectedTool(def.id)
+                        setPaletteOpen(false)
+                      }}
+                      className={`
+                        flex items-center gap-1 px-1.5 py-0.5 rounded text-xs border transition-colors
+                        ${selectedTool === def.id
+                          ? 'border-primary bg-primary/20 text-primary-foreground'
+                          : 'border-border hover:bg-muted/50 text-foreground'
+                        }
+                      `}
+                    >
+                      <BlockIcon def={def} size={16} />
+                      <span className="max-w-[80px] truncate">{def.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       {/* Three.js viewport */}
-      <div ref={containerRef} className="flex-1 bg-[#111] cursor-crosshair" />
+      <div ref={containerRef} className="flex-1 min-h-0 bg-[#111] cursor-crosshair" />
 
       {/* Build Guide collapsible */}
       <BuildGuideDropdown />
     </div>
   )
 }
+
+function BlockIcon({ def, size = 16 }: { def?: { color: number; terrainIndex?: number; id: string }; size?: number }) {
+  if (!def) return <span className="inline-block rounded-sm border border-white/20" style={{ width: size, height: size, background: '#ff00ff' }} />
+
+  // Try terrain texture icon
+  const dataUrl = def.terrainIndex !== undefined ? getTileDataUrl(def.terrainIndex) : null
+  if (dataUrl) {
+    return <img src={dataUrl} width={size} height={size} className="rounded-sm border border-white/10" style={{ imageRendering: 'pixelated' }} />
+  }
+
+  // Fallback: color swatch
+  return (
+    <span
+      className="inline-block rounded-sm border border-white/20"
+      style={{ width: size, height: size, background: `#${def.color.toString(16).padStart(6, '0')}` }}
+    />
+  )
+}
+
 
 function BuildGuideDropdown() {
   const showBuildGuide = useStore((s) => s.showBuildGuide)

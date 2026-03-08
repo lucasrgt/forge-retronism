@@ -6,17 +6,15 @@ export function BuildGuide() {
   const dimensions = useStore((s) => s.dimensions)
   const name = useStore((s) => s.name)
   const blockId = useStore((s) => s.blockId)
-  const casingId = useStore((s) => s.casingId)
 
   const { w, h, d } = dimensions
 
-  // Count real blocks (in-game: controller vs casing)
-  let controllerCount = 0
-  let casingCount = 0
+  // Count real blocks
+  const materialCounts: Record<string, number> = {}
   for (const [, entry] of blocks) {
-    if (entry.type === 'controller') controllerCount++
-    else casingCount++
+    materialCounts[entry.type] = (materialCounts[entry.type] || 0) + 1
   }
+  const totalBlocks = [...Object.values(materialCounts)].reduce((a, b) => a + b, 0)
 
   // Build layers with conceptual types
   const layers: { y: number; grid: ({ type: string; mode: string } | null)[][] }[] = []
@@ -39,19 +37,24 @@ export function BuildGuide() {
 
   return (
     <div className="p-3 space-y-3">
-      {/* Real blocks summary */}
-      <div className="flex items-center gap-4 text-xs">
-        <span className="font-semibold text-foreground">In-Game Blocks:</span>
-        <span>
-          <span className="inline-block w-3 h-3 rounded-sm bg-red-500 border border-red-700 align-middle mr-1" />
-          {name} (Controller) ID {blockId} x{controllerCount}
-        </span>
-        <span>
-          <span className="inline-block w-3 h-3 rounded-sm bg-zinc-400 border border-zinc-600 align-middle mr-1" />
-          {name} Casing ID {casingId} x{casingCount}
-        </span>
-        <span className="text-muted-foreground ml-2">
-          Total: {controllerCount + casingCount}
+      {/* Real blocks summary — materials list */}
+      <div className="flex items-center gap-3 text-xs flex-wrap">
+        <span className="font-semibold text-foreground">Materials:</span>
+        {Object.entries(materialCounts).map(([type, count]) => {
+          const info = getBlockInfo(type)
+          const hexColor = `#${info.color.toString(16).padStart(6, '0')}`
+          return (
+            <span key={type} className="flex items-center gap-1">
+              <span
+                className="inline-block w-3 h-3 rounded-sm border border-white/20"
+                style={{ backgroundColor: hexColor }}
+              />
+              {info.label} x{count}
+            </span>
+          )
+        })}
+        <span className="text-muted-foreground">
+          Total: {totalBlocks}
         </span>
       </div>
 
@@ -76,7 +79,7 @@ export function BuildGuide() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Colors show conceptual types from the designer. In-game, all non-controller blocks are placed as <strong>Casing</strong> blocks.
+        Port positions are metadata overlays — the underlying block type is what gets placed in-game.
       </p>
 
       {/* Layer-by-layer grid */}

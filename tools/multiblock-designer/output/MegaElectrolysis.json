@@ -1,0 +1,160 @@
+{
+  "name": "MegaElectrolysis",
+  "structType": "machine",
+  "dimensions": [
+    3,
+    3,
+    3
+  ],
+  "ioTypes": [
+    "energy",
+    "fluid",
+    "gas"
+  ],
+  "capacity": {
+    "energy": 64000,
+    "fluid": 16000,
+    "gas": 16000
+  },
+  "processTime": 300,
+  "energyPerTick": 32,
+  "blockId": 213,
+  "casingId": 214,
+  "structure": [
+    {
+      "layer": 0,
+      "pattern": [
+        [
+          "C",
+          "C",
+          "C"
+        ],
+        [
+          "C",
+          "F",
+          "C"
+        ],
+        [
+          "C",
+          "C",
+          "C"
+        ]
+      ]
+    },
+    {
+      "layer": 1,
+      "pattern": [
+        [
+          "C",
+          "K",
+          "C"
+        ],
+        [
+          "F",
+          " ",
+          "F"
+        ],
+        [
+          "G",
+          "G",
+          "G"
+        ]
+      ]
+    },
+    {
+      "layer": 2,
+      "pattern": [
+        [
+          "C",
+          "C",
+          "C"
+        ],
+        [
+          "E",
+          "E",
+          "E"
+        ],
+        [
+          "C",
+          "C",
+          "C"
+        ]
+      ]
+    }
+  ],
+  "legend": {
+    " ": "air",
+    "C": "casing",
+    "F": "fluid_port",
+    "K": "controller",
+    "G": "gas_port",
+    "E": "energy_port"
+  },
+  "portModes": {
+    "1,0,1": "output",
+    "0,1,1": "input",
+    "2,1,1": "input",
+    "0,1,2": "output",
+    "1,1,2": "output",
+    "2,1,2": "output",
+    "0,2,1": "input",
+    "1,2,1": "input",
+    "2,2,1": "input"
+  },
+  "guiComponents": [
+    {
+      "type": "energy_bar",
+      "x": 161,
+      "y": 16,
+      "w": 8,
+      "h": 54,
+      "slotType": null,
+      "ioMode": "display"
+    },
+    {
+      "type": "fluid_tank",
+      "x": 12,
+      "y": 16,
+      "w": 16,
+      "h": 54,
+      "slotType": null,
+      "ioMode": "input"
+    },
+    {
+      "type": "progress_arrow",
+      "x": 52,
+      "y": 34,
+      "w": 24,
+      "h": 17,
+      "slotType": null,
+      "ioMode": "display"
+    },
+    {
+      "type": "gas_tank",
+      "x": 100,
+      "y": 16,
+      "w": 16,
+      "h": 24,
+      "slotType": null,
+      "ioMode": "output"
+    },
+    {
+      "type": "gas_tank",
+      "x": 100,
+      "y": 46,
+      "w": 16,
+      "h": 24,
+      "slotType": null,
+      "ioMode": "output"
+    },
+    {
+      "type": "fluid_tank",
+      "x": 136,
+      "y": 16,
+      "w": 16,
+      "h": 54,
+      "slotType": null,
+      "ioMode": "output"
+    }
+  ]
+}

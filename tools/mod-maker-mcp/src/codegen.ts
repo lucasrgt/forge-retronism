@@ -23,14 +23,7 @@ export function generateAllFiles(): GeneratedFile[] {
     content: JSON.stringify(json, null, 2),
   });
 
-  // 1. Casing Block
-  files.push({
-    name: `${PREFIX}Block${name}Casing.java`,
-    relativePath: `src/retronism/block/${PREFIX}Block${name}Casing.java`,
-    content: genCasingBlock(name),
-  });
-
-  // 2. Controller Block
+  // 1. Controller Block
   files.push({
     name: `${PREFIX}Block${name}Controller.java`,
     relativePath: `src/retronism/block/${PREFIX}Block${name}Controller.java`,
@@ -93,23 +86,6 @@ export function generateAllFiles(): GeneratedFile[] {
 // ---------------------------------------------------------------------------
 // Individual generators
 // ---------------------------------------------------------------------------
-
-function genCasingBlock(name: string): string {
-  return `package retronism.block;
-
-import net.minecraft.src.*;
-
-public class ${PREFIX}Block${name}Casing extends Block {
-    public ${PREFIX}Block${name}Casing(int id, int tex) {
-        super(id, tex, Material.iron);
-        setHardness(3.5F);
-        setResistance(5.0F);
-        setStepSound(Block.soundMetalFootstep);
-        setBlockName("${name.toLowerCase()}Casing");
-    }
-}
-`;
-}
 
 function genControllerBlock(name: string): string {
   return `package retronism.block;
@@ -228,7 +204,13 @@ public class ${PREFIX}Tile${name} extends TileEntity implements ${interfaces.joi
   }
 
   // Structure pattern
-  const structResult = genStructureArray(json);
+  const structResult = genStructureArray(json, name);
+
+  // Build expectedIds array initialization
+  const expectedIdsInit = structResult.typeMappings
+    .map(m => `        expectedIds[${m.constName}] = ${m.javaBlockIdExpr};`)
+    .join('\n');
+
   code += `
 ${structResult.code}
 
@@ -245,8 +227,8 @@ ${structResult.code}
         }
         if (ctrlX == -1) { isFormed = false; return false; }
 
-        int casingId = mod_Retronism.block${name}Casing.blockID;
-        int controllerId = mod_Retronism.block${name}Controller.blockID;
+        int[] expectedIds = new int[TYPE_COUNT];
+${expectedIdsInit}
 
         for (int y = 0; y < STRUCTURE.length; y++) {
             for (int z = 0; z < STRUCTURE[y].length; z++) {
@@ -259,13 +241,9 @@ ${structResult.code}
                     int wz = cz + (z - ctrlZ);
                     int blockId = world.getBlockId(wx, wy, wz);
 
-                    if (expected == ${structResult.controllerConst}) {
-                        if (blockId != controllerId) { isFormed = false; return false; }
-                    } else {
-                        if (blockId != casingId && blockId != controllerId) {
-                            isFormed = false;
-                            return false;
-                        }
+                    if (blockId != expectedIds[expected]) {
+                        isFormed = false;
+                        return false;
                     }
                 }
             }
@@ -511,12 +489,20 @@ ${structResult.code}
   return code;
 }
 
+interface BlockTypeMapping {
+  constName: string;
+  intValue: number;
+  javaBlockIdExpr: string; // Java expression to get block ID
+}
+
 interface StructureArrayResult {
   code: string;
   controllerConst: string;
+  typeCount: number;
+  typeMappings: BlockTypeMapping[];
 }
 
-function genStructureArray(json: SerializedMultiblock): StructureArrayResult {
+function genStructureArray(json: SerializedMultiblock, name: string): StructureArrayResult {
   // Collect all chars used in the structure
   const usedChars = new Set<string>();
   for (const layer of json.structure) {
@@ -527,37 +513,108 @@ function genStructureArray(json: SerializedMultiblock): StructureArrayResult {
     }
   }
 
+  // Find controller position and block type from metadata
+  const controllerPos = json.controllerPos;
+  let controllerBlockId: string | undefined;
+  let controllerChar: string | null = null;
+  if (controllerPos) {
+    const [cx, cy, cz] = controllerPos.split(',').map(Number);
+    for (const layer of json.structure) {
+      if (layer.layer === cy) {
+        if (layer.pattern[cz] && layer.pattern[cz][cx] && layer.pattern[cz][cx] !== ' ') {
+          controllerChar = layer.pattern[cz][cx];
+          controllerBlockId = json.legend[controllerChar];
+        }
+      }
+    }
+  }
+
   // Build char-to-int mapping dynamically from registry
   const charToInt: Record<string, number> = { ' ': 0 };
   let nextInt = 1;
   let code = '    private static final int TYPE_AIR = 0;\n';
-  let controllerConst = 'TYPE_CONTROLLER'; // fallback
+
+  // Reserve TYPE_CONTROLLER = 1 for the controller block position
+  code += `    private static final int TYPE_CONTROLLER = 1;\n`;
+  const controllerConst = 'TYPE_CONTROLLER';
+  const typeMappings: BlockTypeMapping[] = [];
+  // Use the controller block's Java reference (generated block class)
+  typeMappings.push({
+    constName: 'TYPE_CONTROLLER',
+    intValue: 1,
+    javaBlockIdExpr: `mod_Retronism.block${name}Controller.blockID`,
+  });
+  nextInt = 2;
 
   for (const ch of usedChars) {
-    const blockDef = blockRegistry.getByChar(ch);
-    if (blockDef) {
-      charToInt[ch] = nextInt;
-      const constName = `TYPE_${blockDef.id.toUpperCase()}`;
-      code += `    private static final int ${constName} = ${nextInt};\n`;
-      if (blockDef.category === 'controller') {
-        controllerConst = constName;
+    const blockId = json.legend[ch];
+    if (!blockId || blockId === 'air') continue;
+    const blockDef = blockRegistry.get(blockId);
+    if (!blockDef) continue;
+
+    // Skip if this char is used for the controller position — we handle it separately
+    // But ONLY if this char is EXCLUSIVELY the controller block. If other positions
+    // also use this char, we need a type for the non-controller positions too.
+    if (ch === controllerChar) {
+      // Check if any non-controller position uses this char
+      let usedElsewhere = false;
+      for (const layer of json.structure) {
+        for (let z = 0; z < layer.pattern.length; z++) {
+          for (let x = 0; x < layer.pattern[z].length; x++) {
+            if (layer.pattern[z][x] === ch) {
+              const key = `${x},${layer.layer},${z}`;
+              if (key !== controllerPos) {
+                usedElsewhere = true;
+              }
+            }
+          }
+        }
       }
-      nextInt++;
+      if (!usedElsewhere) {
+        // This char is only used for the controller — map it to TYPE_CONTROLLER
+        charToInt[ch] = 1; // TYPE_CONTROLLER
+        continue;
+      }
+      // Otherwise, also create a regular type mapping for non-controller positions
     }
+
+    if (charToInt[ch] !== undefined) continue;
+    charToInt[ch] = nextInt;
+    const constName = `TYPE_${blockDef.id.toUpperCase()}`;
+    code += `    private static final int ${constName} = ${nextInt};\n`;
+
+    let javaBlockIdExpr: string;
+    if (blockDef.mcId !== undefined) {
+      javaBlockIdExpr = `${blockDef.mcId}`;
+    } else {
+      // Custom blocks without mcId — should not happen (all blocks have mcId now)
+      javaBlockIdExpr = `${blockDef.mcId ?? 0}`;
+    }
+
+    typeMappings.push({ constName, intValue: nextInt, javaBlockIdExpr });
+    nextInt++;
   }
 
+  code += `    private static final int TYPE_COUNT = ${nextInt};\n`;
+
+  // Build the structure array, replacing controller position with TYPE_CONTROLLER
   code += '\n    private static final int[][][] STRUCTURE = {\n';
   for (const layer of json.structure) {
     code += `        { // Layer ${layer.layer}\n`;
-    for (const row of layer.pattern) {
-      const ints = row.map(ch => charToInt[ch] || 0);
+    for (let z = 0; z < layer.pattern.length; z++) {
+      const row = layer.pattern[z];
+      const ints = row.map((ch, x) => {
+        const key = `${x},${layer.layer},${z}`;
+        if (key === controllerPos) return 1; // TYPE_CONTROLLER
+        return charToInt[ch] || 0;
+      });
       code += `            {${ints.join(', ')}},\n`;
     }
     code += '        },\n';
   }
   code += '    };\n';
 
-  return { code, controllerConst };
+  return { code, controllerConst, typeCount: nextInt, typeMappings };
 }
 
 function genContainer(

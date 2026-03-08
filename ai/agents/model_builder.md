@@ -44,22 +44,138 @@ The pipeline is: context → Blockbench MCP → export → import → Java code.
 ## Design Philosophy
 
 ### Never Make Plain Cubes
-Every machine MUST have visual personality. A crusher is not a box — it has a wide base, a tapered body, a hopper mouth, and pistons. Apply this thinking to every machine:
-
-- **Layered profiles**: Vary width/depth at different heights. Base wider than body, body narrower than top, etc.
-- **Recessed panels**: Inset faces by 1-2px to create depth (e.g., from [1,3,1] to [15,10,15] inside a [0,0,0]-[16,16,16] shell)
-- **Protruding details**: Pipes, vents, knobs, arms that extend beyond the main body
-- **Stepped angles**: Simulate slopes/bevels with 1-2px staircases of boxes
-- **Asymmetry with purpose**: Functional elements (input hopper on top, output chute on side, exhaust pipe on back)
-- **Negative space**: Leave gaps between elements — not everything needs to be solid
+Every machine MUST have visual personality. A crusher is not a box — it has a wide base, a tapered body, a hopper mouth, and pistons. Apply this thinking to every machine.
 
 ### Silhouette Test
-If you see only its outline against a bright sky, you should immediately know which machine it is.
+If you see only its outline against a bright sky, you should immediately know which machine it is. Achieve this through unique height profiles, protruding elements, and distinctive top shapes.
 
 ### Voxel Professionalism
 - Use 8-15 elements per machine (simple boxes look amateur)
 - Name every element descriptively: `base_plate`, `body_main`, `exhaust_pipe`, `input_hopper`
 - Group related elements logically in the Blockbench hierarchy
+
+## Geometric Techniques — CRITICAL (read carefully)
+
+Even though the render system only supports axis-aligned boxes, you can create visually rich models with real depth and personality. **A flat box with a texture slapped on is NOT acceptable.** Use these techniques:
+
+### Stepped Diagonals (simulate slopes and angles)
+Use 3+ boxes stepping inward 1px each to simulate a slope, bevel, or taper. This creates the illusion of angled surfaces.
+
+Example — tapered chimney top:
+```
+Box 1: [5, 12, 5] to [11, 13, 11]   // widest
+Box 2: [6, 13, 6] to [10, 14, 10]   // steps in 1px
+Box 3: [7, 14, 7] to [9, 15, 9]     // narrowest
+```
+This creates a visible diagonal profile instead of a flat top. Use this for:
+- Funnel/hopper mouths (wide top → narrow bottom)
+- Tapered exhausts and chimneys
+- Machine bases that flare outward
+- Beveled edges on any structural element
+
+### Recessed Panels (create depth on flat faces)
+Never leave a large face flat. Break it up with inset panels that sit 1-2px behind the outer surface.
+
+Example — front panel:
+```
+Outer frame: [0, 3, 0] to [16, 13, 1]    // the face surface (1px thick)
+Inner panel: [2, 5, 0] to [14, 11, 0.5]  // recessed 0.5px behind
+```
+This creates a visible shadow line around the panel. Use this for:
+- Control panels, display screens, access doors
+- Vent grilles (multiple thin horizontal bars with gaps)
+- Decorative trim around functional areas
+
+### Layered Shells (structural depth)
+Build machines as layers, not single blocks. An outer shell wraps an inner body with visible separation.
+
+Example:
+```
+Inner body:  [3, 2, 3] to [13, 10, 13]   // the core
+Outer frame: [1, 0, 1] to [15, 12, 15]   // wraps around, but taller/wider
+Cap:         [0, 12, 0] to [16, 14, 16]  // overhang lip
+```
+The key is that the outer layer doesn't completely cover the inner — you see edges, lips, and transitions.
+
+### Protruding Functional Elements
+Machines have things sticking out — pipes, handles, vents, ports, arms, bolts. These break the box silhouette.
+
+- **Pipes**: 2-3px wide boxes that extend from the body (e.g., `[0, 6, 6] to [3, 10, 10]` — a pipe protruding from the left face)
+- **Vents**: Thin horizontal slits with 1px gaps between them
+- **Handles/knobs**: 1-2px boxes on the front face
+- **Exhaust stacks**: Vertical pipes on top, narrower than the body
+- **Support legs**: Small boxes at the 4 corners under the base
+
+### Frame-and-Panel Composition
+Don't make solid walls. Use a visible structural frame with panel fills between them:
+
+```
+Left frame:   [0, 0, 0] to [2, 16, 16]    // thick vertical frame
+Right frame:  [14, 0, 0] to [16, 16, 16]
+Panel fill:   [2, 2, 1] to [14, 14, 2]     // recessed between frames
+```
+
+### Overhangs and Lips
+Top/bottom caps that extend 1-2px beyond the body create shadow lines and visual weight:
+```
+Body:      [2, 3, 2] to [14, 12, 14]
+Top cap:   [1, 12, 1] to [15, 14, 15]   // 1px wider on each side
+Base:      [0, 0, 0] to [16, 3, 16]     // even wider
+```
+
+### Negative Space
+Leave intentional gaps between elements. Not everything needs to be solid:
+- Gap between body and frame (shows sky/background through the machine)
+- Open hopper mouths (4 walls, no top fill)
+- Visible internal mechanisms through gaps in the shell
+- Jaw/crusher gaps where you can see inside
+
+### Asymmetry with Purpose
+Machines are NOT symmetrical in real life. Break symmetry with functional elements:
+- Input hopper on top-left, exhaust pipe on top-right
+- Control panel on the front, cable port on the back
+- One side has a wider protruding element than the other
+
+## Texture Craft — 16x16 Mastery
+
+The 16x16 block texture is NOT just a flat color fill. It's your primary tool for adding visual richness that geometry alone can't provide.
+
+### Plan the Texture Layout
+Before painting, divide the 16x16 space into zones:
+```
+┌──────────────────┐
+│  Top (metallic)  │  rows 0-3: lighter metal for top-facing surfaces
+│  Body (main)     │  rows 4-11: primary machine color with panel details
+│  Base (dark)     │  rows 12-15: darker base/feet color
+└──────────────────┘
+```
+Different regions of the texture serve different parts of the model. Use UV mapping to select which region each face uses.
+
+### Paint Visual Details INTO the Texture
+The texture should contain:
+- **Panel lines**: 1px dark lines that suggest seams between metal plates
+- **Rivets/bolts**: Single darker pixels at regular intervals along edges
+- **Screen/indicator**: A 3x2 or 4x3 bright-colored rectangle (green, cyan, or orange) suggesting a display
+- **Warning stripes**: Diagonal or horizontal alternating yellow/black pixels for hazard areas
+- **Gradient shading**: Slightly darker pixels at the bottom of panels (simulates ambient occlusion)
+- **Material contrast**: Different zones use different base colors (brushed metal gray, dark steel, copper/bronze accents)
+
+### Color Palette Guidelines
+- **Primary body**: Medium gray (#808080 to #A0A0A0) — brushed metal
+- **Structural frame**: Dark gray/charcoal (#404040 to #505050)
+- **Accent details**: One machine-specific color (copper #B87333, blue #4A90D9, green #5B8C5A)
+- **Highlights**: 1-2px of lighter gray along top edges
+- **Shadows**: 1-2px of darker gray along bottom edges
+- **Indicators**: Small bright pixels (red #FF3333, green #33FF33, cyan #33CCCC)
+- **NEVER** use pure black (#000000) or pure white (#FFFFFF) — they look artificial
+
+### UV Mapping is NOT Optional
+Every face MUST have intentional UV mapping:
+- **Don't** leave all faces mapped to [0,0,16,16] — this wastes the texture and makes everything look the same
+- **Do** map the top face to the "metallic top" region of the texture
+- **Do** map side faces to the "body" region with panel details
+- **Do** map the base to the "dark base" region
+- **Do** map small protruding elements to accent-colored regions
 
 ## Technical Constraints (Beta 1.7.3)
 
@@ -74,6 +190,7 @@ The render system uses `setBlockBounds` + `renderStandardBlock`:
 - Each machine uses a **single 16x16 block texture** (the block's registered texture)
 - All faces reference this same texture via `#0`
 - The texture is applied via `renderStandardBlock` which handles lighting/shading automatically
+- Use UV offsets to select WHICH PART of the texture each face displays
 
 ### UV Rules
 UVs must be proportional to the face dimensions. For a box from `[x0, y0, z0]` to `[x1, y1, z1]`:
@@ -212,7 +329,12 @@ public void renderInventory(RenderBlocks renderer, Block block, int metadata) {
 - ALWAYS save the model JSON to `src/retronism/assets/models/`
 - ALWAYS generate both world render AND inventory render handlers
 - ALWAYS reset block bounds to 0-1 after rendering all parts
+- ALWAYS paint the texture with intentional zones, panel lines, rivets, indicators — NEVER flat single-color fills
+- ALWAYS use UV offsets to map different faces to different texture regions
+- ALWAYS use at least 2 geometric techniques (stepped diagonals, recessed panels, overhangs, etc.) per model
 - NEVER use rotated elements — the render system doesn't support them
 - NEVER exceed 16px on any axis
 - NEVER leave the model as a plain cube — every machine needs character
+- NEVER leave UV mapping at default [0,0,16,16] for all faces — each face must reference the appropriate texture region
+- NEVER use flat single-color textures — minimum: panel lines, edge shading, one accent detail
 - Target 8-15 elements per machine
