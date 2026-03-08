@@ -78,7 +78,7 @@ ModLoader.AddRecipe(new ItemStack(Retronism_Registry.myMachineBlock, 1),
     new Object[] { "X", 'X', Block.someBlock });
 ```
 
-#### 4c. `mod_RetroNism.java` — Render setup
+#### 4c. `mod_Retronism.java` — Render setup
 ```java
 // Declare render ID (top of class):
 public static int myMachineRenderID;
@@ -129,7 +129,7 @@ Check `MEMORY.md` for used IDs. Current range:
 - [ ] Block field declared in `Retronism_Registry.java`
 - [ ] Block, tile entity, and display name registered in `Retronism_Registry.registerAll()`
 - [ ] Debug recipe in `Retronism_Recipes.java`
-- [ ] Render ID + texture + renderer in `mod_RetroNism.java` (if custom render)
+- [ ] Render ID + texture + renderer in `mod_Retronism.java` (if custom render)
 - [ ] Game compiles and launches
 - [ ] GUI opens when right-clicking
 - [ ] IO works correctly
@@ -137,7 +137,7 @@ Check `MEMORY.md` for used IDs. Current range:
 ## Rules
 
 - ALWAYS check `MEMORY.md` for used block/item IDs before allocating new ones
-- ALWAYS follow the registration pattern: block fields in `Retronism_Registry.java`, recipes in `Retronism_Recipes.java`, render setup in `mod_RetroNism.java`
+- ALWAYS follow the registration pattern: block fields in `Retronism_Registry.java`, recipes in `Retronism_Recipes.java`, render setup in `mod_Retronism.java`
 - ALWAYS use `taskkill /F /IM java.exe` before launching a new test
 - ALWAYS run `bash scripts/test_unit.sh` after logic changes, before `scripts/test.sh`
 - NEVER edit files in `mcp/minecraft/src/` directly — edit `src/retronism/` and transpile

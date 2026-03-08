@@ -20,9 +20,9 @@ find "$SRC" -name "*.java" | while read -r file; do
         "$file" > "$DEST/$filename"
 done
 
-# Fix filename case: class is mod_Retronism but file is mod_RetroNism.java
-if [ -f "$DEST/mod_RetroNism.java" ]; then
-    mv "$DEST/mod_RetroNism.java" "$DEST/mod_Retronism.java"
+# Fix filename case: class is mod_Retronism but file is mod_Retronism.java
+if [ -f "$DEST/mod_Retronism.java" ]; then
+    mv "$DEST/mod_Retronism.java" "$DEST/mod_Retronism.java"
 fi
 
 echo "Transpiled $(find "$SRC" -name '*.java' | wc -l) files to $DEST"

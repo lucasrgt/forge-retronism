@@ -1,7 +1,7 @@
 {
   "name": "retronism-mod-maker",
   "version": "2.0.0",
-  "description": "RetroNism Mod Maker — Visual multiblock designer with GUI builder",
+  "description": "Retronism Mod Maker — Visual multiblock designer with GUI builder",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",

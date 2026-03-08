@@ -267,7 +267,7 @@ server.tool(
 // ---------------------------------------------------------------------------
 server.tool(
   'export_to_mod',
-  'Generate and write all files to the RetroNism mod project directory. This writes Java source, JSON, and GUI script.',
+  'Generate and write all files to the Retronism mod project directory. This writes Java source, JSON, and GUI script.',
   {},
   async () => {
     // Auto-save project before exporting

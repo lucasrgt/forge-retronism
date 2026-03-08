@@ -7,7 +7,7 @@ export function Toolbar() {
   return (
     <div className="flex items-center justify-between px-4 py-2 bg-background border-b border-border">
       <div className="flex items-center gap-3">
-        <span className="text-sm font-semibold">RetroNism Mod Maker</span>
+        <span className="text-sm font-semibold">Retronism Mod Maker</span>
         <span className="text-sm text-muted-foreground">{name}</span>
       </div>
       <div className="flex gap-1.5">

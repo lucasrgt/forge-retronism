@@ -118,7 +118,7 @@ ModLoader.AddRecipe(new ItemStack(Retronism_Registry.myMachineCasing, 16),
     new Object[] { "X", 'X', Block.someOtherBlock });
 ```
 
-#### 5c. `mod_RetroNism.java` — Render setup
+#### 5c. `mod_Retronism.java` — Render setup
 ```java
 // Declare render ID (top of class):
 public static int myMachineRenderID;
@@ -147,7 +147,7 @@ Also create the casing block's renderer to hide blocks when formed (see `multibl
 
 Run the GUI builder script:
 ```bash
-cd c:/Users/lucas/RetroNism && python tools/build_gui_mymachine.py
+cd c:/Users/lucas/Retronism && python tools/build_gui_mymachine.py
 ```
 
 ### Phase 7: Build and Test
@@ -180,7 +180,7 @@ Verify:
 - [ ] Block fields in `Retronism_Registry.java`
 - [ ] Blocks, tile entity, names in `Retronism_Registry.registerAll()`
 - [ ] Debug recipes in `Retronism_Recipes.java`
-- [ ] Render ID + texture + renderer in `mod_RetroNism.java`
+- [ ] Render ID + texture + renderer in `mod_Retronism.java`
 - [ ] Controller renderer handles formed/unformed states
 - [ ] Casing renderer hides blocks when formed
 - [ ] Controller tile stores `structOffX/Y/Z` from `checkStructure`
@@ -193,7 +193,7 @@ Verify:
 ## Rules
 
 - ALWAYS check `MEMORY.md` for used block/item IDs
-- ALWAYS follow the registration pattern: `Retronism_Registry.java` → `Retronism_Recipes.java` → `mod_RetroNism.java`
+- ALWAYS follow the registration pattern: `Retronism_Registry.java` → `Retronism_Recipes.java` → `mod_Retronism.java`
 - ALWAYS use `taskkill /F /IM java.exe` before launching tests
 - ALWAYS run `bash scripts/test_unit.sh` after logic changes
 - NEVER edit `mcp/minecraft/src/` directly — edit `src/retronism/` and transpile

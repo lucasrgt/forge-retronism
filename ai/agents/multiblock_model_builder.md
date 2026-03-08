@@ -164,7 +164,7 @@ public boolean renderWorld(RenderBlocks renderer, IBlockAccess world, int x, int
 ### Register in the Mod
 - Create render class in `src/retronism/render/` implementing `Retronism_IBlockRenderer`
 - Put the `FORMED_PARTS` array in the render class
-- In `mod_RetroNism.java`: allocate render ID, texture override, register renderer in `renderers` HashMap
+- In `mod_Retronism.java`: allocate render ID, texture override, register renderer in `renderers` HashMap
 - Save JSON to `src/retronism/assets/models/`
 
 ## Rules

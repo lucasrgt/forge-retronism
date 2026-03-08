@@ -178,7 +178,7 @@ public void renderInventory(RenderBlocks renderer, Block block, int metadata) {
 ### Step 4: Register in the Mod
 - Create render class `Retronism_RenderMyMachine.java` in `src/retronism/render/` implementing `Retronism_IBlockRenderer`
 - Put the `PARTS` array inside the render class
-- In `mod_RetroNism.java`: allocate a render ID, add texture override if needed, register the renderer in the `renderers` HashMap
+- In `mod_Retronism.java`: allocate a render ID, add texture override if needed, register the renderer in the `renderers` HashMap
 - The HashMap-based dispatcher handles `RenderWorldBlock`/`RenderInvBlock` automatically
 - Save JSON to `src/retronism/assets/models/`
 

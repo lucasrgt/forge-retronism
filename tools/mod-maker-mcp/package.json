@@ -1,7 +1,7 @@
 {
   "name": "retronism-mod-maker-mcp",
   "version": "1.0.0",
-  "description": "MCP server for RetroNism Mod Maker - create multiblock structures and generate Java code",
+  "description": "MCP server for Retronism Mod Maker - create multiblock structures and generate Java code",
   "type": "module",
   "scripts": {
     "build": "tsc",

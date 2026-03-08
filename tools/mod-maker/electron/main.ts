@@ -10,7 +10,7 @@ function createWindow() {
     height: 900,
     minWidth: 1200,
     minHeight: 700,
-    title: 'RetroNism Mod Maker',
+    title: 'Retronism Mod Maker',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
