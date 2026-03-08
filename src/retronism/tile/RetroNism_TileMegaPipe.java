@@ -91,7 +91,7 @@ public class Retronism_TileMegaPipe extends TileEntity
 		int receivers = 0;
 		for (int side = 0; side < 6; side++) {
 			int[] d = DIRS[side];
-			TileEntity te = worldObj.getBlockTileEntity(xCoord+d[0], yCoord+d[1], zCoord+d[2]);
+			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, xCoord+d[0], yCoord+d[1], zCoord+d[2]);
 			if (te == null || te == this) continue;
 			if (!canSendType(side, te, Retronism_SideConfig.TYPE_ENERGY)) continue;
 			if (te instanceof Retronism_TileMegaPipe) {
@@ -109,7 +109,7 @@ public class Retronism_TileMegaPipe extends TileEntity
 
 		for (int side = 0; side < 6; side++) {
 			int[] d = DIRS[side];
-			TileEntity te = worldObj.getBlockTileEntity(xCoord+d[0], yCoord+d[1], zCoord+d[2]);
+			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, xCoord+d[0], yCoord+d[1], zCoord+d[2]);
 			if (te == null || te == this) continue;
 			if (!canSendType(side, te, Retronism_SideConfig.TYPE_ENERGY)) continue;
 			if (te instanceof Retronism_TileMegaPipe) {
@@ -150,7 +150,7 @@ public class Retronism_TileMegaPipe extends TileEntity
 		int receivers = 0;
 		for (int side = 0; side < 6; side++) {
 			int[] d = DIRS[side];
-			TileEntity te = worldObj.getBlockTileEntity(xCoord+d[0], yCoord+d[1], zCoord+d[2]);
+			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, xCoord+d[0], yCoord+d[1], zCoord+d[2]);
 			if (te == null || te == this) continue;
 			if (!canSendType(side, te, Retronism_SideConfig.TYPE_FLUID)) continue;
 			if (te instanceof Retronism_TileMegaPipe) {
@@ -168,7 +168,7 @@ public class Retronism_TileMegaPipe extends TileEntity
 
 		for (int side = 0; side < 6; side++) {
 			int[] d = DIRS[side];
-			TileEntity te = worldObj.getBlockTileEntity(xCoord+d[0], yCoord+d[1], zCoord+d[2]);
+			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, xCoord+d[0], yCoord+d[1], zCoord+d[2]);
 			if (te == null || te == this) continue;
 			if (!canSendType(side, te, Retronism_SideConfig.TYPE_FLUID)) continue;
 			if (te instanceof Retronism_TileMegaPipe) {
@@ -224,7 +224,7 @@ public class Retronism_TileMegaPipe extends TileEntity
 		int receivers = 0;
 		for (int side = 0; side < 6; side++) {
 			int[] d = DIRS[side];
-			TileEntity te = worldObj.getBlockTileEntity(xCoord+d[0], yCoord+d[1], zCoord+d[2]);
+			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, xCoord+d[0], yCoord+d[1], zCoord+d[2]);
 			if (te == null || te == this) continue;
 			if (!canSendType(side, te, Retronism_SideConfig.TYPE_GAS)) continue;
 			if (te instanceof Retronism_TileMegaPipe) {
@@ -242,7 +242,7 @@ public class Retronism_TileMegaPipe extends TileEntity
 
 		for (int side = 0; side < 6; side++) {
 			int[] d = DIRS[side];
-			TileEntity te = worldObj.getBlockTileEntity(xCoord+d[0], yCoord+d[1], zCoord+d[2]);
+			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, xCoord+d[0], yCoord+d[1], zCoord+d[2]);
 			if (te == null || te == this) continue;
 			if (!canSendType(side, te, Retronism_SideConfig.TYPE_GAS)) continue;
 			if (te instanceof Retronism_TileMegaPipe) {
@@ -312,7 +312,7 @@ public class Retronism_TileMegaPipe extends TileEntity
 		for (int side = 0; side < 6; side++) {
 			if (side == itemReceivedFrom) continue;
 			int[] d = DIRS[side];
-			TileEntity te = worldObj.getBlockTileEntity(xCoord+d[0], yCoord+d[1], zCoord+d[2]);
+			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, xCoord+d[0], yCoord+d[1], zCoord+d[2]);
 			if (te == null || te == this) continue;
 			if (!canSendType(side, te, Retronism_SideConfig.TYPE_ITEM)) continue;
 			if (te instanceof Retronism_TileMegaPipe) {

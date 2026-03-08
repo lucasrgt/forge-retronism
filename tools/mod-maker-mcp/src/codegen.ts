@@ -88,9 +88,14 @@ export function generateAllFiles(): GeneratedFile[] {
 // ---------------------------------------------------------------------------
 
 function genControllerBlock(name: string): string {
+  // Check if this machine has ports
+  const state = getState();
+  const json = serialize();
+  const controllerHasPorts = json.portModes && Object.keys(json.portModes).length > 0;
+
   return `package retronism.block;
 
-import net.minecraft.src.*;
+import net.minecraft.src.*;${controllerHasPorts ? '\nimport retronism.api.Retronism_PortRegistry;' : ''}
 
 public class ${PREFIX}Block${name}Controller extends BlockContainer {
     public ${PREFIX}Block${name}Controller(int id, int tex) {
@@ -113,6 +118,8 @@ public class ${PREFIX}Block${name}Controller extends BlockContainer {
         if (tile == null) return false;
 
         if (!tile.checkStructure(world, x, y, z)) {
+            String debug = tile.getLastFailDebug();
+            player.addChatMessage("Structure incomplete! " + (debug != null ? debug : ""));
             return true;
         }
 
@@ -129,9 +136,11 @@ public class ${PREFIX}Block${name}Controller extends BlockContainer {
     }
 
     @Override
-    public void onBlockRemoval(World world, int x, int y, int z) {
+    public void onBlockRemoval(World world, int x, int y, int z) {${controllerHasPorts ? `
+        Retronism_PortRegistry.unregisterAllForController(x, y, z);` : ''}
         ${PREFIX}Tile${name} tile = (${PREFIX}Tile${name}) world.getBlockTileEntity(x, y, z);
         if (tile != null) {
+            tile.isFormed = false;
             for (int i = 0; i < tile.getSizeInventory(); i++) {
                 ItemStack stack = tile.getStackInSlot(i);
                 if (stack != null) {
@@ -162,10 +171,22 @@ function genTileEntity(
   const inputSlots = slotInfo.inputs.length;
   const outputSlots = slotInfo.outputs.length;
 
+  // Build PORTS array from JSON portModes + portTypes
+  const portEntries: { sx: number; sy: number; sz: number; portType: string; portMode: string }[] = [];
+  if (json.portModes && json.portTypes) {
+    for (const key of Object.keys(json.portModes)) {
+      const [sx, sy, sz] = key.split(',').map(Number);
+      const mode = json.portModes[key];
+      const type = json.portTypes[key] || 'energy';
+      portEntries.push({ sx, sy, sz, portType: type, portMode: mode });
+    }
+  }
+  const hasPorts = portEntries.length > 0;
+
   let code = `package retronism.tile;
 
 import net.minecraft.src.*;
-${hasFluid ? 'import retronism.api.Retronism_IFluidHandler;\nimport retronism.api.Retronism_FluidType;\n' : ''}${hasGas ? 'import retronism.api.Retronism_IGasHandler;\nimport retronism.api.Retronism_GasType;\n' : ''}${hasEnergy ? 'import retronism.api.Retronism_IEnergyReceiver;\n' : ''}
+${hasFluid ? 'import retronism.api.Retronism_IFluidHandler;\nimport retronism.api.Retronism_FluidType;\n' : ''}${hasGas ? 'import retronism.api.Retronism_IGasHandler;\nimport retronism.api.Retronism_GasType;\n' : ''}${hasEnergy ? 'import retronism.api.Retronism_IEnergyReceiver;\n' : ''}${hasPorts ? 'import retronism.api.Retronism_PortRegistry;\n' : ''}import retronism.Retronism_Registry;
 public class ${PREFIX}Tile${name} extends TileEntity implements ${interfaces.join(', ')} {
 
     private ItemStack[] inventory = new ItemStack[${totalSlots}];
@@ -207,58 +228,184 @@ public class ${PREFIX}Tile${name} extends TileEntity implements ${interfaces.joi
   const structResult = genStructureArray(json, name);
 
   // Build expectedIds array initialization
+  const hasMetaBlocks = structResult.typeMappings.some(m => m.mcMeta !== undefined);
   const expectedIdsInit = structResult.typeMappings
     .map(m => `        expectedIds[${m.constName}] = ${m.javaBlockIdExpr};`)
     .join('\n');
+  const expectedMetaInit = hasMetaBlocks
+    ? structResult.typeMappings
+        .map(m => `        expectedMeta[${m.constName}] = ${m.mcMeta !== undefined ? m.mcMeta : -1};`)
+        .join('\n')
+    : '';
+
+  // Generate PORTS array
+  let portsCode = '';
+  if (hasPorts) {
+    const portTypeMap: Record<string, string> = {
+      energy: 'Retronism_PortRegistry.PORT_TYPE_ENERGY',
+      fluid: 'Retronism_PortRegistry.PORT_TYPE_FLUID',
+      gas: 'Retronism_PortRegistry.PORT_TYPE_GAS',
+    };
+    const portModeMap: Record<string, string> = {
+      input: 'Retronism_PortRegistry.PORT_MODE_INPUT',
+      output: 'Retronism_PortRegistry.PORT_MODE_OUTPUT',
+      input_output: 'Retronism_PortRegistry.PORT_MODE_INPUT',
+    };
+    const portLines = portEntries.map(p =>
+      `        {${p.sx}, ${p.sy}, ${p.sz}, ${portTypeMap[p.portType] || portTypeMap.energy}, ${portModeMap[p.portMode] || portModeMap.input}},`
+    ).join('\n');
+    portsCode = `
+    // Port definitions: {structX, structY, structZ, portType, portMode}
+    private static final int[][] PORTS = {
+${portLines}
+    };
+
+    private int formedRotation = -1;
+    private boolean portsRegistered = false;
+`;
+  }
 
   code += `
 ${structResult.code}
+${portsCode}
+    private String lastFailDebug = null;
+    public String getLastFailDebug() { return lastFailDebug; }
 
     public boolean checkStructure(World world, int cx, int cy, int cz) {
         int ctrlX = -1, ctrlY = -1, ctrlZ = -1;
-        for (int y = 0; y < STRUCTURE.length; y++) {
-            for (int z = 0; z < STRUCTURE[y].length; z++) {
-                for (int x = 0; x < STRUCTURE[y][z].length; x++) {
-                    if (STRUCTURE[y][z][x] == ${structResult.controllerConst}) {
-                        ctrlX = x; ctrlY = y; ctrlZ = z;
-                    }
-                }
-            }
-        }
+        for (int y = 0; y < STRUCTURE.length; y++)
+            for (int z = 0; z < STRUCTURE[y].length; z++)
+                for (int x = 0; x < STRUCTURE[y][z].length; x++)
+                    if (STRUCTURE[y][z][x] == ${structResult.controllerConst}) { ctrlX = x; ctrlY = y; ctrlZ = z; }
         if (ctrlX == -1) { isFormed = false; return false; }
 
         int[] expectedIds = new int[TYPE_COUNT];
-${expectedIdsInit}
+${expectedIdsInit}${hasMetaBlocks ? `
+        int[] expectedMeta = new int[TYPE_COUNT];
+        for (int i = 0; i < TYPE_COUNT; i++) expectedMeta[i] = -1;
+${expectedMetaInit}` : ''}
 
-        for (int y = 0; y < STRUCTURE.length; y++) {
-            for (int z = 0; z < STRUCTURE[y].length; z++) {
-                for (int x = 0; x < STRUCTURE[y][z].length; x++) {
-                    int expected = STRUCTURE[y][z][x];
-                    if (expected == TYPE_AIR) continue;
+        int[][] facings = {
+            { 1, 0, 0, 1},
+            { 0, 1,-1, 0},
+            {-1, 0, 0,-1},
+            { 0,-1, 1, 0},
+        };
 
-                    int wx = cx + (x - ctrlX);
-                    int wy = cy + (y - ctrlY);
-                    int wz = cz + (z - ctrlZ);
-                    int blockId = world.getBlockId(wx, wy, wz);
+        lastFailDebug = null;
+        String allFails = "";
 
-                    if (blockId != expectedIds[expected]) {
-                        isFormed = false;
-                        return false;
+        for (int f = 0; f < 4; f++) {
+            boolean ok = true;
+            for (int sy = 0; sy < STRUCTURE.length && ok; sy++) {
+                for (int sz = 0; sz < STRUCTURE[sy].length && ok; sz++) {
+                    for (int sx = 0; sx < STRUCTURE[sy][sz].length && ok; sx++) {
+                        int expected = STRUCTURE[sy][sz][sx];
+                        if (expected == TYPE_AIR) continue;
+                        int relX = sx - ctrlX;
+                        int relZ = sz - ctrlZ;
+                        int wx = cx + relX * facings[f][0] + relZ * facings[f][2];
+                        int wy = cy + (sy - ctrlY);
+                        int wz = cz + relX * facings[f][1] + relZ * facings[f][3];
+                        int blockId = world.getBlockId(wx, wy, wz);${hasMetaBlocks ? `
+                        int meta = world.getBlockMetadata(wx, wy, wz);
+                        boolean match = (blockId == expectedIds[expected]) && (expectedMeta[expected] < 0 || meta == expectedMeta[expected]);` : `
+                        boolean match = (blockId == expectedIds[expected]);`}
+                        if (!match) {
+                            allFails += "rot" + f + ":s(" + sx + "," + sy + "," + sz + ")w(" + wx + "," + wy + "," + wz + ")exp=" + expectedIds[expected] + "got=" + blockId + "${hasMetaBlocks ? `:" + meta + "` : `"`} | ";
+                            ok = false;
+                        }
                     }
                 }
             }
+            if (ok) {
+                boolean wasFormed = isFormed;
+                isFormed = true;${hasPorts ? `
+                formedRotation = f;
+                if (!wasFormed) {
+                    registerPorts(cx, cy, cz, facings[f]);
+                    applyPortMetadata(world, cx, cy, cz, facings[f]);
+                }` : ''}
+                return true;
+            }
         }
-        isFormed = true;
-        return true;
+${hasPorts ? `
+        if (isFormed) {
+            unregisterPorts(cx, cy, cz);
+        }` : ''}
+        lastFailDebug = allFails;
+        isFormed = false;${hasPorts ? '\n        formedRotation = -1;' : ''}
+        return false;
     }
 `;
 
+  // Port register/unregister methods
+  if (hasPorts) {
+    code += `
+    private void registerPorts(int cx, int cy, int cz, int[] facing) {
+        int ctrlX = -1, ctrlZ = -1;
+        for (int y = 0; y < STRUCTURE.length; y++)
+            for (int z = 0; z < STRUCTURE[y].length; z++)
+                for (int x = 0; x < STRUCTURE[y][z].length; x++)
+                    if (STRUCTURE[y][z][x] == ${structResult.controllerConst}) { ctrlX = x; ctrlZ = z; }
+        for (int[] port : PORTS) {
+            int relX = port[0] - ctrlX, relZ = port[2] - ctrlZ;
+            int wx = cx + relX * facing[0] + relZ * facing[2];
+            int wy = cy + (port[1] - ${json.controllerPos ? json.controllerPos.split(',').map(Number)[1] : 0});
+            int wz = cz + relX * facing[1] + relZ * facing[3];
+            Retronism_PortRegistry.registerPort(wx, wy, wz, cx, cy, cz, port[3], port[4]);
+        }
+        portsRegistered = true;
+    }
+
+    private void unregisterPorts(int cx, int cy, int cz) {
+        Retronism_PortRegistry.unregisterAllForController(cx, cy, cz);
+        portsRegistered = false;
+    }
+
+    private void applyPortMetadata(World world, int cx, int cy, int cz, int[] facing) {
+        int ctrlX = -1, ctrlZ = -1, ctrlY = -1;
+        for (int y = 0; y < STRUCTURE.length; y++)
+            for (int z = 0; z < STRUCTURE[y].length; z++)
+                for (int x = 0; x < STRUCTURE[y][z].length; x++)
+                    if (STRUCTURE[y][z][x] == ${structResult.controllerConst}) { ctrlX = x; ctrlY = y; ctrlZ = z; }
+        for (int[] port : PORTS) {
+            int relX = port[0] - ctrlX, relZ = port[2] - ctrlZ;
+            int wx = cx + relX * facing[0] + relZ * facing[2];
+            int wy = cy + (port[1] - ctrlY);
+            int wz = cz + relX * facing[1] + relZ * facing[3];
+            int meta = port[3] - 1; // PORT_TYPE_ENERGY=1->0, FLUID=2->1, GAS=3->2
+            world.setBlockMetadataWithNotify(wx, wy, wz, meta);
+        }
+    }
+`;
+  }
+
   // updateEntity for machines
   if (json.structType === 'machine') {
-    code += `
+    let portReRegister = '';
+    if (hasPorts) {
+      portReRegister = `
+        // Re-register ports after world load
+        if (isFormed && !portsRegistered && formedRotation >= 0) {
+            int[][] facings = {
+                { 1, 0, 0, 1}, { 0, 1, -1, 0}, {-1, 0, 0,-1}, { 0,-1, 1, 0},
+            };
+            registerPorts(xCoord, yCoord, zCoord, facings[formedRotation]);
+        }
+
+        // Periodically recheck structure integrity
+        if (isFormed && ++recheckTimer >= 20) {
+            recheckTimer = 0;
+            checkStructure(worldObj, xCoord, yCoord, zCoord);
+        }
+`;
+    }
+    code += `${hasPorts ? '\n    private int recheckTimer = 0;\n' : ''}
     @Override
     public void updateEntity() {
         if (worldObj.multiplayerWorld) return;
+${portReRegister}
         if (!isFormed) return;
 
         boolean canProcess = canProcess();
@@ -425,6 +572,7 @@ ${expectedIdsInit}
         super.readFromNBT(nbt);
         isFormed = nbt.getBoolean("Formed");
 `;
+  if (hasPorts) code += `        formedRotation = nbt.getInteger("FormedRotation");\n`;
   if (hasEnergy) code += `        storedEnergy = nbt.getInteger("Energy");\n`;
   if (hasFluid) {
     code += `        fluidType = nbt.getInteger("FluidType");\n`;
@@ -457,6 +605,7 @@ ${expectedIdsInit}
         super.writeToNBT(nbt);
         nbt.setBoolean("Formed", isFormed);
 `;
+  if (hasPorts) code += `        nbt.setInteger("FormedRotation", formedRotation);\n`;
   if (hasEnergy) code += `        nbt.setInteger("Energy", storedEnergy);\n`;
   if (hasFluid) {
     code += `        nbt.setInteger("FluidType", fluidType);\n`;
@@ -493,6 +642,7 @@ interface BlockTypeMapping {
   constName: string;
   intValue: number;
   javaBlockIdExpr: string; // Java expression to get block ID
+  mcMeta?: number; // If defined, also check block metadata
 }
 
 interface StructureArrayResult {
@@ -513,9 +663,8 @@ function genStructureArray(json: SerializedMultiblock, name: string): StructureA
     }
   }
 
-  // Find controller position and block type from metadata
+  // Find controller position and char
   const controllerPos = json.controllerPos;
-  let controllerBlockId: string | undefined;
   let controllerChar: string | null = null;
   if (controllerPos) {
     const [cx, cy, cz] = controllerPos.split(',').map(Number);
@@ -523,59 +672,51 @@ function genStructureArray(json: SerializedMultiblock, name: string): StructureA
       if (layer.layer === cy) {
         if (layer.pattern[cz] && layer.pattern[cz][cx] && layer.pattern[cz][cx] !== ' ') {
           controllerChar = layer.pattern[cz][cx];
-          controllerBlockId = json.legend[controllerChar];
         }
       }
     }
   }
 
-  // Build char-to-int mapping dynamically from registry
   const charToInt: Record<string, number> = { ' ': 0 };
   let nextInt = 1;
   let code = '    private static final int TYPE_AIR = 0;\n';
 
-  // Reserve TYPE_CONTROLLER = 1 for the controller block position
+  // TYPE_CONTROLLER = 1
   code += `    private static final int TYPE_CONTROLLER = 1;\n`;
   const controllerConst = 'TYPE_CONTROLLER';
   const typeMappings: BlockTypeMapping[] = [];
-  // Use the controller block's Java reference (generated block class)
+  const lowerName = name.charAt(0).toLowerCase() + name.slice(1);
   typeMappings.push({
     constName: 'TYPE_CONTROLLER',
     intValue: 1,
-    javaBlockIdExpr: `mod_Retronism.block${name}Controller.blockID`,
+    javaBlockIdExpr: `Retronism_Registry.${lowerName}ControllerBlock.blockID`,
   });
   nextInt = 2;
 
+  // --- Handle all block chars ---
   for (const ch of usedChars) {
     const blockId = json.legend[ch];
     if (!blockId || blockId === 'air') continue;
     const blockDef = blockRegistry.get(blockId);
     if (!blockDef) continue;
 
-    // Skip if this char is used for the controller position — we handle it separately
-    // But ONLY if this char is EXCLUSIVELY the controller block. If other positions
-    // also use this char, we need a type for the non-controller positions too.
+    // Skip controller char if only used at controller position
     if (ch === controllerChar) {
-      // Check if any non-controller position uses this char
       let usedElsewhere = false;
       for (const layer of json.structure) {
         for (let z = 0; z < layer.pattern.length; z++) {
           for (let x = 0; x < layer.pattern[z].length; x++) {
             if (layer.pattern[z][x] === ch) {
               const key = `${x},${layer.layer},${z}`;
-              if (key !== controllerPos) {
-                usedElsewhere = true;
-              }
+              if (key !== controllerPos) usedElsewhere = true;
             }
           }
         }
       }
       if (!usedElsewhere) {
-        // This char is only used for the controller — map it to TYPE_CONTROLLER
         charToInt[ch] = 1; // TYPE_CONTROLLER
         continue;
       }
-      // Otherwise, also create a regular type mapping for non-controller positions
     }
 
     if (charToInt[ch] !== undefined) continue;
@@ -584,20 +725,17 @@ function genStructureArray(json: SerializedMultiblock, name: string): StructureA
     code += `    private static final int ${constName} = ${nextInt};\n`;
 
     let javaBlockIdExpr: string;
-    if (blockDef.mcId !== undefined) {
-      javaBlockIdExpr = `${blockDef.mcId}`;
+    if (blockId === 'machine_port') {
+      javaBlockIdExpr = 'Retronism_Registry.machinePortBlock.blockID';
     } else {
-      // Custom blocks without mcId — should not happen (all blocks have mcId now)
       javaBlockIdExpr = `${blockDef.mcId ?? 0}`;
     }
-
     typeMappings.push({ constName, intValue: nextInt, javaBlockIdExpr });
     nextInt++;
   }
 
   code += `    private static final int TYPE_COUNT = ${nextInt};\n`;
 
-  // Build the structure array, replacing controller position with TYPE_CONTROLLER
   code += '\n    private static final int[][][] STRUCTURE = {\n';
   for (const layer of json.structure) {
     code += `        { // Layer ${layer.layer}\n`;
@@ -646,7 +784,7 @@ function genContainer(
 
   const lastFieldDecl = syncFields.map(f => `    private int ${f.field} = -1;`).join('\n');
   const syncCheck = syncFields.map((f, i) =>
-    `        if (${f.field} != ${f.getter}) {\n            ${f.field} = ${f.getter};\n            for (int j = 0; j < crafters.size(); j++) {\n                ((ICrafting)crafters.get(j)).updateCraftingInventoryInfo(this, ${i}, ${f.field});\n            }\n        }`
+    `        if (${f.field} != ${f.getter}) {\n            ${f.field} = ${f.getter};\n            for (int j = 0; j < this.field_20121_g.size(); j++) {\n                ((ICrafting)this.field_20121_g.get(j)).func_20158_a(this, ${i}, ${f.field});\n            }\n        }`
   ).join('\n');
   const syncReceive = syncFields.map((f, i) =>
     `        if (id == ${i}) { /* ${f.field} */ }`
@@ -680,26 +818,22 @@ ${slotCode}
         }
     }
 
-    @Override
-    public boolean canInteractWith(EntityPlayer player) {
+    public boolean isUsableByPlayer(EntityPlayer player) {
         return tile.canInteractWith(player);
     }
 
-    @Override
     public void updateCraftingResults() {
         super.updateCraftingResults();
 ${syncCheck}
     }
 
-    @Override
     public void func_20112_a(int id, int value) {
 ${syncReceive}
     }
 
-    @Override
     public ItemStack getStackInSlot(int slotIndex) {
         ItemStack result = null;
-        Slot slot = (Slot) inventorySlots.get(slotIndex);
+        Slot slot = (Slot) this.slots.get(slotIndex);
         if (slot != null && slot.getHasStack()) {
             ItemStack slotStack = slot.getStack();
             result = slotStack.copy();
@@ -753,7 +887,7 @@ function genGui(
 `;
   }
 
-  const fluidTank = getComponentByType('fluid_tank');
+  const fluidTank = getComponentByType('fluid_tank') || getComponentByType('fluid_tank_small');
   if (hasFluid && fluidTank) {
     const tx = fluidTank.x + 1, ty = fluidTank.y + 1;
     const tw = fluidTank.w - 2, th = fluidTank.h - 2;
@@ -766,7 +900,7 @@ function genGui(
 `;
   }
 
-  const gasTank = getComponentByType('gas_tank');
+  const gasTank = getComponentByType('gas_tank') || getComponentByType('gas_tank_small');
   if (hasGas && gasTank) {
     const gx = gasTank.x + 1, gy = gasTank.y + 1;
     const gw = gasTank.w - 2, gh = gasTank.h - 2;
@@ -777,6 +911,33 @@ function genGui(
             drawRect(x + ${gx}, y + ${gy} + ${gh} - gasScaled, x + ${gx} + ${gw}, y + ${gy} + ${gh}, 0xFFAAAAAA);
         }
 `;
+  }
+
+  // Build tooltip code
+  let tooltipChecks = '';
+  if (hasEnergy && energyBar) {
+    const ex1 = energyBar.x, ey1 = energyBar.y;
+    const ex2 = energyBar.x + energyBar.w, ey2 = energyBar.y + energyBar.h;
+    tooltipChecks += `
+        if (relMouseX >= ${ex1} && relMouseX < ${ex2} && relMouseY >= ${ey1} && relMouseY < ${ey2}) {
+            tooltip = "Energy: " + tile.getStoredEnergy() + " / " + tile.getMaxEnergy() + " RN";
+        }`;
+  }
+  if (hasFluid && fluidTank) {
+    const fx1 = fluidTank.x, fy1 = fluidTank.y;
+    const fx2 = fluidTank.x + fluidTank.w, fy2 = fluidTank.y + fluidTank.h;
+    tooltipChecks += `
+        ${tooltipChecks ? 'else ' : ''}if (relMouseX >= ${fx1} && relMouseX < ${fx2} && relMouseY >= ${fy1} && relMouseY < ${fy2}) {
+            tooltip = "Fluid: " + tile.getFluidAmount() + " / " + tile.getFluidCapacity() + " mB";
+        }`;
+  }
+  if (hasGas && gasTank) {
+    const gx1 = gasTank.x, gy1 = gasTank.y;
+    const gx2 = gasTank.x + gasTank.w, gy2 = gasTank.y + gasTank.h;
+    tooltipChecks += `
+        ${tooltipChecks ? 'else ' : ''}if (relMouseX >= ${gx1} && relMouseX < ${gx2} && relMouseY >= ${gy1} && relMouseY < ${gy2}) {
+            tooltip = "Gas: " + tile.getGasAmount() + " / " + tile.getGasCapacity() + " mB";
+        }`;
   }
 
   return `package retronism.gui;
@@ -790,6 +951,8 @@ public class ${PREFIX}Gui${name} extends GuiContainer {
 
     private ${PREFIX}Tile${name} tile;
     private int textureID;
+    private int mouseX;
+    private int mouseY;
 
     public ${PREFIX}Gui${name}(InventoryPlayer playerInv, ${PREFIX}Tile${name} tile) {
         super(new ${PREFIX}Container${name}(playerInv, tile));
@@ -799,12 +962,37 @@ public class ${PREFIX}Gui${name} extends GuiContainer {
     }
 
     @Override
+    public void drawScreen(int mouseX, int mouseY, float partialTick) {
+        this.mouseX = mouseX;
+        this.mouseY = mouseY;
+        super.drawScreen(mouseX, mouseY, partialTick);
+    }
+
+    @Override
     protected void drawGuiContainerForegroundLayer() {
         fontRenderer.drawString("${name}", (xSize - fontRenderer.getStringWidth("${name}")) / 2, 6, 4210752);
         fontRenderer.drawString("Inventory", 8, ySize - 96 + 2, 4210752);
 
         if (!tile.isFormed) {
             fontRenderer.drawString("Structure incomplete!", 8, 20, 0xFF4444);
+            return;
+        }
+
+        int guiLeft = (this.width - this.xSize) / 2;
+        int guiTop = (this.height - this.ySize) / 2;
+        int relMouseX = this.mouseX - guiLeft;
+        int relMouseY = this.mouseY - guiTop;
+
+        String tooltip = null;
+${tooltipChecks}
+
+        if (tooltip != null) {
+            int tw = this.fontRenderer.getStringWidth(tooltip);
+            int tx = relMouseX - tw - 5;
+            if (tx < 0) tx = relMouseX + 12;
+            int ty = relMouseY - 12;
+            this.drawGradientRect(tx - 3, ty - 3, tx + tw + 3, ty + 11, -1073741824, -1073741824);
+            this.fontRenderer.drawStringWithShadow(tooltip, tx, ty, -1);
         }
     }
 
@@ -866,10 +1054,12 @@ gui.panel(0, 0, 176, 166)
         script += `gui.flame(${comp.x}, ${comp.y})\n`;
         break;
       case 'fluid_tank':
-        script += `gui.energy_bar(${comp.x}, ${comp.y}, ${comp.w}, ${comp.h})  # fluid tank\n`;
+      case 'fluid_tank_small':
+        script += `gui.fluid_tank(${comp.x}, ${comp.y}, ${comp.w}, ${comp.h})\n`;
         break;
       case 'gas_tank':
-        script += `gui.energy_bar(${comp.x}, ${comp.y}, ${comp.w}, ${comp.h})  # gas tank\n`;
+      case 'gas_tank_small':
+        script += `gui.gas_tank(${comp.x}, ${comp.y}, ${comp.w}, ${comp.h})\n`;
         break;
       case 'separator':
         script += `gui.separator(${comp.x}, ${comp.y}, ${comp.w})\n`;

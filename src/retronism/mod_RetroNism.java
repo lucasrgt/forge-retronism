@@ -37,6 +37,9 @@ public class mod_Retronism extends BaseMod {
 		Retronism_Registry.wrench.setIconIndex(ModLoader.addOverride("/gui/items.png", "/item/retronism_wrench.png"));
 		texCrusher = ModLoader.addOverride("/terrain.png", "/block/retronism_crusher.png");
 		Retronism_Registry.crusherBlock.blockIndexInTexture = texCrusher;
+		Retronism_Registry.machinePortBlock.texEnergy = ModLoader.addOverride("/terrain.png", "/block/retronism_port_energy.png");
+		Retronism_Registry.machinePortBlock.texFluid = ModLoader.addOverride("/terrain.png", "/block/retronism_port_fluid.png");
+		Retronism_Registry.machinePortBlock.texGas = ModLoader.addOverride("/terrain.png", "/block/retronism_port_gas.png");
 
 		// Register blocks, tiles, names
 		Retronism_Registry.registerAll(this);

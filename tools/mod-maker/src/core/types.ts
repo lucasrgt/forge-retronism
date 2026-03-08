@@ -7,7 +7,7 @@ export type IOType = 'energy' | 'fluid' | 'gas' | 'item'
 export type SlotRole = 'input' | 'output' | 'fuel'
 export type IoMode = 'input' | 'output' | 'display'
 export type GuiComponentType = 'slot' | 'big_slot' | 'energy_bar' | 'progress_arrow' | 'flame' | 'fluid_tank' | 'gas_tank' | 'fluid_tank_small' | 'gas_tank_small' | 'separator'
-export type BlockCategory = 'controller' | 'mod' | 'vanilla' | 'custom'
+export type BlockCategory = 'controller' | 'port' | 'mod' | 'vanilla' | 'custom'
 
 export interface BlockDef {
   id: string

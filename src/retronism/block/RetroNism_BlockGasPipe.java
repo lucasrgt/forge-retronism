@@ -73,7 +73,8 @@ public class Retronism_BlockGasPipe extends BlockContainer {
 		int id = world.getBlockId(x, y, z);
 		if (id == this.blockID || id == Retronism_Registry.megaPipeBlock.blockID) return true;
 		TileEntity te = world.getBlockTileEntity(x, y, z);
-		return te instanceof Retronism_IGasHandler;
+		if (te instanceof Retronism_IGasHandler) return true;
+		return Retronism_PortRegistry.isPortOfType(x, y, z, Retronism_PortRegistry.PORT_TYPE_GAS);
 	}
 
 	public boolean isNeighborMachine(IBlockAccess world, int nx, int ny, int nz) {

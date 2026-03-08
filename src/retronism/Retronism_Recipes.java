@@ -25,6 +25,9 @@ public class Retronism_Recipes {
 		ModLoader.AddRecipe(new ItemStack(Retronism_Registry.wrench, 1), new Object[] { "S", 'S', Item.stick });
 		ModLoader.AddRecipe(new ItemStack(Retronism_Registry.megaElectrolysisController, 1), new Object[] { "E", 'E', Block.sponge });
 		ModLoader.AddRecipe(new ItemStack(Retronism_Registry.megaElectrolysisCasing, 16), new Object[] { "L", 'L', Item.leather });
+		ModLoader.AddRecipe(new ItemStack(Retronism_Registry.ozonizerControllerBlock, 1), new Object[] { "P", 'P', Item.paper });
+		// Machine port (debug: 1 iron ingot = 4 ports, right-click to cycle type)
+		ModLoader.AddRecipe(new ItemStack(Retronism_Registry.machinePortBlock, 4), new Object[] { "I", 'I', Item.ingotIron });
 
 		// Crusher recipes: ore -> 2 dust
 		Retronism_RecipesCrusher.crushing().addCrushing(Block.oreIron.blockID, new ItemStack(Retronism_Registry.ironDust, 2));

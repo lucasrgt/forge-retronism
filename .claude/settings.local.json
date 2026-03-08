@@ -51,7 +51,17 @@
       "Bash(npm run build)",
       "Bash(npm install)",
       "Bash(npx tsc --project tsconfig.electron.json)",
-      "Bash(npx vite build)"
+      "Bash(npx vite build)",
+      "Bash(xargs grep -l \"fluid_tank\\\\|gas_tank\\\\|fluid\\\\|gauge\")",
+      "mcp__retronism-mod-maker__set_port",
+      "mcp__retronism-mod-maker__remove_blocks",
+      "mcp__retronism-mod-maker__get_state",
+      "mcp__retronism-mod-maker__set_controller",
+      "mcp__retronism-mod-maker__register_block",
+      "mcp__retronism-mod-maker__unregister_block",
+      "Bash(python tools/build_port_textures.py)",
+      "Bash(grep -l \"extends ItemBlock\" /c/Users/lucas/RetroNism/mcp/minecraft/src/net/minecraft/src/Item*.java)",
+      "mcp__retronism-mod-maker__load_project"
     ]
   }
 }

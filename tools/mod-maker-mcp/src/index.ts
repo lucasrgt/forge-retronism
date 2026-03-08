@@ -41,6 +41,17 @@ function wsSend(msg: object): void {
   }
 }
 
+function isElectronConnected(): boolean {
+  return wsConnection !== null && wsConnection.readyState === WebSocket.OPEN;
+}
+
+function requireElectron(): string | null {
+  if (!isElectronConnected()) {
+    return 'Error: Mod Maker app is not open. Please open the Electron app first (cd tools/mod-maker && npm run dev), then try again.';
+  }
+  return null;
+}
+
 function syncStateViaWs(): void {
   wsSend({ type: 'state', payload: serialize() });
 }
@@ -108,6 +119,30 @@ const server = new McpServer({
   version: '1.0.0',
 });
 
+// Read-only tools that don't require the Electron app to be open
+const READ_ONLY_TOOLS = new Set([
+  'get_state', 'get_block_at', 'list_blocks_by_type', 'list_block_registry',
+  'list_projects', 'export_json', 'export_model_context',
+]);
+
+// Wrap server.tool to auto-inject Electron connection guard on mutating tools
+const originalTool = server.tool.bind(server);
+server.tool = function (...toolArgs: any[]) {
+  // server.tool(name, desc, schema, handler) or server.tool(name, desc, handler)
+  const handlerIdx = toolArgs.length - 1;
+  const toolName = toolArgs[0] as string;
+  const originalHandler = toolArgs[handlerIdx];
+
+  if (!READ_ONLY_TOOLS.has(toolName)) {
+    toolArgs[handlerIdx] = async (...handlerArgs: any[]) => {
+      const guard = requireElectron();
+      if (guard) return { content: [{ type: 'text' as const, text: guard }] };
+      return originalHandler(...handlerArgs);
+    };
+  }
+  return (originalTool as any)(...toolArgs);
+} as any;
+
 // ---------------------------------------------------------------------------
 // Zod helpers for dynamic block validation
 // ---------------------------------------------------------------------------
@@ -156,11 +191,32 @@ server.tool(
       defaultShellBlock: args.defaultShellBlock,
     });
 
+    // Auto-register a controller block for this multiblock if it doesn't exist yet
+    const ctrlId = args.name.replace(/([A-Z])/g, '_$1').toLowerCase().replace(/^_/, '') + '_ctrl';
+    if (!blockRegistry.has(ctrlId)) {
+      const char = blockRegistry.nextAvailableChar();
+      if (char) {
+        try {
+          blockRegistry.register({
+            id: ctrlId,
+            category: 'controller' as BlockCategory,
+            label: `${args.name} Controller`,
+            color: 0x6a8a6a,
+            char,
+            builtIn: false,
+            mcId: args.blockId,
+            terrainIndex: 45,
+          });
+        } catch (_) { /* ignore if already exists */ }
+      }
+    }
+
     let msg = `Created multiblock "${args.name}" (${args.w}x${args.h}x${args.d} ${args.structType})`;
     if (args.fillShell) {
       const count = fillShell();
       msg += `\nFilled shell with ${count} ${args.defaultShellBlock} blocks.`;
     }
+    msg += `\nController block "${ctrlId}" registered in block palette.`;
     msg += '\n\n' + getStateSummary();
     return { content: [{ type: 'text', text: msg }] };
   },
@@ -233,7 +289,7 @@ server.tool(
   {
     preset: z.enum(['processor', 'triple_processor', 'dual_input', 'generator', 'pump', 'fluid_to_gas', 'single_slot', 'tank', 'fluid_processor', 'none']).default('none').describe('Load a preset layout based on real mod machines'),
     components: z.array(z.object({
-      type: z.enum(['slot', 'big_slot', 'energy_bar', 'progress_arrow', 'flame', 'fluid_tank', 'gas_tank', 'separator']),
+      type: z.enum(['slot', 'big_slot', 'energy_bar', 'progress_arrow', 'flame', 'fluid_tank', 'gas_tank', 'fluid_tank_small', 'gas_tank_small', 'separator']),
       x: z.number().int().min(0).max(175),
       y: z.number().int().min(0).max(165),
       w: z.number().int().optional().describe('Width override (for resizable components)'),
@@ -243,6 +299,8 @@ server.tool(
     })).default([]).describe('Additional components to add after preset'),
   },
   async (args) => {
+    // Auto-navigate to GUI tab
+    wsSend({ type: 'set-tab', tab: 'gui' });
     if (args.preset !== 'none') {
       loadGuiPreset(args.preset);
     }
@@ -803,7 +861,7 @@ server.tool(
   'Register a new custom block type for use in multiblock structures. The block becomes available in all placement tools immediately.',
   {
     id: z.string().regex(/^[a-z][a-z0-9_]*$/).describe('Unique block ID in snake_case (e.g., steel_casing, hv_energy_port)'),
-    category: z.enum(['mod', 'vanilla', 'custom']).describe('Block category — determines behavior in structure validation and codegen'),
+    category: z.enum(['controller', 'mod', 'vanilla', 'custom']).describe('Block category — determines behavior in structure validation and codegen'),
     label: z.string().describe('Display label (e.g., "Steel Casing")'),
     color: z.number().int().describe('Hex color for 3D preview (e.g., 0xAABBCC)'),
     char: z.string().max(1).optional().describe('Single char for serialization (auto-assigned if omitted)'),

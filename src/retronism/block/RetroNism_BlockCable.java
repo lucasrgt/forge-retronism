@@ -73,7 +73,8 @@ public class Retronism_BlockCable extends BlockContainer {
 		int id = world.getBlockId(x, y, z);
 		if (id == this.blockID || id == Retronism_Registry.megaPipeBlock.blockID) return true;
 		TileEntity te = world.getBlockTileEntity(x, y, z);
-		return te instanceof Retronism_IEnergyReceiver || te instanceof Retronism_TileGenerator;
+		if (te instanceof Retronism_IEnergyReceiver || te instanceof Retronism_TileGenerator) return true;
+		return Retronism_PortRegistry.isPortOfType(x, y, z, Retronism_PortRegistry.PORT_TYPE_ENERGY);
 	}
 
 	public boolean isNeighborMachine(IBlockAccess world, int nx, int ny, int nz) {

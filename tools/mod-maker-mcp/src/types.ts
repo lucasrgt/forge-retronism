@@ -1,7 +1,7 @@
 import { DEFAULT_BLOCKS } from '../../shared/block-defaults.js';
 
 // Block category determines behavior in codegen and structure validation
-export type BlockCategory = 'controller' | 'mod' | 'vanilla' | 'custom';
+export type BlockCategory = 'controller' | 'port' | 'mod' | 'vanilla' | 'custom';
 export type StructureType = 'machine' | 'tank' | 'reactor' | 'custom';
 export type PortMode = 'input' | 'output' | 'input_output';
 export type IOType = 'energy' | 'fluid' | 'gas' | 'item';
@@ -10,7 +10,7 @@ export type IoMode = 'input' | 'output' | 'display';
 
 export type GuiComponentType =
   | 'slot' | 'big_slot' | 'energy_bar' | 'progress_arrow'
-  | 'flame' | 'fluid_tank' | 'gas_tank' | 'separator';
+  | 'flame' | 'fluid_tank' | 'gas_tank' | 'fluid_tank_small' | 'gas_tank_small' | 'separator';
 
 export const GUI_COMP_DEFS: Record<GuiComponentType, { w: number; h: number; slotType?: SlotType; ioMode: IoMode }> = {
   slot:           { w: 18, h: 18, slotType: 'input', ioMode: 'input' },
@@ -18,9 +18,11 @@ export const GUI_COMP_DEFS: Record<GuiComponentType, { w: number; h: number; slo
   energy_bar:     { w: 8,  h: 54, ioMode: 'display' },
   progress_arrow: { w: 24, h: 17, ioMode: 'display' },
   flame:          { w: 14, h: 14, ioMode: 'display' },
-  fluid_tank:     { w: 18, h: 54, ioMode: 'input' },
-  gas_tank:       { w: 18, h: 54, ioMode: 'input' },
-  separator:      { w: 162, h: 2, ioMode: 'display' },
+  fluid_tank:       { w: 18, h: 54, ioMode: 'input' },
+  gas_tank:         { w: 18, h: 54, ioMode: 'input' },
+  fluid_tank_small: { w: 18, h: 27, ioMode: 'input' },
+  gas_tank_small:   { w: 18, h: 27, ioMode: 'input' },
+  separator:        { w: 162, h: 2, ioMode: 'display' },
 };
 
 export interface BlockDef {
@@ -33,6 +35,7 @@ export interface BlockDef {
   tier?: number;
   builtIn: boolean;
   mcId?: number;
+  mcMeta?: number;
   terrainIndex?: number;
 }
 
@@ -145,6 +148,7 @@ export class BlockRegistry {
         portType: b.portType as IOType | undefined,
         builtIn: true,
         mcId: b.mcId,
+        mcMeta: (b as any).mcMeta,
         terrainIndex: b.terrainIndex,
       });
     }

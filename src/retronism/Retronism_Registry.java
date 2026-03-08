@@ -4,6 +4,7 @@ import net.minecraft.src.*;
 import retronism.block.*;
 import retronism.tile.*;
 import retronism.item.*;
+import retronism.render.*;
 
 public class Retronism_Registry {
 
@@ -88,6 +89,12 @@ public class Retronism_Registry {
 	public static final Block megaElectrolysisCasing = (new Retronism_BlockMegaElectrolysisCasing(214, 45))
 		.setBlockName("retroNismMegaElectrolysisCasing");
 
+	public static final Block ozonizerControllerBlock = (new Retronism_BlockOzonizerController(215, 45))
+		.setBlockName("retroNismOzonizerController");
+
+	public static final Retronism_BlockMachinePort machinePortBlock = (Retronism_BlockMachinePort) (new Retronism_BlockMachinePort(216, 45))
+		.setBlockName("retroNismMachinePort");
+
 	public static final Item testItem = (new Retronism_ItemTest(500))
 		.setIconIndex(7 + 3 * 16)
 		.setItemName("retroNismTestItem");
@@ -140,6 +147,8 @@ public class Retronism_Registry {
 		ModLoader.RegisterBlock(megaCrusherCoreBlock);
 		ModLoader.RegisterBlock(megaElectrolysisController);
 		ModLoader.RegisterBlock(megaElectrolysisCasing);
+		ModLoader.RegisterBlock(ozonizerControllerBlock);
+		ModLoader.RegisterBlock(machinePortBlock, Retronism_ItemBlockMachinePort.class);
 
 		// Tile Entities
 		ModLoader.RegisterTileEntity(Retronism_TileCrusher.class, "Crusher");
@@ -155,6 +164,7 @@ public class Retronism_Registry {
 		ModLoader.RegisterTileEntity(Retronism_TileMegaPipe.class, "MegaPipe");
 		ModLoader.RegisterTileEntity(Retronism_TileItemPipe.class, "ItemPipe");
 		ModLoader.RegisterTileEntity(Retronism_TileMegaElectrolysis.class, "MegaElectrolysis");
+		ModLoader.RegisterTileEntity(Retronism_TileOzonizer.class, "Ozonizer");
 
 		// Names - Blocks
 		ModLoader.AddName(testBlock, "Retronism Test Block");
@@ -172,6 +182,8 @@ public class Retronism_Registry {
 		ModLoader.AddName(megaCrusherCoreBlock, "Mega Crusher Controller");
 		ModLoader.AddName(megaElectrolysisController, "Mega Electrolysis Controller");
 		ModLoader.AddName(megaElectrolysisCasing, "Mega Electrolysis Casing");
+		ModLoader.AddName(ozonizerControllerBlock, "Ozonizer Controller");
+		ModLoader.AddName(machinePortBlock, "Basic Machine Port");
 
 		// Names - Items
 		ModLoader.AddName(testItem, "Retronism Test Item");

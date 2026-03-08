@@ -20,6 +20,7 @@ export const DEFAULT_BLOCKS = [
   { id: 'mega_pipe',       category: 'mod', label: 'Mega Pipe',        color: 0xcc8844, char: 't', mcId: 210, terrainIndex: 22 },
   { id: 'item_pipe',       category: 'mod', label: 'Item Pipe',        color: 0xee8833, char: 'v', mcId: 211, terrainIndex: 22 },
   { id: 'mega_elec_case',  category: 'mod', label: 'Mega Electrolysis Casing', color: 0x778888, char: 'Z', mcId: 214, terrainIndex: 45 },
+  { id: 'machine_port',    category: 'port', label: 'Machine Port',             color: 0xc8c800, char: '1', mcId: 216, terrainIndex: 45 },
 
   // ── Vanilla blocks (Beta 1.7.3) ────────────────────────────────────────
   { id: 'glass',              category: 'vanilla', label: 'Glass',              color: 0x88ddff, char: 'W', mcId: 20, terrainIndex: 49 },

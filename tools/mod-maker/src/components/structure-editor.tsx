@@ -1,9 +1,13 @@
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import * as THREE from 'three'
 import { useStore } from '@/hooks/use-store'
-import { blockRegistry, type BlockEntry } from '@/core/types'
+import { blockRegistry, type BlockEntry, type BlockCategory } from '@/core/types'
 import { loadTextures, isTexturesReady, getBlockMaterial, clearMaterialCache, getTileDataUrl } from '@/core/textures'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { BuildGuide } from '@/components/build-guide'
 
 export function StructureEditor() {
@@ -468,8 +472,10 @@ export function StructureEditor() {
   }, [dimensions])
 
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [addBlockOpen, setAddBlockOpen] = useState(false)
+  const registryVersion = useStore((s) => s.registryVersion)
 
-  // Organize blocks by category
+  // Organize blocks by category (reactive to registryVersion)
   const mergedCategories = useMemo(() => {
     const cats: Record<string, (typeof blockRegistry extends Map<string, infer V> ? V : never)[]> = {}
     for (const def of blockRegistry.values()) {
@@ -478,16 +484,17 @@ export function StructureEditor() {
       cats[cat].push(def)
     }
     return cats
-  }, [])
+  }, [registryVersion])
 
   const categoryLabels: Record<string, string> = {
     controller: 'Controller',
+    port: 'Port',
     mod: 'Mod',
     vanilla: 'Vanilla',
     custom: 'Custom',
   }
 
-  const categoryOrder = ['controller', 'mod', 'vanilla', 'custom']
+  const categoryOrder = ['controller', 'port', 'mod', 'vanilla', 'custom']
 
   const selectedDef = blockRegistry.get(selectedTool)
 
@@ -557,6 +564,15 @@ export function StructureEditor() {
               </div>
             )
           })}
+          <div className="mt-2 pt-2 border-t border-border">
+            <button
+              onClick={() => setAddBlockOpen(!addBlockOpen)}
+              className="flex items-center gap-1 px-2 py-1 rounded text-xs border border-dashed border-border hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <span className="text-sm font-bold">+</span> Add Block
+            </button>
+          </div>
+          {addBlockOpen && <AddBlockForm onDone={() => setAddBlockOpen(false)} />}
         </div>
       )}
 
@@ -587,6 +603,85 @@ function BlockIcon({ def, size = 16 }: { def?: { color: number; terrainIndex?: n
   )
 }
 
+
+const CHAR_POOL = 'iklmnopqrstuvwxyzZ0123456789'
+function nextAvailableChar(): string {
+  const used = new Set([...blockRegistry.values()].map(b => b.char))
+  for (const ch of CHAR_POOL) {
+    if (!used.has(ch)) return ch
+  }
+  return '?'
+}
+
+function AddBlockForm({ onDone }: { onDone: () => void }) {
+  const [id, setId] = useState('')
+  const [label, setLabel] = useState('')
+  const [category, setCategory] = useState<BlockCategory>('controller')
+  const [color, setColor] = useState('#6a8a6a')
+  const [mcId, setMcId] = useState(213)
+  const registerBlock = useStore((s) => s.registerBlock)
+
+  const handleSubmit = () => {
+    const cleanId = id.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^_+/, '')
+    if (!cleanId || blockRegistry.has(cleanId)) {
+      toast.error(blockRegistry.has(cleanId) ? `Block "${cleanId}" already exists` : 'Invalid ID')
+      return
+    }
+    const char = nextAvailableChar()
+    registerBlock({
+      id: cleanId,
+      category,
+      label: label || cleanId,
+      color: parseInt(color.replace('#', ''), 16),
+      char,
+      builtIn: false,
+      mcId: mcId || undefined,
+      terrainIndex: 45,
+    })
+    toast.success(`Block "${cleanId}" registered`)
+    setId('')
+    setLabel('')
+    onDone()
+  }
+
+  return (
+    <div className="mt-2 p-2 rounded border border-border bg-muted/30 space-y-1.5">
+      <div className="flex gap-1.5">
+        <div className="flex-1">
+          <Label>ID (snake_case)</Label>
+          <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="ozonizer_ctrl" />
+        </div>
+        <div className="flex-1">
+          <Label>Label</Label>
+          <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ozonizer Controller" />
+        </div>
+      </div>
+      <div className="flex gap-1.5">
+        <div className="flex-1">
+          <Label>Category</Label>
+          <Select value={category} onChange={(e) => setCategory(e.target.value as BlockCategory)}>
+            <option value="controller">Controller</option>
+            <option value="mod">Mod</option>
+            <option value="custom">Custom</option>
+          </Select>
+        </div>
+        <div className="w-16">
+          <Label>Color</Label>
+          <input type="color" value={color} onChange={(e) => setColor(e.target.value)}
+            className="w-full h-7 rounded border border-border cursor-pointer" />
+        </div>
+        <div className="w-16">
+          <Label>MC ID</Label>
+          <Input type="number" value={mcId} min={200} max={255} onChange={(e) => setMcId(+e.target.value)} />
+        </div>
+      </div>
+      <div className="flex gap-1.5">
+        <Button size="sm" onClick={handleSubmit}>Add</Button>
+        <Button size="sm" variant="outline" onClick={onDone}>Cancel</Button>
+      </div>
+    </div>
+  )
+}
 
 function BuildGuideDropdown() {
   const showBuildGuide = useStore((s) => s.showBuildGuide)

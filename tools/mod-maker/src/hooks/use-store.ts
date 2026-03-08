@@ -77,6 +77,9 @@ interface MultiblockStore {
   showBuildGuide: boolean
   mcpConnected: boolean
 
+  // Block registry version (incremented when custom blocks are added/removed)
+  registryVersion: number
+
   // MCP UI commands (consumed by structure-editor)
   pendingCamera: CameraCommand | null
   pendingHighlight: HighlightCommand | null
@@ -127,6 +130,10 @@ interface MultiblockStore {
   setHighlightCommand: (cmd: HighlightCommand) => void
   consumeHighlightCommand: () => HighlightCommand | null
 
+  // Actions: block registry
+  registerBlock: (def: BlockDef) => void
+  unregisterBlock: (id: string) => void
+
   // Actions: serialize/deserialize
   serialize: () => SerializedMultiblock
   deserialize: (data: SerializedMultiblock) => void
@@ -161,6 +168,7 @@ export const useStore = create<MultiblockStore>((set, get) => ({
   snapEnabled: true,
   gridSize: 9,
   activeTab: 'structure',
+  registryVersion: 0,
   pendingCamera: null,
   pendingHighlight: null,
 
@@ -334,6 +342,21 @@ export const useStore = create<MultiblockStore>((set, get) => ({
     return cmd
   },
 
+  // Block registry management
+  registerBlock: (def) => {
+    if (!blockRegistry.has(def.id)) {
+      blockRegistry.set(def.id, def)
+      set((s) => ({ registryVersion: s.registryVersion + 1 }))
+    }
+  },
+  unregisterBlock: (id) => {
+    const def = blockRegistry.get(id)
+    if (def && !def.builtIn) {
+      blockRegistry.delete(id)
+      set((s) => ({ registryVersion: s.registryVersion + 1 }))
+    }
+  },
+
   // Serialize: convert store state to JSON format matching MCP server
   serialize: () => {
     const s = get()
@@ -366,14 +389,17 @@ export const useStore = create<MultiblockStore>((set, get) => ({
       layers.push({ layer: y, pattern })
     }
 
-    // Find controller position and port types
+    // Find controller position, port modes and port types
     let controllerPos: string | undefined
     const portModes: Record<string, PortMode> = {}
     const portTypes: Record<string, IOType> = {}
     for (const [key, block] of s.blocks) {
       const bDef = blockRegistry.get(block.type)
       if (bDef?.category === 'controller') controllerPos = key
-      if (block.portType) portTypes[key] = block.portType
+      if (block.portType) {
+        portModes[key] = block.mode
+        portTypes[key] = block.portType
+      }
     }
 
     // Include custom blocks in registry field
@@ -403,10 +429,12 @@ export const useStore = create<MultiblockStore>((set, get) => ({
   // Deserialize: load from JSON format (from MCP server or file)
   deserialize: (data) => {
     // Register custom blocks from the saved registry before loading structure
+    let registryChanged = false
     if (data.registry) {
       for (const def of data.registry) {
         if (!blockRegistry.has(def.id)) {
           blockRegistry.set(def.id, def)
+          registryChanged = true
         }
       }
     }
@@ -438,7 +466,7 @@ export const useStore = create<MultiblockStore>((set, get) => ({
       }
     }
 
-    set({
+    set((s) => ({
       projectType: data.projectType || 'multiblock',
       name: data.name,
       structType: data.structType,
@@ -456,7 +484,8 @@ export const useStore = create<MultiblockStore>((set, get) => ({
       blocks,
       selectedBlock: null,
       selectedCompIndex: -1,
-    })
+      ...(registryChanged ? { registryVersion: s.registryVersion + 1 } : {}),
+    }))
   },
 
   // Export JSON via Electron file dialog

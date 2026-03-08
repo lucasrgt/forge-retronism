@@ -118,17 +118,23 @@ export function setPortType(x: number, y: number, z: number, portType: IOType | 
 }
 
 export function setController(key: string | null, blockType?: string): boolean {
-  // Clear any existing controller-category block
+  // Find existing controller block type before clearing
+  let existingCtrlType: string | undefined;
   for (const [k, block] of state.blocks) {
     const def = blockRegistry.get(block.blockId);
     if (def?.category === 'controller') {
+      existingCtrlType = block.blockId;
       state.blocks.delete(k);
     }
   }
   // Place controller block at new position
   if (key) {
-    // Use specified type, or find first controller-category block in registry
-    const type = blockType || blockRegistry.getAll().find(d => d.category === 'controller')?.id;
+    // Check if the target position already has a controller-category block
+    const existing = state.blocks.get(key);
+    const existingDef = existing ? blockRegistry.get(existing.blockId) : null;
+    const posCtrlType = existingDef?.category === 'controller' ? existing!.blockId : undefined;
+    // Priority: explicit blockType > block already at position > previously cleared controller > first in registry
+    const type = blockType || posCtrlType || existingCtrlType || blockRegistry.getAll().find(d => d.category === 'controller')?.id;
     if (!type) return false;
     state.blocks.set(key, { blockId: type, mode: 'input_output' });
   }

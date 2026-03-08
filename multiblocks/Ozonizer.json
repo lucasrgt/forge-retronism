@@ -1,0 +1,174 @@
+{
+  "name": "Ozonizer",
+  "structType": "machine",
+  "dimensions": [
+    3,
+    4,
+    3
+  ],
+  "ioTypes": [
+    "energy",
+    "fluid",
+    "gas"
+  ],
+  "capacity": {
+    "energy": 64000,
+    "fluid": 8000,
+    "gas": 8000
+  },
+  "processTime": 200,
+  "energyPerTick": 32,
+  "blockId": 215,
+  "defaultShellBlock": "iron_block",
+  "controllerPos": "1,1,0",
+  "structure": [
+    {
+      "layer": 0,
+      "pattern": [
+        [
+          "R",
+          "R",
+          "R"
+        ],
+        [
+          "R",
+          "R",
+          "R"
+        ],
+        [
+          "R",
+          "R",
+          "R"
+        ]
+      ]
+    },
+    {
+      "layer": 1,
+      "pattern": [
+        [
+          "R",
+          "m",
+          "R"
+        ],
+        [
+          " ",
+          " ",
+          " "
+        ],
+        [
+          "R",
+          " ",
+          "R"
+        ]
+      ]
+    },
+    {
+      "layer": 2,
+      "pattern": [
+        [
+          "W",
+          "R",
+          "W"
+        ],
+        [
+          "R",
+          " ",
+          "R"
+        ],
+        [
+          "W",
+          "R",
+          "W"
+        ]
+      ]
+    },
+    {
+      "layer": 3,
+      "pattern": [
+        [
+          " ",
+          "R",
+          " "
+        ],
+        [
+          "R",
+          " ",
+          "R"
+        ],
+        [
+          " ",
+          "R",
+          " "
+        ]
+      ]
+    }
+  ],
+  "legend": {
+    " ": "air",
+    "R": "iron_block",
+    "m": "ozonizer_ctrl",
+    "W": "glass"
+  },
+  "portModes": {
+    "0,1,1": "input",
+    "2,1,1": "input",
+    "1,1,2": "input",
+    "1,3,1": "output"
+  },
+  "portTypes": {
+    "0,1,1": "energy",
+    "2,1,1": "energy",
+    "1,1,2": "fluid",
+    "1,3,1": "gas"
+  },
+  "guiComponents": [
+    {
+      "type": "energy_bar",
+      "x": 7,
+      "y": 16,
+      "w": 8,
+      "h": 54,
+      "slotType": null,
+      "ioMode": "display"
+    },
+    {
+      "type": "fluid_tank",
+      "x": 56,
+      "y": 16,
+      "w": 14,
+      "h": 52,
+      "slotType": null,
+      "ioMode": "input"
+    },
+    {
+      "type": "progress_arrow",
+      "x": 79,
+      "y": 35,
+      "w": 24,
+      "h": 17,
+      "slotType": null,
+      "ioMode": "display"
+    },
+    {
+      "type": "gas_tank",
+      "x": 112,
+      "y": 16,
+      "w": 14,
+      "h": 52,
+      "slotType": null,
+      "ioMode": "output"
+    }
+  ],
+  "registry": [
+    {
+      "id": "ozonizer_ctrl",
+      "category": "controller",
+      "label": "Ozonizer Controller",
+      "color": 6982250,
+      "char": "m",
+      "builtIn": false,
+      "mcId": 215,
+      "terrainIndex": 45
+    }
+  ]
+}

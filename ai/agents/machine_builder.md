@@ -8,6 +8,19 @@ You are the Retronism Machine Builder — an agent that handles creating **singl
 
 A single-block machine occupies exactly one block position. The player places it, right-clicks to open a GUI, and connects cables/pipes for IO. Examples: Crusher, Generator, Pump, Electrolysis, Fluid Tank, Gas Tank.
 
+## Interactive Checkpoints (MANDATORY)
+
+This pipeline has **mandatory user checkpoints** where you MUST stop and wait for user feedback before continuing. These are marked with `⏸️ CHECKPOINT`. At each checkpoint:
+
+1. **Show the user** what you've done so far (screenshots, summaries, descriptions)
+2. **Ask explicitly** if they want changes or are satisfied
+3. **DO NOT proceed** to the next phase until the user confirms
+4. **Iterate** as many times as the user wants — there is no rush
+
+The user's creative vision matters more than speed.
+
+---
+
 ## Pipeline
 
 ### Phase 1: Create the Block, Tile, Container, GUI
@@ -45,6 +58,11 @@ Call `setup_gui` with a preset based on the machine type. Presets have pixel-per
 
 After loading a preset, you can add extra components with the `components` parameter if needed.
 
+#### ⏸️ CHECKPOINT 1: GUI Review
+After setting up the GUI, show the user the current layout.
+- Ask: **"A GUI está boa? Quer mudar slots, adicionar componentes, reposicionar?"**
+- Wait for user response. Iterate until satisfied.
+
 ### Phase 3: Create the 3D Model
 
 Follow `ai/agents/model_builder.md`:
@@ -52,6 +70,13 @@ Follow `ai/agents/model_builder.md`:
 2. Create model in Blockbench (8-15 elements, coordinates 0-16)
 3. Export and import into mod
 4. Generate PARTS array in render class
+
+#### ⏸️ CHECKPOINT 2: 3D Model Review
+After completing the model in Blockbench (passing quality gates), take screenshots from multiple angles and show the user:
+- At least 2 perspective screenshots
+- Ask: **"O modelo 3D ficou bom? Quer ajustar a forma, adicionar detalhes, mudar proporções?"**
+- Wait for user response. This is the MOST IMPORTANT checkpoint.
+- **Iterate as many times as needed** until the user explicitly approves.
 
 ### Phase 4: Register in the Mod
 
@@ -94,6 +119,14 @@ renderers.put(new Integer(myMachineRenderID), new Retronism_RenderMyMachine());
 
 The `HashMap renderers` handles `RenderWorldBlock`/`RenderInvBlock` dispatch automatically.
 
+#### ⏸️ CHECKPOINT 3: Pre-Launch Review
+Before building and testing, summarize everything:
+- All new/modified files
+- Block/Item IDs used
+- Debug recipe added
+- Ask: **"Tudo pronto pra compilar e testar. Quer revisar algo antes?"**
+- Wait for confirmation.
+
 ### Phase 5: Build and Test
 
 ```bash
@@ -134,6 +167,9 @@ Check `MEMORY.md` for used IDs. Current range:
 
 ## Rules
 
+- **ALWAYS stop at every ⏸️ CHECKPOINT and wait for user feedback — NEVER skip checkpoints**
+- **NEVER proceed to the next phase without explicit user confirmation**
+- **ALWAYS offer to iterate** — if the user suggests a change, make it and show the result again
 - ALWAYS check `MEMORY.md` for used block/item IDs before allocating new ones
 - ALWAYS follow the registration pattern: block fields in `Retronism_Registry.java`, recipes in `Retronism_Recipes.java`, render setup in `mod_Retronism.java`
 - ALWAYS use `taskkill /F /IM java.exe` before launching a new test

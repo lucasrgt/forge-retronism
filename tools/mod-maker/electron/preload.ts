@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('api', {
   readFileBase64: (filePath: string) => ipcRenderer.invoke('read-file-base64', filePath),
   getProjectRoot: () => ipcRenderer.invoke('get-project-root'),
   exportToMod: (files: any[]) => ipcRenderer.invoke('export-to-mod', { files }),
+  getMcpSyncState: () => ipcRenderer.invoke('get-mcp-sync-state'),
   // Legacy — kept for backward compat but no longer used
   onMcpStateUpdate: (callback: (data: string) => void) => {
     ipcRenderer.on('mcp-state-update', (_event: any, data: string) => callback(data))

@@ -64,6 +64,7 @@ public class Retronism_BlockMegaPipe extends BlockContainer {
 		if (te instanceof Retronism_IFluidHandler) return true;
 		if (te instanceof Retronism_IGasHandler) return true;
 		if (te instanceof IInventory) return true;
+		if (Retronism_PortRegistry.isPort(x, y, z)) return true;
 		int id = world.getBlockId(x, y, z);
 		return id == Retronism_Registry.cableBlock.blockID
 			|| id == Retronism_Registry.fluidPipeBlock.blockID

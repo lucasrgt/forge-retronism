@@ -75,7 +75,8 @@ public class Retronism_TileCable extends TileEntity implements Retronism_IEnergy
 
 		for (int side = 0; side < 6; side++) {
 			int[] d = DIRS[side];
-			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
+			int nx = xCoord + d[0], ny = yCoord + d[1], nz = zCoord + d[2];
+			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, nx, ny, nz);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
 			if (te instanceof Retronism_IEnergyReceiver && !(te instanceof Retronism_TileCable)) {
@@ -94,7 +95,8 @@ public class Retronism_TileCable extends TileEntity implements Retronism_IEnergy
 		for (int side = 0; side < 6; side++) {
 			if (storedEnergy <= 0) break;
 			int[] d = DIRS[side];
-			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
+			int nx = xCoord + d[0], ny = yCoord + d[1], nz = zCoord + d[2];
+			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, nx, ny, nz);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
 			if (te instanceof Retronism_IEnergyReceiver && !(te instanceof Retronism_TileCable)) {

@@ -24,7 +24,9 @@ DK = (85, 85, 85, 255)      # dark gray (shadow)
 SD = (55, 55, 55, 255)      # slot dark border
 SL = (139, 139, 139, 255)   # slot inner fill
 GY = (104, 104, 104, 255)   # gray (arrow shadow)
-BAR_BG = (64, 64, 64, 255)  # energy bar empty (#404040)
+BAR_BG = (64, 64, 64, 255)      # energy bar empty (#404040)
+TANK_BG = (120, 120, 120, 255)  # fluid/gas tank empty (#787878)
+GAUGE = (86, 0, 1, 255)         # tank gauge marks (bordeaux #560001)
 
 # Furnace.png path for extracting sprites
 FURNACE_PATH = os.path.join(os.path.dirname(__file__), "..", "temp", "merged", "gui", "furnace.png")
@@ -259,6 +261,60 @@ class GuiBuilder:
         img.putpixel((x + 25, y), SL)
         # Inner fill
         self.draw.rectangle([x + 1, y + 1, x + 24, y + 24], fill=SL)
+        return self
+
+    # =========================================================================
+    # TANK GAUGE - vertical bar with bordeaux measurement strips
+    # =========================================================================
+    def _draw_tank_gauge(self, x, y, w, h):
+        """Draw bordeaux gauge marks inside a bar area.
+        Every 5th line is full-width, others are half-width.
+        Matches the Java drawTankGauge() used in Fluid/Gas Tank GUIs."""
+        img = self.image
+        total_lines = h // 5 - 1
+        if total_lines < 1:
+            return
+        half_w = w // 2
+        for i in range(1, total_lines + 1):
+            ly = y + (h * i // (total_lines + 1))
+            line_w = w if (i % 5 == 0) else half_w
+            for px in range(x, x + line_w):
+                img.putpixel((px, ly), GAUGE)
+
+    def _tank_bar(self, x, y, w, h):
+        """Vertical tank bar with slot-style border and lighter background (#787878).
+        Used for fluid and gas tanks (brighter than energy bar)."""
+        img = self.image
+        # Top border (dark)
+        for px in range(x, x + w - 1):
+            img.putpixel((px, y), SD)
+        # Left border (dark)
+        for py in range(y, y + h - 1):
+            img.putpixel((x, py), SD)
+        # Bottom border (white)
+        for px in range(x, x + w):
+            img.putpixel((px, y + h - 1), WH)
+        # Right border (white)
+        for py in range(y, y + h):
+            img.putpixel((x + w - 1, py), WH)
+        # Corner pixels
+        img.putpixel((x + w - 1, y), SL)
+        # Inner fill (lighter than energy bar)
+        self.draw.rectangle([x + 1, y + 1, x + w - 2, y + h - 2], fill=TANK_BG)
+        return self
+
+    def fluid_tank(self, x, y, w=18, h=54):
+        """Fluid tank gauge with slot border, lighter background, and bordeaux gauge marks.
+        Java fills with blue at runtime based on fluid level."""
+        self._tank_bar(x, y, w, h)
+        self._draw_tank_gauge(x + 1, y + 1, w - 2, h - 2)
+        return self
+
+    def gas_tank(self, x, y, w=18, h=54):
+        """Gas tank gauge with slot border, lighter background, and bordeaux gauge marks.
+        Java fills with colored gas at runtime based on gas level."""
+        self._tank_bar(x, y, w, h)
+        self._draw_tank_gauge(x + 1, y + 1, w - 2, h - 2)
         return self
 
     # =========================================================================

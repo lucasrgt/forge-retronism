@@ -78,6 +78,27 @@ ipcMain.handle('get-project-root', () => path.resolve(__dirname, '..', '..', '..
 const WS_PORT = 19400
 let wsServer: any = null
 let mcpClients: Set<any> = new Set()
+let pendingWsMessages: any[] = []
+let webContentsReady = false
+
+function sendToRenderer(channel: string, ...args: any[]) {
+  if (!mainWindow || mainWindow.isDestroyed()) return
+  if (webContentsReady) {
+    mainWindow.webContents.send(channel, ...args)
+  } else {
+    pendingWsMessages.push({ channel, args })
+  }
+}
+
+function flushPendingMessages() {
+  webContentsReady = true
+  for (const { channel, args } of pendingWsMessages) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send(channel, ...args)
+    }
+  }
+  pendingWsMessages = []
+}
 
 function startWsServer() {
   try {
@@ -85,22 +106,20 @@ function startWsServer() {
 
     wsServer.on('connection', (ws: any) => {
       mcpClients.add(ws)
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('mcp-ws-status', true)
-      }
+      sendToRenderer('mcp-ws-status', true)
 
       ws.on('message', (data: any) => {
         if (!mainWindow || mainWindow.isDestroyed()) return
         try {
           const msg = JSON.parse(data.toString())
-          mainWindow.webContents.send('mcp-ws-message', msg)
+          sendToRenderer('mcp-ws-message', msg)
         } catch (_: any) {}
       })
 
       ws.on('close', () => {
         mcpClients.delete(ws)
-        if (mcpClients.size === 0 && mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send('mcp-ws-status', false)
+        if (mcpClients.size === 0) {
+          sendToRenderer('mcp-ws-status', false)
         }
       })
 
@@ -134,9 +153,7 @@ function startFileFallbackSync() {
           const content = fs.readFileSync(MCP_SYNC_FILE, 'utf-8')
           if (content !== lastSyncContent && content.length > 0) {
             lastSyncContent = content
-            if (mainWindow && !mainWindow.isDestroyed()) {
-              mainWindow.webContents.send('mcp-ws-message', { type: 'state', payload: JSON.parse(content) })
-            }
+            sendToRenderer('mcp-ws-message', { type: 'state', payload: JSON.parse(content) })
           }
         } catch (_: any) {}
       }
@@ -144,9 +161,26 @@ function startFileFallbackSync() {
   } catch (_: any) {}
 }
 
+// IPC: renderer asks for the last known MCP sync state (on startup)
+ipcMain.handle('get-mcp-sync-state', () => {
+  try {
+    if (fs.existsSync(MCP_SYNC_FILE)) {
+      return fs.readFileSync(MCP_SYNC_FILE, 'utf-8')
+    }
+  } catch (_: any) {}
+  return null
+})
+
 app.whenReady().then(() => {
   startWsServer()
   startFileFallbackSync()
+})
+
+// When the main window finishes loading, flush any queued WS messages
+app.on('browser-window-created', (_: any, win: any) => {
+  win.webContents.on('did-finish-load', () => {
+    flushPendingMessages()
+  })
 })
 
 ipcMain.handle('export-to-mod', async (_event: any, { files }: any) => {

@@ -26,6 +26,19 @@ Examples: Mega Crusher (3×3×3), future machines like refineries, reactors, etc
 
 The mod-maker knows NOTHING about visuals. Blockbench knows NOTHING about gameplay.
 
+## Interactive Checkpoints (MANDATORY)
+
+This pipeline has **mandatory user checkpoints** where you MUST stop and wait for user feedback before continuing. These are marked with `⏸️ CHECKPOINT`. At each checkpoint:
+
+1. **Show the user** what you've done so far (screenshots, summaries, state dumps)
+2. **Ask explicitly** if they want changes, adjustments, or are satisfied
+3. **DO NOT proceed** to the next phase until the user confirms
+4. **Iterate** as many times as the user wants — there is no rush
+
+The user's creative vision matters more than speed. A machine built in 3 iterations with feedback beats one rushed in 1 pass.
+
+---
+
 ## Full Pipeline
 
 ### Phase 1: Design the Multiblock Structure (Mod Maker MCP)
@@ -35,6 +48,13 @@ The mod-maker knows NOTHING about visuals. Blockbench knows NOTHING about gamepl
 2. **`place_blocks`** — Place controller, ports (with correct `mode`: input/output), glass for hollow sections
 3. **`place_on_face`** — Fill entire faces with a block type. Use `replace: true` to overwrite non-casing
 4. **`get_state`** — Verify the structure layout (layer grid view)
+
+#### ⏸️ CHECKPOINT 1: Structure Review
+After placing all blocks, call `get_state` and show the user:
+- The layer-by-layer grid view
+- Summary: dimensions, IO types, port positions, controller position
+- Ask: **"A estrutura ficou como você imaginou? Quer mudar posição de portas, adicionar/remover blocos, ou alterar dimensões?"**
+- Wait for user response. Iterate until they say it's good.
 
 #### Port Mode Rules
 - **Energy ports**: almost always `input` (machines consume energy)
@@ -66,6 +86,11 @@ Call `setup_gui` with a preset. Presets have pixel-perfect positions from real m
 
 After loading a preset, add extra components with the `components` parameter if needed.
 
+#### ⏸️ CHECKPOINT 2: GUI Review
+After setting up the GUI, show the user the current layout (describe or screenshot the mod-maker GUI builder).
+- Ask: **"A GUI está boa? Quer mudar slots, adicionar tanks, reposicionar componentes?"**
+- Wait for user response. Iterate until satisfied.
+
 ### Phase 3: Export Base Files
 
 Call `export_to_mod` to generate:
@@ -87,6 +112,14 @@ Follow `ai/agents/multiblock_model_builder.md` step by step:
 4. **MUST** export and call `import_model`.
 5. **THEN** generate the `FORMED_PARTS` array from the Blockbench model.
    - The unformed controller renders as a normal standard block (no custom model needed).
+
+#### ⏸️ CHECKPOINT 3: 3D Model Review
+After completing the model in Blockbench (passing quality gates), take screenshots from multiple angles and show the user:
+- At least 2 perspective screenshots (front-side and back-side views)
+- Ask: **"O modelo 3D ficou bom? Quer ajustar a forma, adicionar detalhes, mudar proporções, ou refazer?"**
+- Wait for user response. This is the MOST IMPORTANT checkpoint — the model defines the machine's identity.
+- **Iterate as many times as needed.** Add elements, remove elements, repaint texture — whatever the user wants.
+- Only proceed to registration after the user explicitly approves the model.
 
 ### Phase 5: Register in the Mod
 
@@ -150,6 +183,14 @@ Run the GUI builder script:
 cd c:/Users/lucas/Retronism && python tools/build_gui_mymachine.py
 ```
 
+#### ⏸️ CHECKPOINT 4: Pre-Launch Review
+Before building and testing, summarize everything that was created:
+- List all new files (block, tile, container, gui, render, texture, model)
+- Block/Item IDs used
+- Debug recipes added
+- Ask: **"Tudo pronto pra compilar e testar. Quer revisar algo antes de eu lançar o jogo?"**
+- Wait for confirmation.
+
 ### Phase 7: Build and Test
 
 ```bash
@@ -192,6 +233,9 @@ Verify:
 
 ## Rules
 
+- **ALWAYS stop at every ⏸️ CHECKPOINT and wait for user feedback — NEVER skip checkpoints**
+- **NEVER proceed to the next phase without explicit user confirmation**
+- **ALWAYS offer to iterate** — if the user suggests a change, make it and show the result again
 - ALWAYS check `MEMORY.md` for used block/item IDs
 - ALWAYS follow the registration pattern: `Retronism_Registry.java` → `Retronism_Recipes.java` → `mod_Retronism.java`
 - ALWAYS use `taskkill /F /IM java.exe` before launching tests

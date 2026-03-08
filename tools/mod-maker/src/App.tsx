@@ -73,6 +73,24 @@ export default function App() {
         } catch { /* ignore parse errors */ }
       })
     }
+
+    // On startup, load the last known MCP state from sync file
+    // This handles the case where MCP sent state before the renderer was ready
+    if (api.getMcpSyncState) {
+      api.getMcpSyncState().then((content: string | null) => {
+        if (content) {
+          try {
+            const data = JSON.parse(content) as SerializedMultiblock
+            // Only apply if we still have the default empty state
+            const current = useStore.getState()
+            if (current.name === 'Unnamed' && current.blocks.size === 0) {
+              current.deserialize(data)
+              current.setMcpConnected(true)
+            }
+          } catch { /* ignore */ }
+        }
+      })
+    }
   }, [])
 
   return (
