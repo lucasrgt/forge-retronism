@@ -5,40 +5,51 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
  * AeroMesh OBJ Loader by AeroCoding.dev
- * Carrega modelos OBJ do classpath em runtime — sem pipeline de conversão.
+ * Loads OBJ models from the classpath at runtime — no conversion pipeline needed.
  *
- * Uso:
+ * Usage:
  *   Aero_MeshModel model = Aero_ObjLoader.load("/models/my_machine.obj");
  *
- * Exporte pelo Blockbench: File > Export > Export OBJ Model
- * Coloque apenas o .obj em src/retronism/assets/models/ (o .mtl não é usado).
+ * Export from Blockbench: File > Export > Export OBJ Model
+ * Place only the .obj in src/retronism/assets/models/ (the .mtl is not used).
  *
- * Suporte:
- *   - v  (vértices), vt (UVs), vn (ignorado — normal calculada da geometria)
- *   - f  (faces: triângulos e quads, triangulação por fan)
- *   - Índices negativos OBJ (referência do final da lista)
- *   - g, o, usemtl, mtllib, s → ignorados
+ * Supported directives:
+ *   - v  (vertices), vt (UVs), vn (ignored — normal computed from geometry)
+ *   - f  (faces: triangles and quads, fan triangulation)
+ *   - o / g (named objects/groups — used to separate animated parts)
+ *   - Negative OBJ indices (reference from end of list)
+ *   - usemtl, mtllib, s → ignored
  *
- * UV: aplica flip V (1-V) — OBJ usa V=0 embaixo, Minecraft usa V=0 no topo.
+ * UV: applies V-flip (1-V) — OBJ uses V=0 at bottom, Minecraft uses V=0 at top.
  *
- * Triângulos são classificados em 4 grupos de brightness ao parsear
- * (veja Aero_MeshModel.GROUP_*), evitando cálculo de normal por frame.
+ * Named groups (o / g directives):
+ *   Triangles under a named object/group are stored separately in the model's
+ *   namedGroups map and excluded from the main groups array. Unnamed triangles
+ *   (before any o/g directive) go into the main groups array as static geometry.
+ *
+ *   This enables animated parts:
+ *     Aero_MeshRenderer.renderModel(MODEL, ...);              // static geometry
+ *     Aero_MeshRenderer.renderGroupRotated(MODEL, "fan", ...); // animated fan
+ *
+ * Triangles are classified into 4 brightness groups at parse time
+ * (see Aero_MeshModel.GROUP_*), avoiding per-frame normal computation.
  */
 public class Aero_ObjLoader {
 
     private static final Map cache = new HashMap();
 
-    /** Carrega e cacheia um modelo OBJ do classpath. */
+    /** Loads and caches an OBJ model from the classpath. */
     public static Aero_MeshModel load(String resourcePath) {
         return load(resourcePath, resourcePath);
     }
 
-    /** Carrega e cacheia um modelo OBJ do classpath com nome explícito. */
+    /** Loads and caches an OBJ model from the classpath with an explicit name. */
     public static Aero_MeshModel load(String resourcePath, String name) {
         if (cache.containsKey(resourcePath)) {
             return (Aero_MeshModel) cache.get(resourcePath);
@@ -59,16 +70,20 @@ public class Aero_ObjLoader {
     }
 
     // -----------------------------------------------------------------------
-    // Parser OBJ
+    // OBJ Parser
     // -----------------------------------------------------------------------
 
     private static Aero_MeshModel parseObj(BufferedReader reader, String name) throws Exception {
         List verts = new ArrayList();  // float[3]: x, y, z
-        List uvs   = new ArrayList();  // float[2]: u, v  (já com flip V)
+        List uvs   = new ArrayList();  // float[2]: u, v  (V-flipped)
 
-        // 4 listas — uma por grupo de brightness (TOP, BOTTOM, NS, EW)
-        List[] groups = new List[4];
-        for (int g = 0; g < 4; g++) groups[g] = new ArrayList();
+        // Static geometry (unnamed) — 4 brightness groups
+        List[] staticGroups = new List[4];
+        for (int g = 0; g < 4; g++) staticGroups[g] = new ArrayList();
+
+        // Named groups: Map<String, List[4]>
+        Map namedGroupLists = new HashMap();
+        List[] currentNamedGroup = null; // null = static
 
         String line;
         while ((line = reader.readLine()) != null) {
@@ -81,24 +96,52 @@ public class Aero_ObjLoader {
 
             } else if (line.startsWith("vt ")) {
                 String[] p = split(line.substring(3));
-                // Flip V: OBJ usa V=0 embaixo, Minecraft usa V=0 no topo
+                // V-flip: OBJ uses V=0 at bottom, Minecraft uses V=0 at top
                 uvs.add(new float[]{f(p[0]), 1.0f - f(p[1])});
 
             } else if (line.startsWith("f ")) {
-                parseFace(line.substring(2).trim(), verts, uvs, groups);
+                List[] target = (currentNamedGroup != null) ? currentNamedGroup : staticGroups;
+                parseFace(line.substring(2).trim(), verts, uvs, target);
+
+            } else if (line.startsWith("o ") || line.startsWith("g ")) {
+                String groupName = line.substring(2).trim();
+                if (!namedGroupLists.containsKey(groupName)) {
+                    List[] ng = new List[4];
+                    for (int g = 0; g < 4; g++) ng[g] = new ArrayList();
+                    namedGroupLists.put(groupName, ng);
+                }
+                currentNamedGroup = (List[]) namedGroupLists.get(groupName);
             }
-            // vn, g, o, s, usemtl, mtllib → ignorar
+            // vn, s, usemtl, mtllib → ignored
         }
 
-        if (allEmpty(groups)) {
+        boolean hasStatic = !allEmpty(staticGroups);
+        boolean hasNamed  = !namedGroupLists.isEmpty();
+        if (!hasStatic && !hasNamed) {
             throw new RuntimeException("AeroObjLoader: no faces found in " + name);
         }
 
-        float[][][] groupArrays = new float[4][][];
+        // Convert static groups
+        float[][][] staticArrays = new float[4][][];
         for (int g = 0; g < 4; g++) {
-            groupArrays[g] = (float[][]) groups[g].toArray(new float[groups[g].size()][]);
+            staticArrays[g] = (float[][]) staticGroups[g].toArray(new float[staticGroups[g].size()][]);
         }
-        return new Aero_MeshModel(name, groupArrays);
+
+        // Convert named groups
+        Map namedGroupArrays = new HashMap();
+        Iterator it = namedGroupLists.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String groupName = (String) entry.getKey();
+            List[] ng = (List[]) entry.getValue();
+            float[][][] arr = new float[4][][];
+            for (int g = 0; g < 4; g++) {
+                arr[g] = (float[][]) ng[g].toArray(new float[ng[g].size()][]);
+            }
+            namedGroupArrays.put(groupName, arr);
+        }
+
+        return new Aero_MeshModel(name, staticArrays, 1.0f, namedGroupArrays);
     }
 
     private static void parseFace(String faceStr, List verts, List uvs, List[] groups) {
@@ -108,11 +151,11 @@ public class Aero_ObjLoader {
             poly[i] = parseFaceVert(tokens[i], verts, uvs);
         }
 
-        // Triangulação por fan (funciona para polígonos convexos)
+        // Fan triangulation (works for convex polygons)
         for (int i = 1; i < poly.length - 1; i++) {
             float[] v0 = poly[0], v1 = poly[i], v2 = poly[i + 1];
 
-            // Normal da face via produto vetorial
+            // Face normal via cross product
             float ax = v1[0]-v0[0], ay = v1[1]-v0[1], az = v1[2]-v0[2];
             float bx = v2[0]-v0[0], by = v2[1]-v0[1], bz = v2[2]-v0[2];
             float nx = ay*bz - az*by;
@@ -131,8 +174,8 @@ public class Aero_ObjLoader {
     }
 
     /**
-     * Classifica a normal em um dos 4 grupos de brightness.
-     * Mirrors the logic in Aero_MeshRenderer.
+     * Classifies the face normal into one of the 4 brightness groups.
+     * The dominant axis determines the group; Y-axis sign determines TOP vs BOTTOM.
      */
     static int brightnessGroup(float nx, float ny, float nz) {
         float ax = Math.abs(nx), ay = Math.abs(ny), az = Math.abs(nz);
@@ -142,8 +185,8 @@ public class Aero_ObjLoader {
     }
 
     /**
-     * Parseia um token de vértice de face: "v", "v/vt", "v//vn", "v/vt/vn"
-     * Retorna float[5]: x, y, z, u, v
+     * Parses a face vertex token: "v", "v/vt", "v//vn", "v/vt/vn".
+     * Returns float[5]: x, y, z, u, v
      */
     private static float[] parseFaceVert(String token, List verts, List uvs) {
         String[] parts = token.split("/", -1);

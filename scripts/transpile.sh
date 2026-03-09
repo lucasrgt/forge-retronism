@@ -20,13 +20,12 @@ find "$SRC" -name "*.java" | while read -r file; do
         "$file" > "$DEST/$filename"
 done
 
-# Removed failing mv of identical file
-
 echo "Transpiled $(find "$SRC" -name '*.java' | wc -l) files to $DEST"
 
-# Copy assets (textures) to temp/merged for jar injection
+# Copy assets (textures, models) to temp/merged for jar injection
 ASSETS="$SRC/assets"
 if [ -d "$ASSETS" ]; then
+    mkdir -p "$BASE/temp/merged"
     cp -r "$ASSETS"/* "$BASE/temp/merged/"
     echo "Copied assets to temp/merged/"
 fi

@@ -67,7 +67,8 @@
       "mcp__blockbench__gradient_tool",
       "mcp__blockbench__remove_element",
       "mcp__blockbench__apply_texture",
-      "mcp__blockbench__trigger_action"
+      "mcp__blockbench__trigger_action",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

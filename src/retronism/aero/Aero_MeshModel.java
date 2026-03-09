@@ -1,25 +1,39 @@
 package retronism.aero;
 
+import java.util.Map;
+
 /**
- * AeroMesh Model — container para modelos OBJ triangulados.
+ * AeroMesh Model — container for triangulated OBJ models.
  *
- * Triângulos pré-classificados em 4 grupos de brightness (mesmo sistema
- * direcional do Aero_ModelRenderer):
+ * Triangles are pre-classified into 4 brightness groups at parse time
+ * (same directional system as Aero_ModelRenderer):
  *
- *   GROUP_TOP    (ny dominante, positivo) → fator 1.0
- *   GROUP_BOTTOM (ny dominante, negativo) → fator 0.5
- *   GROUP_NS     (nz dominante)           → fator 0.8
- *   GROUP_EW     (nx dominante)           → fator 0.6
+ *   GROUP_TOP    (dominant ny, positive) → factor 1.0
+ *   GROUP_BOTTOM (dominant ny, negative) → factor 0.5
+ *   GROUP_NS     (dominant nz)           → factor 0.8
+ *   GROUP_EW     (dominant nx)           → factor 0.6
  *
- * Classificação ocorre no parse (Aero_ObjLoader), não por frame.
- * Isso reduz as chamadas de setColorOpaque_F de O(N triângulos) para 4.
+ * Classification happens during parsing (Aero_ObjLoader), not per frame.
+ * This reduces setColorOpaque_F calls from O(N triangles) to 4.
  *
- * Cada triângulo é float[15]:
- *   [0-4]   vértice 0: x, y, z, u, v
- *   [5-9]   vértice 1: x, y, z, u, v
- *   [10-14] vértice 2: x, y, z, u, v
+ * Each triangle is float[15]:
+ *   [0-4]   vertex 0: x, y, z, u, v
+ *   [5-9]   vertex 1: x, y, z, u, v
+ *   [10-14] vertex 2: x, y, z, u, v
  *
- * A normal não é guardada — foi usada apenas para classificar o grupo.
+ * Named groups (OBJ "o" / "g" directives):
+ *   Triangles belonging to a named OBJ object/group are stored separately
+ *   in namedGroups and excluded from the main groups array. This allows
+ *   animated parts (fan, piston, gear) to be rendered independently with
+ *   their own GL transforms, while the static geometry renders normally.
+ *
+ *   Example OBJ:
+ *     o base      ← static, goes into groups[]
+ *     ...faces...
+ *     o fan       ← animated, goes into namedGroups["fan"]
+ *     ...faces...
+ *
+ * The face normal is not stored — it was only used to classify the group.
  */
 public class Aero_MeshModel {
 
@@ -34,26 +48,43 @@ public class Aero_MeshModel {
     public final float scale;
 
     /**
-     * Triângulos por grupo de brightness.
-     * groups[GROUP_TOP][i] = float[15] do i-ésimo triângulo top-facing.
+     * Static triangles per brightness group (excludes named groups).
+     * groups[GROUP_TOP][i] = float[15] for the i-th top-facing triangle.
      */
     public final float[][][] groups;
 
-    public Aero_MeshModel(String name, float[][][] groups, float scale) {
+    /**
+     * Named group triangles: Map<String, float[][][]>.
+     * Each entry has the same 4-brightness-group structure as groups[].
+     * Empty map if the OBJ has no named objects/groups.
+     */
+    public final Map namedGroups;
+
+    public Aero_MeshModel(String name, float[][][] groups, float scale, Map namedGroups) {
         this.name = name;
         this.groups = groups;
         this.scale = scale;
+        this.namedGroups = namedGroups;
     }
 
-    /** Construtor padrão: scale=1 (OBJ do Blockbench já exporta em block-units). */
+    /** Convenience constructor: scale=1, empty named groups. */
     public Aero_MeshModel(String name, float[][][] groups) {
-        this(name, groups, 1.0f);
+        this(name, groups, 1.0f, new java.util.HashMap());
     }
 
-    /** Total de triângulos somando todos os grupos. */
+    /** Total triangle count in static geometry (excludes named groups). */
     public int triangleCount() {
         int n = 0;
         for (int g = 0; g < 4; g++) n += groups[g].length;
+        return n;
+    }
+
+    /** Total triangle count in a named group, or 0 if not found. */
+    public int triangleCountForGroup(String groupName) {
+        float[][][] ng = (float[][][]) namedGroups.get(groupName);
+        if (ng == null) return 0;
+        int n = 0;
+        for (int g = 0; g < 4; g++) n += ng[g].length;
         return n;
     }
 }

@@ -4,8 +4,8 @@ import net.minecraft.src.*;
 import net.minecraft.client.Minecraft;
 import retronism.tile.Retronism_TileMegaCrusher;
 import retronism.aero.Aero_MeshModel;
-import retronism.aero.Aero_ObjLoader;
 import retronism.aero.Aero_MeshRenderer;
+import retronism.aero.Aero_ObjLoader;
 
 public class Retronism_TileEntityRenderMegaCrusher extends TileEntitySpecialRenderer {
 
@@ -50,6 +50,11 @@ public class Retronism_TileEntityRenderMegaCrusher extends TileEntitySpecialRend
                          w.getLightBrightness(ox + 3, oy + 3, oz + 1))
             );
         }
-        Aero_MeshRenderer.renderModel(MODEL, d + offsetX, d1 + offsetY, d2 + offsetZ, 0, brightness);
+        Aero_MeshRenderer.renderAnimated(MODEL,
+            Retronism_TileMegaCrusher.BUNDLE,
+            Retronism_TileMegaCrusher.ANIM_DEF,
+            tile.animState,
+            d + offsetX, d1 + offsetY, d2 + offsetZ,
+            brightness, f);
     }
 }

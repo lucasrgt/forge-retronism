@@ -4,6 +4,10 @@ import net.minecraft.src.*;
 import retronism.*;
 import retronism.api.*;
 import retronism.recipe.*;
+import retronism.aero.Aero_AnimBundle;
+import retronism.aero.Aero_AnimationDef;
+import retronism.aero.Aero_AnimationLoader;
+import retronism.aero.Aero_AnimationState;
 
 import java.util.Random;
 
@@ -19,6 +23,17 @@ public class Retronism_TileMegaCrusher extends TileEntity implements IInventory,
 	private int validationTimer = 0;
 	private boolean isInvalidating = false;
 	private Random rand = new Random();
+
+	// --- Animação ---
+	public static final int STATE_OFF = 0;
+	public static final int STATE_ON  = 1;
+
+	public static final Aero_AnimBundle   BUNDLE   = Aero_AnimationLoader.load("/models/MegaCrusher.anim.json");
+	public static final Aero_AnimationDef ANIM_DEF = new Aero_AnimationDef()
+		.state(STATE_OFF, "idle")
+		.state(STATE_ON,  "spin");
+
+	public final Aero_AnimationState animState = ANIM_DEF.createState(BUNDLE);
 
 	{
 		for (int s = 0; s < 6; s++) {
@@ -94,6 +109,11 @@ public class Retronism_TileMegaCrusher extends TileEntity implements IInventory,
 	}
 
 	public void updateEntity() {
+		animState.tick();
+		boolean running = storedEnergy >= ENERGY_PER_TICK
+			&& (cookTime[0] > 0 || cookTime[1] > 0 || cookTime[2] > 0);
+		animState.setState(running ? STATE_ON : STATE_OFF);
+
 		if (worldObj.multiplayerWorld) return;
 
 		validationTimer++;
@@ -240,6 +260,7 @@ public class Retronism_TileMegaCrusher extends TileEntity implements IInventory,
 		if (nbt.hasKey("SC0")) {
 			for (int i = 0; i < 24; i++) sideConfig[i] = nbt.getInteger("SC" + i);
 		}
+		animState.readFromNBT(nbt);
 	}
 
 	public void writeToNBT(NBTTagCompound nbt) {
@@ -260,5 +281,6 @@ public class Retronism_TileMegaCrusher extends TileEntity implements IInventory,
 			}
 		}
 		nbt.setTag("Items", list);
+		animState.writeToNBT(nbt);
 	}
 }

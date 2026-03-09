@@ -1,0 +1,25 @@
+{
+  "format_version": "1.0",
+  "pivots": {
+    "fan": [24.0, 44.5, 47.0]
+  },
+  "animations": {
+    "spin": {
+      "loop": true,
+      "length": 1.0,
+      "bones": {
+        "fan": {
+          "rotation": {
+            "0.0": [0.0, 0.0,   0.0],
+            "1.0": [0.0, 0.0, 360.0]
+          }
+        }
+      }
+    },
+    "idle": {
+      "loop": true,
+      "length": 0.05,
+      "bones": {}
+    }
+  }
+}
