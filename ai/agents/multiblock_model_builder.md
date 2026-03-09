@@ -40,32 +40,6 @@ Before starting, verify the Blockbench MCP is connected:
 
 **DO NOT generate Blockbench JSON manually as a workaround.**
 
----
-
-## Blockbench MCP Tool Quick Reference
-
-| Tool | Purpose | Key Params |
-|------|---------|------------|
-| `create_project` | New project | `name`, `format` (default "bedrock_block") |
-| `add_group` | Create element group | `name`, `origin: [x,y,z]`, `rotation: [0,0,0]` |
-| `place_cube` | Place one or more cubes | `elements: [{name, from, to}]`, `group`, `texture`, `faces: true` |
-| `modify_cube` | Change cube position/size/UV | `id` (name), `from`, `to`, `uv_offset: [x,y]` |
-| `duplicate_element` | Copy a cube with offset | `id` (name), `newName`, `offset: [x,y,z]` |
-| `create_texture` | Create/fill texture | `name`, `width`, `height`, `fill_color` (hex or RGBA), `layer_name` |
-| `paint_with_brush` | Paint pixels on texture | `coordinates: [{x,y}]`, `brush_settings: {color, size, opacity}`, `connect_strokes`, `texture_id` |
-| `draw_shape_tool` | Draw rectangles/ellipses | `shape`, `start: {x,y}`, `end: {x,y}`, `color`, `texture_id` |
-| `paint_fill_tool` | Bucket fill | `x`, `y`, `color`, `fill_mode`, `texture_id` |
-| `gradient_tool` | Apply gradient | `start: {x,y}`, `end: {x,y}`, `start_color`, `end_color`, `blend_mode`, `texture_id` |
-| `paint_settings` | Configure paint options | `pixel_perfect`, `mirror_painting: {enabled, axis}` |
-| `set_camera_angle` | Position camera | `position: [x,y,z]`, `projection`, `target: [x,y,z]` |
-| `capture_screenshot` | Take viewport screenshot | (none) |
-| `capture_app_screenshot` | Full app screenshot | (none) |
-| `list_outline` | Verify element hierarchy | (none) |
-| `list_textures` | Verify textures exist | (none) |
-| `remove_element` | Delete element | `id` (name) |
-
----
-
 ## Design Philosophy — THE IRON LAW
 
 These are not suggestions. These are absolute rules. Violating any one of them means the model has failed and must be redone.

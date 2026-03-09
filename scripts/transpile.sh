@@ -2,7 +2,7 @@
 # Transpiles organized src/retronism/ -> flat mcp/minecraft/src/net/minecraft/src/
 # Rewrites packages and removes internal imports so RetroMCP can compile
 set -e
-BASE="c:/Users/lucas/RetroNism"
+BASE="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$BASE/src/retronism"
 DEST="$BASE/mcp/minecraft/src/net/minecraft/src"
 
@@ -20,10 +20,7 @@ find "$SRC" -name "*.java" | while read -r file; do
         "$file" > "$DEST/$filename"
 done
 
-# Fix filename case: class is mod_Retronism but file is mod_Retronism.java
-if [ -f "$DEST/mod_Retronism.java" ]; then
-    mv "$DEST/mod_Retronism.java" "$DEST/mod_Retronism.java"
-fi
+# Removed failing mv of identical file
 
 echo "Transpiled $(find "$SRC" -name '*.java' | wc -l) files to $DEST"
 

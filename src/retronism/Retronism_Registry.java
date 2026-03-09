@@ -140,7 +140,7 @@ public class Retronism_Registry {
 
 		// Tile Entities
 		ModLoader.RegisterTileEntity(Retronism_TileCrusher.class, "Crusher");
-		ModLoader.RegisterTileEntity(Retronism_TileMegaCrusher.class, "MegaCrusher");
+		ModLoader.RegisterTileEntity(Retronism_TileMegaCrusher.class, "MegaCrusher", new Retronism_TileEntityRenderMegaCrusher());
 		ModLoader.RegisterTileEntity(Retronism_TileGenerator.class, "Generator");
 		ModLoader.RegisterTileEntity(Retronism_TileCable.class, "Cable");
 		ModLoader.RegisterTileEntity(Retronism_TilePump.class, "Pump");

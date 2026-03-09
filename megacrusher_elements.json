@@ -1,0 +1,5108 @@
+[
+  {
+    "name": "chamber",
+    "from": [
+      12,
+      10,
+      12
+    ],
+    "to": [
+      36,
+      30,
+      36
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          96,
+          88,
+          116
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          96,
+          88,
+          116
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          96,
+          88,
+          116
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          96,
+          88,
+          116
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          96,
+          88,
+          120
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          96,
+          88,
+          120
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "crusher_drum_l",
+    "from": [
+      16,
+      12,
+      14
+    ],
+    "to": [
+      22,
+      28,
+      34
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          96,
+          96,
+          102,
+          112
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          96,
+          96,
+          116,
+          112
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          96,
+          96,
+          102,
+          112
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          96,
+          96,
+          116,
+          112
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          96,
+          96,
+          102,
+          116
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          96,
+          96,
+          102,
+          116
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "crusher_drum_r",
+    "from": [
+      26,
+      12,
+      14
+    ],
+    "to": [
+      32,
+      28,
+      34
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          96,
+          96,
+          102,
+          112
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          96,
+          96,
+          116,
+          112
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          96,
+          96,
+          102,
+          112
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          96,
+          96,
+          116,
+          112
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          96,
+          96,
+          102,
+          116
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          96,
+          96,
+          102,
+          116
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "discharge_funnel",
+    "from": [
+      22,
+      4,
+      20
+    ],
+    "to": [
+      26,
+      10,
+      28
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          88,
+          0,
+          92,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          88,
+          0,
+          96,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          88,
+          0,
+          92,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          88,
+          0,
+          96,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          88,
+          0,
+          92,
+          8
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          88,
+          0,
+          92,
+          8
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "pillar_fl",
+    "from": [
+      0,
+      0,
+      0
+    ],
+    "to": [
+      6,
+      48,
+      6
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          6,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          6,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "pillar_fr",
+    "from": [
+      42,
+      0,
+      0
+    ],
+    "to": [
+      48,
+      48,
+      6
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          6,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          6,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "pillar_bl",
+    "from": [
+      0,
+      0,
+      42
+    ],
+    "to": [
+      6,
+      48,
+      48
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          6,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          6,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "pillar_br",
+    "from": [
+      42,
+      0,
+      42
+    ],
+    "to": [
+      48,
+      48,
+      48
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          6,
+          48
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          6,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          6,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "rail_front_bot",
+    "from": [
+      6,
+      0,
+      0
+    ],
+    "to": [
+      42,
+      6,
+      6
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          16,
+          0,
+          22,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          16,
+          0,
+          22,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "rail_back_bot",
+    "from": [
+      6,
+      0,
+      42
+    ],
+    "to": [
+      42,
+      6,
+      48
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          16,
+          0,
+          22,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          16,
+          0,
+          22,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "rail_left_bot",
+    "from": [
+      0,
+      0,
+      6
+    ],
+    "to": [
+      6,
+      6,
+      42
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          16,
+          0,
+          22,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          16,
+          0,
+          22,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          16,
+          0,
+          22,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          16,
+          0,
+          22,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "rail_right_bot",
+    "from": [
+      42,
+      0,
+      6
+    ],
+    "to": [
+      48,
+      6,
+      42
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          16,
+          0,
+          22,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          16,
+          0,
+          22,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          16,
+          0,
+          52,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          16,
+          0,
+          22,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          16,
+          0,
+          22,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "beam_front_mid",
+    "from": [
+      6,
+      20,
+      0
+    ],
+    "to": [
+      42,
+      24,
+      6
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          32,
+          36,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          32,
+          6,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          32,
+          36,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          32,
+          6,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "beam_back_mid",
+    "from": [
+      6,
+      20,
+      42
+    ],
+    "to": [
+      42,
+      24,
+      48
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          32,
+          36,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          32,
+          6,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          32,
+          36,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          32,
+          6,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "beam_left_mid",
+    "from": [
+      0,
+      20,
+      6
+    ],
+    "to": [
+      6,
+      24,
+      42
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          32,
+          6,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          32,
+          36,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          32,
+          6,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          32,
+          36,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          32,
+          6,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          32,
+          6,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "beam_right_mid",
+    "from": [
+      42,
+      20,
+      6
+    ],
+    "to": [
+      48,
+      24,
+      42
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          32,
+          6,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          32,
+          36,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          32,
+          6,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          32,
+          36,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          32,
+          6,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          32,
+          6,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "beam_front_top",
+    "from": [
+      6,
+      42,
+      0
+    ],
+    "to": [
+      42,
+      48,
+      6
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          32,
+          6,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          32,
+          6,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "beam_back_top",
+    "from": [
+      6,
+      42,
+      42
+    ],
+    "to": [
+      42,
+      48,
+      48
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          32,
+          6,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          32,
+          6,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "beam_left_top",
+    "from": [
+      0,
+      42,
+      6
+    ],
+    "to": [
+      6,
+      48,
+      42
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          32,
+          6,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          32,
+          6,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          32,
+          6,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          32,
+          6,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "beam_right_top",
+    "from": [
+      42,
+      42,
+      6
+    ],
+    "to": [
+      48,
+      48,
+      42
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          32,
+          6,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          32,
+          6,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          32,
+          36,
+          38
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          32,
+          6,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          32,
+          6,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "panel_front_ll",
+    "from": [
+      6,
+      6,
+      2
+    ],
+    "to": [
+      14,
+      20,
+      4
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          0,
+          72,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          0,
+          66,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          0,
+          72,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          0,
+          66,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          0,
+          72,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          0,
+          72,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "panel_front_lr",
+    "from": [
+      34,
+      6,
+      2
+    ],
+    "to": [
+      42,
+      20,
+      4
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          0,
+          72,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          0,
+          66,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          0,
+          72,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          0,
+          66,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          0,
+          72,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          0,
+          72,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "panel_front_upper",
+    "from": [
+      10,
+      24,
+      2
+    ],
+    "to": [
+      38,
+      42,
+      4
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          0,
+          92,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          0,
+          66,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          0,
+          92,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          0,
+          66,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          0,
+          92,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          0,
+          92,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "panel_back_high_l",
+    "from": [
+      6,
+      24,
+      44
+    ],
+    "to": [
+      20,
+      42,
+      46
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          0,
+          78,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          0,
+          66,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          0,
+          78,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          0,
+          66,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          0,
+          78,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          0,
+          78,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "panel_back_high_r",
+    "from": [
+      28,
+      24,
+      44
+    ],
+    "to": [
+      42,
+      42,
+      46
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          0,
+          78,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          0,
+          66,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          0,
+          78,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          0,
+          66,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          0,
+          78,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          0,
+          78,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "grate_l1",
+    "from": [
+      2,
+      8,
+      8
+    ],
+    "to": [
+      4,
+      10,
+      40
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          2,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          32,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          2,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          32,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          32,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          32,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "grate_l2",
+    "from": [
+      2,
+      14,
+      8
+    ],
+    "to": [
+      4,
+      16,
+      40
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          2,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          32,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          2,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          32,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          32,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          32,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "panel_left_upper",
+    "from": [
+      1,
+      24,
+      8
+    ],
+    "to": [
+      3,
+      42,
+      40
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          0,
+          66,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          0,
+          96,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          0,
+          66,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          0,
+          96,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          0,
+          66,
+          32
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          0,
+          66,
+          32
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "panel_right_lower",
+    "from": [
+      45,
+      6,
+      8
+    ],
+    "to": [
+      47,
+      20,
+      24
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          0,
+          66,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          0,
+          80,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          0,
+          66,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          0,
+          80,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          0,
+          66,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          0,
+          66,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "panel_right_upper",
+    "from": [
+      45,
+      24,
+      8
+    ],
+    "to": [
+      47,
+      42,
+      40
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          0,
+          66,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          0,
+          96,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          0,
+          66,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          0,
+          96,
+          18
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          0,
+          66,
+          32
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          0,
+          66,
+          32
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "base_platform",
+    "from": [
+      -2,
+      0,
+      -2
+    ],
+    "to": [
+      50,
+      4,
+      50
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          48,
+          52,
+          52
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          48,
+          52,
+          52
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          48,
+          52,
+          52
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          48,
+          52,
+          52
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          48,
+          52,
+          100
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          48,
+          52,
+          100
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "hopper_rim_f",
+    "from": [
+      10,
+      48,
+      10
+    ],
+    "to": [
+      38,
+      56,
+      14
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          32,
+          92,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          32,
+          68,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          32,
+          92,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          32,
+          68,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          32,
+          92,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          32,
+          92,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "hopper_rim_b",
+    "from": [
+      10,
+      48,
+      34
+    ],
+    "to": [
+      38,
+      56,
+      38
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          32,
+          92,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          32,
+          68,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          32,
+          92,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          32,
+          68,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          32,
+          92,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          32,
+          92,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "hopper_rim_l",
+    "from": [
+      10,
+      48,
+      14
+    ],
+    "to": [
+      14,
+      56,
+      34
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          32,
+          68,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          32,
+          84,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          32,
+          68,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          32,
+          84,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          32,
+          68,
+          52
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          32,
+          68,
+          52
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "hopper_rim_r",
+    "from": [
+      34,
+      48,
+      14
+    ],
+    "to": [
+      38,
+      56,
+      34
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          32,
+          68,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          32,
+          84,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          32,
+          68,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          32,
+          84,
+          40
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          32,
+          68,
+          52
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          32,
+          68,
+          52
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "ctrl_box",
+    "from": [
+      8,
+      14,
+      -2
+    ],
+    "to": [
+      16,
+      22,
+      2
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          16,
+          72,
+          24
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          16,
+          72,
+          24
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          16,
+          72,
+          24
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          16,
+          72,
+          24
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          16,
+          72,
+          24
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          16,
+          72,
+          24
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "ctrl_screen",
+    "from": [
+      10,
+      16,
+      -3
+    ],
+    "to": [
+      14,
+      20,
+      -2
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          104,
+          80,
+          108,
+          84
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          104,
+          80,
+          105,
+          84
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          104,
+          80,
+          108,
+          84
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          104,
+          80,
+          105,
+          84
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          104,
+          80,
+          108,
+          81
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          104,
+          80,
+          108,
+          81
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "pipe_br1",
+    "from": [
+      36,
+      6,
+      38
+    ],
+    "to": [
+      40,
+      48,
+      42
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          64,
+          68,
+          106
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          64,
+          68,
+          106
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          64,
+          68,
+          106
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          64,
+          68,
+          106
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          64,
+          68,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          64,
+          68,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "pipe_br3",
+    "from": [
+      32,
+      48,
+      38
+    ],
+    "to": [
+      36,
+      52,
+      42
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          64,
+          68,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          64,
+          68,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          64,
+          68,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          64,
+          68,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          64,
+          68,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          64,
+          68,
+          68
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "pipe_br_motor",
+    "from": [
+      30,
+      46,
+      36
+    ],
+    "to": [
+      38,
+      54,
+      44
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          64,
+          64,
+          72,
+          72
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          64,
+          64,
+          72,
+          72
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          64,
+          64,
+          72,
+          72
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          64,
+          64,
+          72,
+          72
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          64,
+          64,
+          72,
+          72
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          64,
+          64,
+          72,
+          72
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "exhaust_bl",
+    "from": [
+      10,
+      48,
+      36
+    ],
+    "to": [
+      16,
+      60,
+      42
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          48,
+          4,
+          54,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          48,
+          4,
+          54,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          48,
+          4,
+          54,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          48,
+          4,
+          54,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          48,
+          0,
+          54,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          48,
+          0,
+          54,
+          6
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "exhaust_cap",
+    "from": [
+      8,
+      60,
+      34
+    ],
+    "to": [
+      18,
+      62,
+      44
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          32,
+          14,
+          42,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          32,
+          14,
+          42,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          32,
+          14,
+          42,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          32,
+          14,
+          42,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          32,
+          0,
+          42,
+          10
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          32,
+          0,
+          42,
+          10
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "bracket_fl_h",
+    "from": [
+      -2,
+      4,
+      -2
+    ],
+    "to": [
+      8,
+      8,
+      4
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          32,
+          24,
+          42,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          32,
+          24,
+          38,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          32,
+          24,
+          42,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          32,
+          24,
+          38,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          32,
+          24,
+          42,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          32,
+          24,
+          42,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "bracket_fl_v",
+    "from": [
+      -2,
+      4,
+      -2
+    ],
+    "to": [
+      4,
+      16,
+      4
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          32,
+          24,
+          38,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          32,
+          24,
+          38,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "bracket_fr_h",
+    "from": [
+      40,
+      4,
+      -2
+    ],
+    "to": [
+      50,
+      8,
+      4
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          32,
+          24,
+          42,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          32,
+          24,
+          38,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          32,
+          24,
+          42,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          32,
+          24,
+          38,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          32,
+          24,
+          42,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          32,
+          24,
+          42,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "bracket_fr_v",
+    "from": [
+      44,
+      4,
+      -2
+    ],
+    "to": [
+      50,
+      16,
+      4
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          32,
+          24,
+          38,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          32,
+          24,
+          38,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "bracket_bl_h",
+    "from": [
+      -2,
+      4,
+      44
+    ],
+    "to": [
+      8,
+      8,
+      50
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          32,
+          24,
+          42,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          32,
+          24,
+          38,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          32,
+          24,
+          42,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          32,
+          24,
+          38,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          32,
+          24,
+          42,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          32,
+          24,
+          42,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "bracket_bl_v",
+    "from": [
+      -2,
+      4,
+      44
+    ],
+    "to": [
+      4,
+      16,
+      50
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          32,
+          24,
+          38,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          32,
+          24,
+          38,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "bracket_br_h",
+    "from": [
+      40,
+      4,
+      44
+    ],
+    "to": [
+      50,
+      8,
+      50
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          32,
+          24,
+          42,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          32,
+          24,
+          38,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          32,
+          24,
+          42,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          32,
+          24,
+          38,
+          28
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          32,
+          24,
+          42,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          32,
+          24,
+          42,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "bracket_br_v",
+    "from": [
+      44,
+      4,
+      44
+    ],
+    "to": [
+      50,
+      16,
+      50
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          32,
+          24,
+          38,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          32,
+          24,
+          38,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          32,
+          24,
+          38,
+          30
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "tooth_upper_1",
+    "from": [
+      16,
+      20,
+      4
+    ],
+    "to": [
+      20,
+      24,
+      6
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          112,
+          96,
+          116,
+          100
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          112,
+          96,
+          114,
+          100
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          112,
+          96,
+          116,
+          100
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          112,
+          96,
+          114,
+          100
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          112,
+          96,
+          116,
+          98
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          112,
+          96,
+          116,
+          98
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "tooth_upper_2",
+    "from": [
+      24,
+      20,
+      4
+    ],
+    "to": [
+      28,
+      24,
+      6
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          112,
+          96,
+          116,
+          100
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          112,
+          96,
+          114,
+          100
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          112,
+          96,
+          116,
+          100
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          112,
+          96,
+          114,
+          100
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          112,
+          96,
+          116,
+          98
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          112,
+          96,
+          116,
+          98
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "wall_inner_l",
+    "from": [
+      7,
+      6,
+      7
+    ],
+    "to": [
+      8,
+      42,
+      41
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          1,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          34,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          1,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          34,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          1,
+          34
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          1,
+          34
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "wall_inner_r",
+    "from": [
+      40,
+      6,
+      7
+    ],
+    "to": [
+      41,
+      42,
+      41
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          1,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          34,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          1,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          34,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          1,
+          34
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          1,
+          34
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "wall_inner_b",
+    "from": [
+      8,
+      6,
+      40
+    ],
+    "to": [
+      40,
+      42,
+      41
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          32,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          1,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          32,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          1,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          32,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          32,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "wall_inner_bot",
+    "from": [
+      8,
+      6,
+      7
+    ],
+    "to": [
+      40,
+      7,
+      41
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          32,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          34,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          32,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          34,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          32,
+          34
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          32,
+          34
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "lid_main",
+    "from": [
+      6,
+      48,
+      6
+    ],
+    "to": [
+      42,
+      50,
+      42
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          36,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          36,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          36,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          36,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          36,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          36,
+          36
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "lid_top",
+    "from": [
+      12,
+      50,
+      12
+    ],
+    "to": [
+      36,
+      52,
+      36
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          24,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          24,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          24,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          24,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          24,
+          24
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          24,
+          24
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "hopper_bottom",
+    "from": [
+      8,
+      42,
+      8
+    ],
+    "to": [
+      40,
+      43,
+      40
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          32,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          32,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          32,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          32,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          32,
+          32
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          32,
+          32
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "lid_vent_1",
+    "from": [
+      14,
+      52,
+      20
+    ],
+    "to": [
+      34,
+      53,
+      22
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          20,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          2,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          20,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          2,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          20,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          20,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "lid_vent_2",
+    "from": [
+      14,
+      52,
+      26
+    ],
+    "to": [
+      34,
+      53,
+      28
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          20,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          2,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          20,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          2,
+          1
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          20,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          20,
+          2
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_r1_a1",
+    "from": [
+      44,
+      15,
+      10
+    ],
+    "to": [
+      49,
+      18,
+      13
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          122,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          121,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          118,
+          98,
+          123,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          119,
+          98,
+          124,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_r1_loop_b1",
+    "from": [
+      49,
+      15,
+      10
+    ],
+    "to": [
+      52,
+      35,
+      13
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          120,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          114,
+          98,
+          117,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          119,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          120,
+          98,
+          123,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_r1_c1",
+    "from": [
+      44,
+      32,
+      10
+    ],
+    "to": [
+      49,
+      35,
+      13
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          122,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          121,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          118,
+          98,
+          123,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          119,
+          98,
+          124,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_r2_a1",
+    "from": [
+      44,
+      15,
+      14
+    ],
+    "to": [
+      49,
+      18,
+      17
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          122,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          121,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          118,
+          98,
+          123,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          119,
+          98,
+          124,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_r2_loop_b1",
+    "from": [
+      49,
+      15,
+      14
+    ],
+    "to": [
+      52,
+      35,
+      17
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          120,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          114,
+          98,
+          117,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          119,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          120,
+          98,
+          123,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_r2_c1",
+    "from": [
+      44,
+      32,
+      14
+    ],
+    "to": [
+      49,
+      35,
+      17
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          122,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          121,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          118,
+          98,
+          123,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          119,
+          98,
+          124,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_l1_a1",
+    "from": [
+      -1,
+      15,
+      10
+    ],
+    "to": [
+      4,
+      18,
+      13
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          122,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          121,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          118,
+          98,
+          123,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          119,
+          98,
+          124,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_l1_loop_b1",
+    "from": [
+      -4,
+      15,
+      10
+    ],
+    "to": [
+      -1,
+      35,
+      13
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          120,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          114,
+          98,
+          117,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          119,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          120,
+          98,
+          123,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_l1_c1",
+    "from": [
+      -1,
+      32,
+      10
+    ],
+    "to": [
+      4,
+      35,
+      13
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          122,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          121,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          118,
+          98,
+          123,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          119,
+          98,
+          124,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_l2_a1",
+    "from": [
+      -1,
+      15,
+      14
+    ],
+    "to": [
+      4,
+      18,
+      17
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          122,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          121,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          118,
+          98,
+          123,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          119,
+          98,
+          124,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_l2_loop_b1",
+    "from": [
+      -4,
+      15,
+      14
+    ],
+    "to": [
+      -1,
+      35,
+      17
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          120,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          114,
+          98,
+          117,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          119,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          120,
+          98,
+          123,
+          118
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "handle_l2_c1",
+    "from": [
+      -1,
+      32,
+      14
+    ],
+    "to": [
+      4,
+      35,
+      17
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          117,
+          98,
+          122,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          116,
+          98,
+          121,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          126,
+          96,
+          129,
+          99
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          118,
+          98,
+          123,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          119,
+          98,
+          124,
+          101
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  },
+  {
+    "name": "panel_left_lower",
+    "from": [
+      1,
+      6,
+      8
+    ],
+    "to": [
+      3,
+      20,
+      24
+    ],
+    "faces": {
+      "north": {
+        "uv": [
+          0,
+          0,
+          2,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "east": {
+        "uv": [
+          0,
+          0,
+          16,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "south": {
+        "uv": [
+          0,
+          0,
+          2,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "west": {
+        "uv": [
+          0,
+          0,
+          16,
+          14
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "up": {
+        "uv": [
+          0,
+          0,
+          2,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      },
+      "down": {
+        "uv": [
+          0,
+          0,
+          2,
+          16
+        ],
+        "texture": "46c3ebc3-4ca5-7061-fbd2-b11c09fafdc5"
+      }
+    }
+  }
+]

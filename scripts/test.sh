@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-BASE="c:/Users/lucas/RetroNism"
+BASE="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$BASE"
 
 echo "=== Transpiling ==="

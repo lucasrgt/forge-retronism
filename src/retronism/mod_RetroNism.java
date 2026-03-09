@@ -15,9 +15,11 @@ public class mod_Retronism extends BaseMod {
 	public static int itemPipeRenderID;
 	public static int crusherRenderID;
 	public static int machinePortRenderID;
+	public static int megaCrusherRenderID;
 	public static final int GAS_OVERLAY_INDEX = 175;
 
 	public static int texCrusher;
+	public static int texMegaCrusherModel;
 
 	private HashMap renderers = new HashMap();
 
@@ -30,6 +32,7 @@ public class mod_Retronism extends BaseMod {
 		itemPipeRenderID = ModLoader.getUniqueBlockModelID(this, true);
 		crusherRenderID = ModLoader.getUniqueBlockModelID(this, true);
 		machinePortRenderID = ModLoader.getUniqueBlockModelID(this, true);
+		megaCrusherRenderID = ModLoader.getUniqueBlockModelID(this, true);
 
 		// Texture overrides
 		Retronism_Registry.wrench.setIconIndex(ModLoader.addOverride("/gui/items.png", "/item/retronism_wrench.png"));
@@ -38,6 +41,7 @@ public class mod_Retronism extends BaseMod {
 		Retronism_Registry.machinePortBlock.texEnergy = ModLoader.addOverride("/terrain.png", "/block/retronism_port_energy.png");
 		Retronism_Registry.machinePortBlock.texFluid = ModLoader.addOverride("/terrain.png", "/block/retronism_port_fluid.png");
 		Retronism_Registry.machinePortBlock.texGas = ModLoader.addOverride("/terrain.png", "/block/retronism_port_gas.png");
+		texMegaCrusherModel = ModLoader.addOverride("/terrain.png", "/block/retronism_megacrusher_hq.png");
 
 		// Register blocks, tiles, names
 		Retronism_Registry.registerAll(this);
@@ -53,6 +57,7 @@ public class mod_Retronism extends BaseMod {
 		renderers.put(new Integer(itemPipeRenderID), new Retronism_RenderItemPipe());
 		renderers.put(new Integer(crusherRenderID), new Retronism_RenderCrusher());
 		renderers.put(new Integer(machinePortRenderID), new Retronism_RenderMachinePort());
+		renderers.put(new Integer(megaCrusherRenderID), new Retronism_RenderMegaCrusher());
 	}
 
 	public boolean RenderWorldBlock(RenderBlocks renderer, IBlockAccess world, int x, int y, int z, Block block, int modelID) {

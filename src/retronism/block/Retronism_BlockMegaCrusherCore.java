@@ -15,6 +15,10 @@ public class Retronism_BlockMegaCrusherCore extends BlockContainer {
 		this.blockIndexInTexture = textureIndex;
 	}
 
+	public boolean isOpaqueCube() { return false; }
+	public boolean renderAsNormalBlock() { return false; }
+	public int getRenderType() { return mod_Retronism.megaCrusherRenderID; }
+
 	public int idDropped(int metadata, Random random) {
 		return Retronism_Registry.testBlock.blockID;
 	}

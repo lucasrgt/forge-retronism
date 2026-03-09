@@ -12,6 +12,10 @@ public class Retronism_BlockTest extends Block {
 		super(id, textureIndex, Material.iron);
 	}
 
+	public boolean isOpaqueCube() { return false; }
+	public boolean renderAsNormalBlock() { return false; }
+	public int getRenderType() { return mod_Retronism.megaCrusherRenderID; }
+
 	public String getModName() { return "Retronism"; }
 
 	public int quantityDropped(java.util.Random random) {
