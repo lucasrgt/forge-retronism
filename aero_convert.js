@@ -10,8 +10,8 @@ if (!inputPath || !className) {
 }
 
 const data = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
-const elements = data.elements || [];
-const textureWidth = data.resolution ? data.resolution.width : 128;
+const elements = Array.isArray(data) ? data : (data.elements || []);
+const textureWidth = (data.textures && data.textures[0] && data.textures[0].width) || (data.resolution ? data.resolution.width : 128);
 
 // Tweak Settings
 const tweaks = {

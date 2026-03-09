@@ -76,12 +76,15 @@ public class Retronism_Registry {
 		.setResistance(2.0F)
 		.setStepSound(Block.soundMetalFootstep)
 		.setBlockName("retroNismItemPipe");
-
-	public static final Block megaCrusherCoreBlock = (new Retronism_BlockMegaCrusherCore(212, 45))
+	
+	public static final Block megaCrusherCoreBlock = (new Retronism_BlockMegaCrusherCore(212, 16))
 		.setHardness(3.5F)
 		.setResistance(5.0F)
 		.setStepSound(Block.soundStoneFootstep)
 		.setBlockName("retroNismMegaCrusherCore");
+
+	public static final Block megaCrusherPortBlock = (new Retronism_BlockMultiblockPort(213, 16))
+		.setBlockName("retroNismMegaCrusherPort");
 
 	public static final Retronism_BlockMachinePort machinePortBlock = (Retronism_BlockMachinePort) (new Retronism_BlockMachinePort(216, 45))
 		.setBlockName("retroNismMachinePort");
@@ -136,11 +139,13 @@ public class Retronism_Registry {
 		ModLoader.RegisterBlock(megaPipeBlock);
 		ModLoader.RegisterBlock(itemPipeBlock);
 		ModLoader.RegisterBlock(megaCrusherCoreBlock);
+		ModLoader.RegisterBlock(megaCrusherPortBlock);
 		ModLoader.RegisterBlock(machinePortBlock, Retronism_ItemBlockMachinePort.class);
 
 		// Tile Entities
 		ModLoader.RegisterTileEntity(Retronism_TileCrusher.class, "Crusher");
 		ModLoader.RegisterTileEntity(Retronism_TileMegaCrusher.class, "MegaCrusher", new Retronism_TileEntityRenderMegaCrusher());
+		ModLoader.RegisterTileEntity(Retronism_TileMultiblockPort.class, "AeroPort");
 		ModLoader.RegisterTileEntity(Retronism_TileGenerator.class, "Generator");
 		ModLoader.RegisterTileEntity(Retronism_TileCable.class, "Cable");
 		ModLoader.RegisterTileEntity(Retronism_TilePump.class, "Pump");
@@ -166,6 +171,7 @@ public class Retronism_Registry {
 		ModLoader.AddName(megaPipeBlock, "Mega Pipe");
 		ModLoader.AddName(itemPipeBlock, "Item Pipe");
 		ModLoader.AddName(megaCrusherCoreBlock, "Mega Crusher Controller");
+		ModLoader.AddName(megaCrusherPortBlock, "Mega Crusher Port");
 		ModLoader.AddName(machinePortBlock, "Basic Machine Port");
 
 		// Names - Items

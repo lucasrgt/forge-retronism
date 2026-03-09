@@ -1,151 +1,84 @@
 package retronism.tile;
 
 import net.minecraft.src.*;
+import retronism.aero.Aero_IPort;
 import retronism.api.Retronism_IEnergyReceiver;
-import retronism.api.Retronism_IFluidHandler;
-import retronism.api.Retronism_IGasHandler;
 
-public class Retronism_TileMultiblockPort extends TileEntity
-        implements Retronism_IEnergyReceiver, Retronism_IFluidHandler, Retronism_IGasHandler {
+/**
+ * AeroPort System: Redireciona tudo (Energia, Itens, Fluidos) para o Core.
+ */
+public class Retronism_TileMultiblockPort extends TileEntity implements Aero_IPort, Retronism_IEnergyReceiver {
+    
+    public int coreX, coreY, coreZ;
+    public boolean hasCore = false;
+    public String type = "energy";
 
-    public int controllerX, controllerY, controllerZ;
-    public int portType; // 0=none, 1=energy, 2=fluid, 3=gas
-    public int portMode; // 0=none, 1=input, 2=output
-
-    public static final int TYPE_NONE = 0;
-    public static final int TYPE_ENERGY = 1;
-    public static final int TYPE_FLUID = 2;
-    public static final int TYPE_GAS = 3;
-
-    public static final int MODE_NONE = 0;
-    public static final int MODE_INPUT = 1;
-    public static final int MODE_OUTPUT = 2;
-
-    private TileEntity getController() {
-        if (worldObj == null) return null;
-        return worldObj.getBlockTileEntity(controllerX, controllerY, controllerZ);
+    public TileEntity getCore() {
+        if (!hasCore) return null;
+        TileEntity te = worldObj.getBlockTileEntity(coreX, coreY, coreZ);
+        if (te == null) {
+            hasCore = false;
+            return null;
+        }
+        return te;
     }
 
-    public void notifyControllerRemoved() {
-        TileEntity ctrl = getController();
-        // Notify other controller implementations when a port is removed if needed
+    public void setCore(TileEntity core) {
+        if (core != null) {
+            this.coreX = core.xCoord;
+            this.coreY = core.yCoord;
+            this.coreZ = core.zCoord;
+            this.hasCore = true;
+        } else {
+            this.hasCore = false;
+        }
     }
 
-    // --- IEnergyReceiver ---
+    public String getPortType() { return type; }
+
+    // --- Redirecionamento de Energia ---
     @Override
     public int receiveEnergy(int amount) {
-        if (portType != TYPE_ENERGY) return 0;
-        TileEntity ctrl = getController();
-        if (ctrl instanceof Retronism_IEnergyReceiver) {
-            return ((Retronism_IEnergyReceiver) ctrl).receiveEnergy(amount);
+        TileEntity core = getCore();
+        if (core instanceof Retronism_IEnergyReceiver) {
+            return ((Retronism_IEnergyReceiver) core).receiveEnergy(amount);
         }
         return 0;
     }
 
     @Override
     public int getStoredEnergy() {
-        TileEntity ctrl = getController();
-        if (ctrl instanceof Retronism_IEnergyReceiver) {
-            return ((Retronism_IEnergyReceiver) ctrl).getStoredEnergy();
+        TileEntity core = getCore();
+        if (core instanceof Retronism_IEnergyReceiver) {
+            return ((Retronism_IEnergyReceiver) core).getStoredEnergy();
         }
         return 0;
     }
 
     @Override
     public int getMaxEnergy() {
-        TileEntity ctrl = getController();
-        if (ctrl instanceof Retronism_IEnergyReceiver) {
-            return ((Retronism_IEnergyReceiver) ctrl).getMaxEnergy();
+        TileEntity core = getCore();
+        if (core instanceof Retronism_IEnergyReceiver) {
+            return ((Retronism_IEnergyReceiver) core).getMaxEnergy();
         }
         return 0;
     }
 
-    // --- IFluidHandler ---
-    @Override
-    public int receiveFluid(int type, int amountMB) {
-        if (portType != TYPE_FLUID || portMode != MODE_INPUT) return 0;
-        TileEntity ctrl = getController();
-        if (ctrl instanceof Retronism_IFluidHandler) {
-            return ((Retronism_IFluidHandler) ctrl).receiveFluid(type, amountMB);
-        }
-        return 0;
-    }
-
-    @Override
-    public int extractFluid(int type, int amountMB) {
-        if (portType != TYPE_FLUID || portMode != MODE_OUTPUT) return 0;
-        TileEntity ctrl = getController();
-        if (ctrl instanceof Retronism_IFluidHandler) {
-            return ((Retronism_IFluidHandler) ctrl).extractFluid(type, amountMB);
-        }
-        return 0;
-    }
-
-    @Override public int getFluidType() {
-        TileEntity ctrl = getController();
-        return ctrl instanceof Retronism_IFluidHandler ? ((Retronism_IFluidHandler) ctrl).getFluidType() : 0;
-    }
-    @Override public int getFluidAmount() {
-        TileEntity ctrl = getController();
-        return ctrl instanceof Retronism_IFluidHandler ? ((Retronism_IFluidHandler) ctrl).getFluidAmount() : 0;
-    }
-    @Override public int getFluidCapacity() {
-        TileEntity ctrl = getController();
-        return ctrl instanceof Retronism_IFluidHandler ? ((Retronism_IFluidHandler) ctrl).getFluidCapacity() : 0;
-    }
-
-    // --- IGasHandler ---
-    @Override
-    public int receiveGas(int type, int amountMB) {
-        if (portType != TYPE_GAS || portMode != MODE_INPUT) return 0;
-        TileEntity ctrl = getController();
-        if (ctrl instanceof Retronism_IGasHandler) {
-            return ((Retronism_IGasHandler) ctrl).receiveGas(type, amountMB);
-        }
-        return 0;
-    }
-
-    @Override
-    public int extractGas(int type, int amountMB) {
-        if (portType != TYPE_GAS || portMode != MODE_OUTPUT) return 0;
-        TileEntity ctrl = getController();
-        if (ctrl instanceof Retronism_IGasHandler) {
-            return ((Retronism_IGasHandler) ctrl).extractGas(type, amountMB);
-        }
-        return 0;
-    }
-
-    @Override public int getGasType() {
-        TileEntity ctrl = getController();
-        return ctrl instanceof Retronism_IGasHandler ? ((Retronism_IGasHandler) ctrl).getGasType() : 0;
-    }
-    @Override public int getGasAmount() {
-        TileEntity ctrl = getController();
-        return ctrl instanceof Retronism_IGasHandler ? ((Retronism_IGasHandler) ctrl).getGasAmount() : 0;
-    }
-    @Override public int getGasCapacity() {
-        TileEntity ctrl = getController();
-        return ctrl instanceof Retronism_IGasHandler ? ((Retronism_IGasHandler) ctrl).getGasCapacity() : 0;
-    }
-
-    // --- NBT ---
-    @Override
     public void readFromNBT(NBTTagCompound nbt) {
         super.readFromNBT(nbt);
-        controllerX = nbt.getInteger("CtrlX");
-        controllerY = nbt.getInteger("CtrlY");
-        controllerZ = nbt.getInteger("CtrlZ");
-        portType = nbt.getInteger("PortType");
-        portMode = nbt.getInteger("PortMode");
+        coreX = nbt.getInteger("cx");
+        coreY = nbt.getInteger("cy");
+        coreZ = nbt.getInteger("cz");
+        hasCore = nbt.getBoolean("hc");
+        type = nbt.getString("pt");
     }
 
-    @Override
     public void writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
-        nbt.setInteger("CtrlX", controllerX);
-        nbt.setInteger("CtrlY", controllerY);
-        nbt.setInteger("CtrlZ", controllerZ);
-        nbt.setInteger("PortType", portType);
-        nbt.setInteger("PortMode", portMode);
+        nbt.setInteger("cx", coreX);
+        nbt.setInteger("cy", coreY);
+        nbt.setInteger("cz", coreZ);
+        nbt.setBoolean("hc", hasCore);
+        nbt.setString("pt", type);
     }
 }

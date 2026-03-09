@@ -1,14 +1,15 @@
 package retronism.render;
 
 import net.minecraft.src.*;
+import net.minecraft.client.Minecraft;
 import retronism.tile.Retronism_TileMegaCrusher;
-import retronism.aero.Aero_Model;
-import retronism.aero.Aero_ModelRenderer;
+import retronism.aero.Aero_MeshModel;
+import retronism.aero.Aero_ObjLoader;
+import retronism.aero.Aero_MeshRenderer;
 
 public class Retronism_TileEntityRenderMegaCrusher extends TileEntitySpecialRenderer {
 
-    // Now using AeroModel API!
-    public static final Aero_Model MODEL = Retronism_MegaCrusherModel.MODEL;
+    public static final Aero_MeshModel MODEL = Aero_ObjLoader.load("/models/MegaCrusher.obj");
 
     public void renderTileEntityAt(TileEntity tileEntity, double d, double d1, double d2, float f) {
         Retronism_TileMegaCrusher tile = (Retronism_TileMegaCrusher) tileEntity;
@@ -25,8 +26,30 @@ public class Retronism_TileEntityRenderMegaCrusher extends TileEntitySpecialRend
         // Bind high-res texture
         bindTextureByName("/block/retronism_megacrusher_hq.png");
 
-        // Single call to AeroModel API! (rotation = 0 for now)
-        float brightness = tile.getBlockType().getBlockBrightness(tile.worldObj, tile.xCoord, tile.yCoord, tile.zCoord);
-        Aero_ModelRenderer.renderModel(MODEL, d + offsetX, d1 + offsetY, d2 + offsetZ, 0, brightness);
+        // Reset GL color to avoid tinting from other renders
+        org.lwjgl.opengl.GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+
+        World w = tile.worldObj;
+        int ox = tile.originX, oy = tile.originY, oz = tile.originZ;
+
+        float brightness;
+        if (Minecraft.isAmbientOcclusionEnabled()) {
+            // Smooth: média de 9 pontos em grid 3x3 acima da estrutura
+            // → respeita sombras parciais (árvore, parede ao lado)
+            float sum = 0;
+            for (int dx = 0; dx <= 2; dx++)
+                for (int dz = 0; dz <= 2; dz++)
+                    sum += w.getLightBrightness(ox + dx, oy + 3, oz + dz);
+            brightness = sum / 9f;
+        } else {
+            // Flat: máximo de 4 cantos — comportamento clássico do Minecraft
+            brightness = Math.max(
+                Math.max(w.getLightBrightness(ox + 1, oy + 3, oz - 1),
+                         w.getLightBrightness(ox + 1, oy + 3, oz + 3)),
+                Math.max(w.getLightBrightness(ox - 1, oy + 3, oz + 1),
+                         w.getLightBrightness(ox + 3, oy + 3, oz + 1))
+            );
+        }
+        Aero_MeshRenderer.renderModel(MODEL, d + offsetX, d1 + offsetY, d2 + offsetZ, 0, brightness);
     }
 }

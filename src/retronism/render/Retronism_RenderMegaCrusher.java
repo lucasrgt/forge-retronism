@@ -4,11 +4,12 @@ import net.minecraft.src.*;
 import retronism.Retronism_Registry;
 import retronism.tile.Retronism_TileMegaCrusher;
 import retronism.aero.Aero_Model;
+import retronism.aero.Aero_ModelLoader;
 import retronism.aero.Aero_ModelRenderer;
 
 public class Retronism_RenderMegaCrusher implements Retronism_IBlockRenderer {
 
-    public static final Aero_Model MODEL = Retronism_MegaCrusherModel.MODEL;
+    public static final Aero_Model MODEL = Aero_ModelLoader.load("/models/MegaCrusher.aero.json");
 
     public boolean renderWorld(RenderBlocks renderer, IBlockAccess world, int x, int y, int z, Block block) {
         if (block == Retronism_Registry.megaCrusherCoreBlock) {
@@ -58,12 +59,10 @@ public class Retronism_RenderMegaCrusher implements Retronism_IBlockRenderer {
     }
 
     public void renderInventory(RenderBlocks renderer, Block block, int metadata) {
-        if (block == Retronism_Registry.megaCrusherCoreBlock) {
-            // Render the full HQ model in inventory!
-            Aero_ModelRenderer.renderInventory(renderer, MODEL, metadata);
-        } else {
-            float[][] singleBlock = {{0, 0, 0, 16, 16, 16}};
-            Retronism_RenderUtils.renderPartsInventory(renderer, block, singleBlock);
-        }
+        // Forçar a textura HQ para o inventário
+        int texID = ModLoader.getMinecraftInstance().renderEngine.getTexture("/block/retronism_megacrusher_hq.png");
+        ModLoader.getMinecraftInstance().renderEngine.bindTexture(texID);
+        
+        Aero_ModelRenderer.renderInventory(renderer, MODEL, metadata);
     }
 }

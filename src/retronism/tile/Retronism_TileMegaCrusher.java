@@ -158,15 +158,26 @@ public class Retronism_TileMegaCrusher extends TileEntity implements IInventory,
 		for (int dx = 0; dx < 3; dx++) {
 			for (int dy = 0; dy < 3; dy++) {
 				for (int dz = 0; dz < 3; dz++) {
-					int bx = originX + dx;
-					int by = originY + dy;
-					int bz = originZ + dz;
+					int bx = originX + dx, by = originY + dy, bz = dz + originZ;
+					int bid = worldObj.getBlockId(bx, by, bz);
+					
 					if (dx == 1 && dy == 1 && dz == 1) {
-						if (worldObj.getBlockId(bx, by, bz) != 0) return false;
+						if (bid != 0) return false;
 					} else if (bx == xCoord && by == yCoord && bz == zCoord) {
 						continue;
 					} else {
-						if (worldObj.getBlockId(bx, by, bz) != Retronism_Registry.testBlock.blockID) return false;
+						// Aceita tanto bloco normal quanto Port!
+						if (bid == Retronism_Registry.testBlock.blockID) {
+							continue;
+						} else if (bid == Retronism_Registry.megaCrusherPortBlock.blockID) {
+							// Linka o porto ao core
+							TileEntity portTe = worldObj.getBlockTileEntity(bx, by, bz);
+							if (portTe instanceof Aero_IPort) {
+								((Aero_IPort) portTe).setCore(this);
+							}
+							continue;
+						}
+						return false;
 					}
 				}
 			}

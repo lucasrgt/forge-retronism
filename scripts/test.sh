@@ -26,6 +26,11 @@ echo "Injected mod classes"
 cd "$BASE/temp/merged"
 jar uf "$BASE/tests/data/minecraft_run.jar" gui/retronism_*.png anim/retronism_*.png item/retronism_*.png block/retronism_*.png
 echo "Injected custom textures"
+# Inject model JSON files
+if [ -d models ]; then
+  jar uf "$BASE/tests/data/minecraft_run.jar" models/
+  echo "Injected models"
+fi
 cd "$BASE"
 rm -rf "$TMP"
 

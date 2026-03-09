@@ -97,10 +97,15 @@ public class Retronism_BlockTest extends Block {
 			for (int j = 0; j < 3; j++) {
 				for (int k = 0; k < 3; k++) {
 					int bx = ox + i, by = oy + j, bz = oz + k;
+					int bid = world.getBlockId(bx, by, bz);
 					if (i == 1 && j == 1 && k == 1) {
-						if (world.getBlockId(bx, by, bz) != 0) return false;
+						if (bid != 0) return false;
 					} else {
-						if (world.getBlockId(bx, by, bz) != this.blockID) return false;
+						// Aceita tanto o bloco base quanto portos durante a montagem!
+						if (bid == Retronism_Registry.testBlock.blockID || bid == Retronism_Registry.megaCrusherPortBlock.blockID) {
+							continue;
+						}
+						return false;
 					}
 				}
 			}
