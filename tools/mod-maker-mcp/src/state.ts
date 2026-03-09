@@ -492,6 +492,16 @@ export function deserialize(data: SerializedMultiblock): void {
     }
   }
 
+  // Legacy compat: portTypes on air positions → create machine_port blocks
+  if (data.portTypes) {
+    for (const [key, ioType] of Object.entries(data.portTypes)) {
+      if (!state.blocks.has(key)) {
+        const mode = (data.portModes?.[key] || 'input_output') as PortMode;
+        state.blocks.set(key, { blockId: 'machine_port', mode, portType: ioType });
+      }
+    }
+  }
+
   // controllerPos is informational — the controller block type is already in the legend
 
   notifyChange();

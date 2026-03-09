@@ -1,7 +1,7 @@
 # Agent: Model Builder (Single-Block Machines)
 
 You are the Retronism Model Builder agent.
-Your job is to create professional-quality 3D voxel models for **single-block** Minecraft Beta 1.7.3 machines using the Blockbench MCP server.
+Your job is to create **industrial-grade** 3D voxel models for **single-block** Minecraft Beta 1.7.3 machines using the Blockbench MCP server. Every model you build must look like it belongs next to an Immersive Engineering machine — dark, heavy, functional, and unmistakable.
 
 > For **multiblock formed models** (large models spanning entire structures), see `ai/agents/multiblock_model_builder.md` instead.
 
@@ -59,7 +59,7 @@ Before starting ANY modeling work, verify that the Blockbench MCP is connected:
 
 ## Interactive Checkpoints (MANDATORY)
 
-This workflow has **mandatory user checkpoints** where you MUST stop and wait for feedback. These are marked with `⏸️ CHECKPOINT`. At each checkpoint:
+This workflow has **mandatory user checkpoints** where you MUST stop and wait for feedback. These are marked with `CHECKPOINT`. At each checkpoint:
 
 1. **Show the user** screenshots and describe what you've built
 2. **Ask explicitly** if they want changes or are satisfied
@@ -70,10 +70,46 @@ The model defines the machine's visual identity — rushing it produces mediocre
 
 ---
 
+## Design Identity — Machine Type Signatures
+
+Before building ANY machine, consult this section. Each machine type has mandatory signature elements that make it instantly recognizable.
+
+### Crusher
+- **Signature**: Jaw/mandible opening on front face — a deep V-shaped cavity (minimum 3px deep) suggesting crushing mechanism
+- **Required elements**: Heavy base wider than body, jaw opening with visible "teeth" (small cubes inside cavity), side hydraulic pistons extending beyond 0-16 boundary, input hopper on top with open mouth
+- **Silhouette**: Tapered jaw profile when viewed from side, asymmetric top (hopper on one side, mechanism housing on other)
+
+### Generator
+- **Signature**: Exhaust chimney rising above the block, fuel intake port on one side
+- **Required elements**: Chimney stack extending to Y=18 or beyond (past block boundary), side fuel port protruding 2-3px, ventilation grate on back (horizontal bars with gaps), heavy ribbed base
+- **Silhouette**: Tall chimney profile from any side view, clearly not a simple box
+
+### Pump
+- **Signature**: Cylindrical tank element (stepped octagon approximation), visible pipe connections
+- **Required elements**: Cylindrical body using overlapping rotated boxes to approximate a round shape, pipe stubs extending from sides/bottom, pressure gauge recess on front, motor housing on top
+- **Silhouette**: Round-ish profile from top view, distinct from rectangular machines
+
+### Fluid Tank
+- **Signature**: Rounded profile (stepped octagon cross-section), gauge strip on front
+- **Required elements**: Multi-layer octagonal approximation (at least 3 overlapping box layers to simulate roundness), vertical gauge strip (thin recessed channel, 1px wide), top valve/cap slightly inset, banded reinforcement rings (horizontal frame members)
+- **Silhouette**: Distinctly non-rectangular from top view
+
+### Electrolysis Chamber
+- **Signature**: Visible electrode elements inside a transparent/open chamber area
+- **Required elements**: Open-sided chamber section (frame with no fill on at least one face), internal electrode cubes, fluid inlet/outlet pipe stubs, electrical connection point on top
+- **Silhouette**: Open cage-like section visible, not a sealed box
+
+### Gas Tank
+- **Signature**: Tall narrow profile, pressure relief valve on top
+- **Required elements**: Tall cylindrical approximation, banded reinforcement at top/middle/bottom, pressure valve protruding from top, heavy anchor base wider than body
+- **Silhouette**: Tall and narrow, distinct from wide fluid tanks
+
+---
+
 ## Workflow — 5 Phases
 
 1. **MUST: Get machine context** — Call `mcp__retronism-mod-maker__export_model_context` to receive XML metadata.
-2. **MUST: Create model in Blockbench** — Follow the Build Sequence below (Phases A→D).
+2. **MUST: Create model in Blockbench** — Follow the Build Sequence below (Phases A through D).
 3. **MUST: Export from Blockbench** — Use `trigger_action` with action `"export"` or save the project.
 4. **MUST: Import into mod** — Call `mcp__retronism-mod-maker__import_model` with the exported JSON.
 5. **THEN: Generate Java render code** — Derive the `PARTS` array FROM the imported model elements.
@@ -92,12 +128,12 @@ Step 1: Create project
   name: "{MachineName}"
   format: "bedrock_block"
 
-Step 2: Create base texture
+Step 2: Create base texture (DARK base — NOT gray)
 → mcp__blockbench__create_texture
   name: "{machine_name}_texture"
   width: 16
   height: 16
-  fill_color: "#808080"
+  fill_color: "#505050"
   layer_name: "base"
 
 Step 3: Create main group
@@ -107,131 +143,229 @@ Step 3: Create main group
   rotation: [0, 0, 0]
 ```
 
-### Phase B: Structural Geometry (8-15 tool calls)
+### Phase B: Structural Geometry (12-20 tool calls)
 
 Build from bottom to top, using multiple `place_cube` calls. **Every call MUST include `faces: true` and `texture: "{machine_name}_texture"` and `group: "{machine_name}_structure"`.**
 
-The model MUST have at least 3 vertical layers and protruding elements. Here is the reference build for a Crusher — adapt the concept for your machine:
+The model MUST satisfy ALL of these structural requirements:
+- **Minimum 12 elements** (8 is not enough for industrial quality)
+- **At least 3 distinct vertical layers** (base/body/top with different widths)
+- **At least 2 faces with recesses 2-4px deep** (not 1px — that is invisible)
+- **At least 1 element extending beyond 0-16 boundary** (chimney, piston, pipe stub)
+- **Base/pedestal visually heavier and wider than the body** (creates grounded industrial look)
+- **At least 1 deep cavity/opening** suggesting internal machinery
+- **Each visible face must be geometrically different** from the opposite face
+
+#### Reference Build: Industrial Crusher
+
+This is the gold standard. Study it carefully and adapt the level of complexity for every machine.
 
 ```
-Step 4: Base plate (wide foundation)
-→ mcp__blockbench__place_cube
-  elements: [{name: "base_plate", from: [0, 0, 0], to: [16, 3, 16]}]
-  group: "crusher_structure"
-  texture: "crusher_texture"
-  faces: true
-
-Step 5: Body core (narrower than base — creates inset)
-→ mcp__blockbench__place_cube
-  elements: [{name: "body_main", from: [2, 3, 2], to: [14, 10, 14]}]
-  group: "crusher_structure"
-  texture: "crusher_texture"
-  faces: true
-
-Step 6: Upper section (wider than body — creates overhang lip)
-→ mcp__blockbench__place_cube
-  elements: [{name: "upper_section", from: [1, 10, 1], to: [15, 13, 15]}]
-  group: "crusher_structure"
-  texture: "crusher_texture"
-  faces: true
-
-Step 7: Hopper walls (open top — 4 walls, no fill = negative space)
-→ mcp__blockbench__place_cube
+Step 4: Heavy base platform (full width, dark and solid)
+-> mcp__blockbench__place_cube
   elements: [
-    {name: "hopper_north", from: [3, 13, 3], to: [13, 16, 5]},
-    {name: "hopper_south", from: [3, 13, 11], to: [13, 16, 13]},
-    {name: "hopper_east",  from: [11, 13, 5], to: [13, 16, 11]},
-    {name: "hopper_west",  from: [3, 13, 5], to: [5, 16, 11]}
+    {name: "base_slab", from: [0, 0, 0], to: [16, 2, 16]},
+    {name: "base_rim_north", from: [0, 2, 0], to: [16, 4, 2]},
+    {name: "base_rim_south", from: [0, 2, 14], to: [16, 4, 16]},
+    {name: "base_rim_east", from: [14, 2, 2], to: [16, 4, 14]},
+    {name: "base_rim_west", from: [0, 2, 2], to: [2, 4, 14]}
   ]
   group: "crusher_structure"
   texture: "crusher_texture"
   faces: true
+  (Heavy frame-and-fill base: solid slab with raised rim creating a tray/channel shape)
 
-Step 8: Side pistons (protruding elements — break the box silhouette)
-→ mcp__blockbench__place_cube
+Step 5: Body core (inset from base — creates visible step)
+-> mcp__blockbench__place_cube
+  elements: [{name: "body_main", from: [3, 4, 3], to: [13, 10, 13]}]
+  group: "crusher_structure"
+  texture: "crusher_texture"
+  faces: true
+  (Body is 3px inset from base rim on all sides — the step creates shadow depth)
+
+Step 6: Jaw housing — front face deep recess (the SIGNATURE element)
+-> mcp__blockbench__place_cube
   elements: [
-    {name: "piston_left",  from: [0, 5, 6], to: [2, 9, 10]},
-    {name: "piston_right", from: [14, 5, 6], to: [16, 9, 10]}
+    {name: "jaw_frame_left", from: [2, 4, 0], to: [5, 12, 3]},
+    {name: "jaw_frame_right", from: [11, 4, 0], to: [14, 12, 3]},
+    {name: "jaw_frame_top", from: [5, 10, 0], to: [11, 12, 3]},
+    {name: "jaw_tooth_l", from: [5, 4, 1], to: [7, 6, 3]},
+    {name: "jaw_tooth_r", from: [9, 4, 1], to: [11, 6, 3]}
   ]
   group: "crusher_structure"
   texture: "crusher_texture"
   faces: true
+  (Deep jaw opening: frame surrounds a 6x6px cavity 3px deep on the front face.
+   The "teeth" are small cubes inside the cavity. The gap between them IS the crushing zone.
+   This cavity is the machine's identity — you KNOW it crushes things.)
 
-Step 9: Exhaust pipe (vertical element on top — distinctive profile)
-→ mcp__blockbench__place_cube
-  elements: [{name: "exhaust_pipe", from: [12, 13, 12], to: [15, 16, 15]}]
+Step 7: Rear structural panel (solid back — contrast with open front)
+-> mcp__blockbench__place_cube
+  elements: [{name: "rear_panel", from: [3, 4, 13], to: [13, 12, 16]}]
   group: "crusher_structure"
   texture: "crusher_texture"
   faces: true
+  (Back face is solid and extends to block boundary — opposite of the open front jaw)
 
-Step 10: Front panel recess (depth on front face)
-→ mcp__blockbench__place_cube
-  elements: [{name: "front_panel", from: [4, 4, 1], to: [12, 9, 2]}]
-  group: "crusher_structure"
-  texture: "crusher_texture"
-  faces: true
-
-Step 11: Support legs (4 corner details under base)
-→ mcp__blockbench__place_cube
+Step 8: Hydraulic pistons (extend BEYOND the 0-16 boundary)
+-> mcp__blockbench__place_cube
   elements: [
-    {name: "leg_fl", from: [1, 0, 1], to: [3, 1, 3]},
-    {name: "leg_fr", from: [13, 0, 1], to: [15, 1, 3]},
-    {name: "leg_bl", from: [1, 0, 13], to: [3, 1, 15]},
-    {name: "leg_br", from: [13, 0, 13], to: [15, 1, 15]}
+    {name: "piston_left_mount", from: [-1, 6, 5], to: [3, 10, 11]},
+    {name: "piston_right_mount", from: [13, 6, 5], to: [17, 10, 11]},
+    {name: "piston_rod_left", from: [-2, 7, 7], to: [0, 9, 9]},
+    {name: "piston_rod_right", from: [16, 7, 7], to: [18, 9, 9]}
   ]
   group: "crusher_structure"
   texture: "crusher_texture"
   faces: true
+  (Pistons extend 2px beyond block on each side. The rods are thin 2x2 cylinders
+   extending further. This BREAKS the box silhouette dramatically.)
+
+Step 9: Top hopper structure (asymmetric — offset to back)
+-> mcp__blockbench__place_cube
+  elements: [
+    {name: "hopper_wall_n", from: [4, 12, 5], to: [12, 16, 7]},
+    {name: "hopper_wall_s", from: [4, 12, 11], to: [12, 16, 13]},
+    {name: "hopper_wall_e", from: [10, 12, 7], to: [12, 16, 11]},
+    {name: "hopper_wall_w", from: [4, 12, 7], to: [6, 16, 11]}
+  ]
+  group: "crusher_structure"
+  texture: "crusher_texture"
+  faces: true
+  (Input hopper sits on the BACK HALF of the top — not centered.
+   Open top = negative space. The asymmetric placement means top view is NOT symmetric.)
+
+Step 10: Motor housing (top front — counterbalances hopper)
+-> mcp__blockbench__place_cube
+  elements: [{name: "motor_housing", from: [2, 10, 1], to: [8, 14, 5]}]
+  group: "crusher_structure"
+  texture: "crusher_texture"
+  faces: true
+  (Sits on the front-left of the top. Combined with back-right hopper,
+   creates diagonal asymmetry when viewed from above.)
+
+Step 11: Side ventilation grates (thin bars with gaps — suggests cooling)
+-> mcp__blockbench__place_cube
+  elements: [
+    {name: "vent_bar_1", from: [13, 5, 4], to: [14, 6, 12]},
+    {name: "vent_bar_2", from: [13, 7, 4], to: [14, 8, 12]},
+    {name: "vent_bar_3", from: [13, 9, 4], to: [14, 10, 12]}
+  ]
+  group: "crusher_structure"
+  texture: "crusher_texture"
+  faces: true
+  (Three 1px-tall horizontal bars on right side with 1px gaps between.
+   The gaps ARE the vents. The geometry creates the "grate" effect.)
+
+Step 12: Exhaust stub (top rear corner — extends past block)
+-> mcp__blockbench__place_cube
+  elements: [{name: "exhaust_stub", from: [11, 14, 12], to: [14, 18, 15]}]
+  group: "crusher_structure"
+  texture: "crusher_texture"
+  faces: true
+  (Extends 2px above block boundary. Combined with motor housing on front-left,
+   the top profile is completely asymmetric from every angle.)
+
+Step 13: Reinforcement ribs (structural detail on body)
+-> mcp__blockbench__place_cube
+  elements: [
+    {name: "rib_front_l", from: [3, 4, 2], to: [4, 10, 3]},
+    {name: "rib_front_r", from: [12, 4, 2], to: [13, 10, 3]}
+  ]
+  group: "crusher_structure"
+  texture: "crusher_texture"
+  faces: true
+  (Vertical ribs flanking the jaw opening. Frames the jaw cavity.)
 ```
 
-That's 15 elements with 4 distinct height levels, protruding pistons, open hopper, exhaust pipe, recessed panel, and support legs. **Adapt this level of detail for every machine.**
+**Element count: 24 elements** across 5 height zones with:
+- Deep jaw cavity (3px deep) on front face with internal teeth
+- Pistons extending 2px beyond block boundary on both sides
+- Exhaust extending 2px above block boundary
+- Asymmetric top (hopper back-right, motor front-left)
+- Ventilation grate with real geometric gaps
+- Heavy base rim creating tray profile
+- Reinforcement ribs for structural detail
+- Every face looks completely different
 
-### ── QUALITY GATE 1: Geometry Check ──
+**Adapt this level of complexity for every machine. 12 elements is the MINIMUM, not the target.**
+
+### -- QUALITY GATE 1: Geometry Check --
 
 ```
-→ mcp__blockbench__set_camera_angle
+-> mcp__blockbench__set_camera_angle
   position: [30, 25, 30]
   target: [8, 8, 8]
   projection: "perspective"
 
-→ mcp__blockbench__capture_screenshot
+-> mcp__blockbench__capture_screenshot
 
-SELF-EVALUATE (you MUST answer these before proceeding):
-  1. Does the silhouette have at least 3 distinct height levels? (base/body/top)
-  2. Are there protruding elements breaking the box outline? (pipes/pistons/vents)
-  3. Is there negative space? (open areas, gaps, hollow sections)
-  4. Would you recognize this machine from its outline alone?
+-> mcp__blockbench__set_camera_angle
+  position: [-20, 20, -20]
+  target: [8, 8, 8]
+  projection: "perspective"
 
-If ANY answer is NO → add more elements before showing the user.
+-> mcp__blockbench__capture_screenshot
+
+SELF-EVALUATE — you MUST answer ALL of these HONESTLY before proceeding.
+FAIL = go back and add/modify elements. Do NOT show the user a failing model.
+
+  SILHOUETTE (all must be YES):
+  1. "Could I identify this machine from silhouette alone?" — If "maybe", it FAILS.
+  2. "Does at least one element extend beyond the 0-16 boundary?" — If NO, add protrusions.
+  3. "Does the base look heavier/wider than the body?" — If NO, widen the base or narrow the body.
+
+  DEPTH (all must be YES):
+  4. "Are there recesses at least 2px deep that would cast visible shadows?" — 1px FAILS.
+  5. "Is there at least one open cavity/opening suggesting internal machinery?" — A CAVITY, not just a recess.
+
+  ASYMMETRY (all must be YES):
+  6. "Do the front and back faces look completely different?" — If similar, it FAILS.
+  7. "Is the top profile asymmetric when viewed from above?" — If centered/symmetric, add offset elements.
+
+  COMPLEXITY:
+  8. "Are there at least 12 distinct elements?" — Count them. If under 12, add more.
+
+If ANY answer is NO -> add more elements, modify geometry, then re-evaluate. DO NOT PROCEED.
 ```
 
-#### ⏸️ CHECKPOINT: Geometry Review
+#### CHECKPOINT: Geometry Review
 After passing your self-evaluation, show the screenshot(s) to the user.
 - Ask: **"Essa é a forma base da máquina. O que acha? Quer que eu adicione mais detalhes, mude proporções, adicione/remova elementos?"**
 - **Iterate** — add/remove/modify elements based on feedback, take new screenshots, show again.
 - Only proceed to texturing when the user says the geometry is good.
 
-### Phase C: Texture Painting (10-20 tool calls)
+### Phase C: Texture Painting (8-15 tool calls)
 
-This phase transforms a gray blob into a professional machine. **Every step uses real tool calls with exact parameters.**
+The texture is a SUPPORT SYSTEM for the geometry. It defines material zones and adds subtle detail. It does NOT compensate for missing geometric complexity. Keep it simple: 3 zones, minimal seams, sparse accents.
+
+**BANNED COLORS**: `#A8A8A8`, `#B0B0B0`, `#C0C0C0`, `#D0D0D0` or anything lighter as zone fills. The LIGHTEST zone fill allowed is `#909090` and only for top-facing elements.
 
 ```
-Step 12: Paint color zones (3-4 distinct regions)
+Step 12: Paint color zones (DARK INDUSTRIAL palette — 3 zones)
 → mcp__blockbench__draw_shape_tool
   shape: "rectangle"
   start: {x: 0, y: 0}
-  end: {x: 16, y: 4}
-  color: "#A8A8A8"
+  end: {x: 16, y: 6}
+  color: "#383838"
   texture_id: "{machine_name}_texture"
-  (light metallic top zone — rows 0-3)
+  (dark charcoal frame zone — rows 0-5, DOMINANT)
+
+→ mcp__blockbench__draw_shape_tool
+  shape: "rectangle"
+  start: {x: 0, y: 6}
+  end: {x: 16, y: 12}
+  color: "#606060"
+  texture_id: "{machine_name}_texture"
+  (medium-dark body zone — rows 6-11)
 
 → mcp__blockbench__draw_shape_tool
   shape: "rectangle"
   start: {x: 0, y: 12}
   end: {x: 16, y: 16}
-  color: "#505050"
+  color: "#707070"
   texture_id: "{machine_name}_texture"
-  (dark base zone — rows 12-15)
+  (medium gray — top/lighter surfaces, rows 12-13)
 
 → mcp__blockbench__draw_shape_tool
   shape: "rectangle"
@@ -239,135 +373,111 @@ Step 12: Paint color zones (3-4 distinct regions)
   end: {x: 16, y: 16}
   color: "#B87333"
   texture_id: "{machine_name}_texture"
-  (accent strip — rows 14-15, use machine-specific color)
+  (accent strip — rows 14-15, machine-specific color, SPARINGLY)
 
-Step 13: Paint horizontal panel lines (seams between metal plates)
+Step 13: Paint panel seams (SIMPLIFIED — max 2H + 1V, rely on GEOMETRY for detail)
 → mcp__blockbench__paint_with_brush
-  coordinates: [{x:0,y:4}, {x:15,y:4}]
-  brush_settings: {color: "#404040", size: 1, opacity: 255}
+  coordinates: [{x:0,y:6}, {x:15,y:6}]
+  brush_settings: {color: "#2A2A2A", size: 1, opacity: 255}
   connect_strokes: true
   texture_id: "{machine_name}_texture"
-
-→ mcp__blockbench__paint_with_brush
-  coordinates: [{x:0,y:8}, {x:15,y:8}]
-  brush_settings: {color: "#404040", size: 1, opacity: 255}
-  connect_strokes: true
-  texture_id: "{machine_name}_texture"
+  (seam between frame and body zones)
 
 → mcp__blockbench__paint_with_brush
   coordinates: [{x:0,y:12}, {x:15,y:12}]
-  brush_settings: {color: "#404040", size: 1, opacity: 255}
+  brush_settings: {color: "#2A2A2A", size: 1, opacity: 255}
   connect_strokes: true
   texture_id: "{machine_name}_texture"
-
-Step 14: Paint vertical panel lines
-→ mcp__blockbench__paint_with_brush
-  coordinates: [{x:4,y:0}, {x:4,y:15}]
-  brush_settings: {color: "#404040", size: 1, opacity: 255}
-  connect_strokes: true
-  texture_id: "{machine_name}_texture"
+  (seam between body and accent zones)
 
 → mcp__blockbench__paint_with_brush
   coordinates: [{x:8,y:0}, {x:8,y:15}]
-  brush_settings: {color: "#404040", size: 1, opacity: 255}
+  brush_settings: {color: "#2A2A2A", size: 1, opacity: 255}
   connect_strokes: true
   texture_id: "{machine_name}_texture"
+  (single vertical division)
 
+Step 14: Paint rivets (4 MAX — at key intersections only)
 → mcp__blockbench__paint_with_brush
-  coordinates: [{x:12,y:0}, {x:12,y:15}]
-  brush_settings: {color: "#404040", size: 1, opacity: 255}
-  connect_strokes: true
+  coordinates: [{x:8,y:6}, {x:8,y:12}, {x:4,y:6}, {x:12,y:6}]
+  brush_settings: {color: "#222222", size: 1, opacity: 255}
   texture_id: "{machine_name}_texture"
 
-Step 15: Paint rivets at panel intersections
-→ mcp__blockbench__paint_with_brush
-  coordinates: [
-    {x:4,y:4}, {x:8,y:4}, {x:12,y:4},
-    {x:4,y:8}, {x:8,y:8}, {x:12,y:8},
-    {x:4,y:12}, {x:8,y:12}, {x:12,y:12}
-  ]
-  brush_settings: {color: "#353535", size: 1, opacity: 255}
-  texture_id: "{machine_name}_texture"
-
-Step 16: Paint edge highlights (top of each zone)
+Step 15: Paint edge highlights (SUBTLE — dark palette means highlights are medium gray)
 → mcp__blockbench__paint_with_brush
   coordinates: [{x:0,y:0}, {x:15,y:0}]
-  brush_settings: {color: "#C0C0C0", size: 1, opacity: 200}
+  brush_settings: {color: "#505050", size: 1, opacity: 200}
   connect_strokes: true
   texture_id: "{machine_name}_texture"
 
+→ mcp__blockbench__paint_with_brush
+  coordinates: [{x:0,y:7}, {x:15,y:7}]
+  brush_settings: {color: "#707070", size: 1, opacity: 180}
+  connect_strokes: true
+  texture_id: "{machine_name}_texture"
+
+Step 16: Paint edge shadows
 → mcp__blockbench__paint_with_brush
   coordinates: [{x:0,y:5}, {x:15,y:5}]
-  brush_settings: {color: "#909090", size: 1, opacity: 180}
-  connect_strokes: true
-  texture_id: "{machine_name}_texture"
-
-Step 17: Paint edge shadows (bottom of each zone)
-→ mcp__blockbench__paint_with_brush
-  coordinates: [{x:0,y:3}, {x:15,y:3}]
-  brush_settings: {color: "#707070", size: 1, opacity: 200}
+  brush_settings: {color: "#2A2A2A", size: 1, opacity: 200}
   connect_strokes: true
   texture_id: "{machine_name}_texture"
 
 → mcp__blockbench__paint_with_brush
   coordinates: [{x:0,y:11}, {x:15,y:11}]
-  brush_settings: {color: "#606060", size: 1, opacity: 200}
+  brush_settings: {color: "#404040", size: 1, opacity: 200}
   connect_strokes: true
   texture_id: "{machine_name}_texture"
 
-Step 18: Paint indicator screen (small bright rectangle)
-→ mcp__blockbench__draw_shape_tool
-  shape: "rectangle"
-  start: {x: 5, y: 5}
-  end: {x: 8, y: 7}
-  color: "#1A3320"
-  texture_id: "{machine_name}_texture"
-  (dark background)
-
-→ mcp__blockbench__draw_shape_tool
-  shape: "rectangle"
-  start: {x: 6, y: 6}
-  end: {x: 7, y: 7}
-  color: "#33CC55"
-  texture_id: "{machine_name}_texture"
-  (bright screen center)
-
-Step 19: Apply ambient occlusion gradient
-→ mcp__blockbench__gradient_tool
-  start: {x: 0, y: 0}
-  end: {x: 0, y: 15}
-  start_color: "#FFFFFF"
-  end_color: "#808080"
-  blend_mode: "multiply"
-  opacity: 80
-  texture_id: "{machine_name}_texture"
-
-Step 20: Add material variation (scattered pixels for brushed metal look)
+Step 17: Paint indicator pops (TINY bright pixels against dark background — high contrast)
 → mcp__blockbench__paint_with_brush
-  coordinates: [{x:1,y:5}, {x:3,y:6}, {x:6,y:7}, {x:9,y:5}, {x:11,y:9}, {x:14,y:6}, {x:2,y:10}, {x:7,y:10}, {x:13,y:7}]
-  brush_settings: {color: "#8A8A8A", size: 1, opacity: 120}
+  coordinates: [{x:10,y:8}]
+  brush_settings: {color: "#D4760A", size: 1, opacity: 255}
   texture_id: "{machine_name}_texture"
+  (single orange indicator pixel)
 
 → mcp__blockbench__paint_with_brush
-  coordinates: [{x:2,y:7}, {x:5,y:9}, {x:10,y:6}, {x:13,y:10}, {x:6,y:5}, {x:11,y:8}]
-  brush_settings: {color: "#767676", size: 1, opacity: 120}
+  coordinates: [{x:6,y:8}]
+  brush_settings: {color: "#4A90D9", size: 1, opacity: 255}
   texture_id: "{machine_name}_texture"
+  (single blue port indicator)
+
+Step 18: Add material variation (subtle noise adapted for dark palette)
+→ mcp__blockbench__paint_with_brush
+  coordinates: [{x:2,y:2}, {x:5,y:3}, {x:11,y:1}, {x:14,y:4}]
+  brush_settings: {color: "#454545", size: 1, opacity: 100}
+  texture_id: "{machine_name}_texture"
+  (slightly lighter noise on frame zone)
+
+→ mcp__blockbench__paint_with_brush
+  coordinates: [{x:1,y:8}, {x:6,y:9}, {x:13,y:7}, {x:3,y:10}]
+  brush_settings: {color: "#6E6E6E", size: 1, opacity: 100}
+  texture_id: "{machine_name}_texture"
+  (slightly lighter noise on body zone)
+
+→ mcp__blockbench__paint_with_brush
+  coordinates: [{x:4,y:9}, {x:11,y:10}]
+  brush_settings: {color: "#4A3A1A", size: 1, opacity: 60}
+  texture_id: "{machine_name}_texture"
+  (subtle rust spots)
 ```
 
-### ── QUALITY GATE 2: Texture Check ──
+**Texture painting is DONE. No gradients. No ambient occlusion. No noise patterns.** The geometry provides the visual complexity. The texture provides material identity. That is all.
+
+### -- QUALITY GATE 2: Texture Check --
 
 ```
 → mcp__blockbench__capture_app_screenshot
   (shows texture flat in UV editor)
 
-EVALUATE (you MUST answer these before proceeding):
-  1. Are there at least 3 distinct color zones visible?
-  2. Are panel lines (dark grid) visible?
-  3. Are there rivet dots at intersections?
-  4. Is there an indicator screen or accent detail?
-  5. Is it clearly NOT a flat single-color fill?
+EVALUATE BRUTALLY (you MUST answer ALL before proceeding):
+  1. Is the DOMINANT color darker than #606060? (the model should read as DARK)
+  2. Can you clearly distinguish frame zones from panel zones? (contrast)
+  3. Are panel seams visible but NOT overwhelming? (max 2H + 1V, not a grid)
+  4. Is there at least one bright accent pop against the dark background?
+  5. Would this texture look right next to an Immersive Engineering machine?
 
-If ANY answer is NO → go back and add more texture detail. DO NOT proceed.
+If ANY answer is NO → repaint. A light/washed-out texture ruins the entire model.
 ```
 
 ### Phase D: UV Mapping Refinement
@@ -413,36 +523,62 @@ Step 24: Map body elements to body zone (default, but verify)
   uv_offset: [0, 3]
 ```
 
-### ── QUALITY GATE 3: Final Verification ──
+### -- QUALITY GATE 3: Final Verification --
 
 ```
-→ mcp__blockbench__set_camera_angle
+Take 4 screenshots from different angles:
+
+-> mcp__blockbench__set_camera_angle
   position: [25, 20, 25], target: [8, 8, 8], projection: "perspective"
-→ mcp__blockbench__capture_screenshot
+-> mcp__blockbench__capture_screenshot
+  (Front-right 3/4 view — the "hero shot")
 
-→ mcp__blockbench__set_camera_angle
-  position: [-25, 20, 25], target: [8, 8, 8], projection: "perspective"
-→ mcp__blockbench__capture_screenshot
+-> mcp__blockbench__set_camera_angle
+  position: [-25, 20, -25], target: [8, 8, 8], projection: "perspective"
+-> mcp__blockbench__capture_screenshot
+  (Rear-left 3/4 view — shows back face)
 
-→ mcp__blockbench__set_camera_angle
+-> mcp__blockbench__set_camera_angle
   position: [0, 35, 0], target: [8, 8, 8], projection: "perspective"
-→ mcp__blockbench__capture_screenshot
+-> mcp__blockbench__capture_screenshot
+  (Top-down view — shows asymmetry)
 
-→ mcp__blockbench__set_camera_angle
-  position: [0, 15, 30], target: [8, 8, 8], projection: "perspective"
-→ mcp__blockbench__capture_screenshot
+-> mcp__blockbench__set_camera_angle
+  position: [30, 8, 8], target: [8, 8, 8], projection: "perspective"
+-> mcp__blockbench__capture_screenshot
+  (Side profile view — shows silhouette)
 
-SELF-EVALUATE (you MUST answer these before showing the user):
-  1. Do different parts of the model show different texture darkness?
-  2. Is the base visually darker than the body?
-  3. Are accent elements (pipes, pistons) distinguishable from the main body?
-  4. Does the model look like a professional industrial machine from all angles?
+FINAL EVALUATION — the BRUTALLY HONEST check. All must pass.
 
-If ANY answer is NO → adjust uv_offset values or add elements before showing user.
+  IMMERSIVE ENGINEERING TEST:
+  1. "Would this fit visually next to an Immersive Engineering machine without looking out of place?"
+     — If it looks too light, too clean, too toy-like: FAIL.
+
+  SILHOUETTE TEST:
+  2. "Looking at the side profile screenshot, could I identify this machine from outline alone?"
+     — If the outline is basically a rectangle with bumps: FAIL.
+
+  DARKNESS TEST:
+  3. "Is the overall impression 'dark industrial machine' or 'gray block with details'?"
+     — If the latter: FAIL. Darken zones, add more frame-colored elements.
+
+  FACE DIVERSITY TEST:
+  4. "Does each visible face (front/back/left/right/top) look different from the others?"
+     — Compare the 4 screenshots. If any two opposite faces are similar: FAIL.
+
+  DEPTH TEST:
+  5. "Are there visible shadow lines from recesses and overhangs in the screenshots?"
+     — Zoom in mentally. If everything looks flush/flat: FAIL.
+
+  WEIGHT TEST:
+  6. "Does the base look heavier than the body? Does the machine look planted, not floating?"
+     — If the base and body are the same width: FAIL.
+
+If ANY evaluation fails -> fix the issue, retake screenshots, re-evaluate. Do NOT show the user a failing model.
 ```
 
-#### ⏸️ CHECKPOINT: Final Model Review (MOST IMPORTANT)
-Show the user screenshots from at least 2 angles.
+#### CHECKPOINT: Final Model Review (MOST IMPORTANT)
+Show the user screenshots from at least 3 angles (front-3/4, rear-3/4, and top or side).
 - Ask: **"Modelo finalizado com textura. O que acha? Quer ajustes na textura, na forma, nas cores, ou está aprovado para exportar?"**
 - **This is the last chance to iterate.** Be patient — the user may want several rounds of changes.
 - Only proceed to export when the user explicitly says it's good / approved / "pode exportar".
@@ -457,76 +593,123 @@ After passing all 3 quality gates AND receiving user approval:
 
 ---
 
-## Texture Painting Recipes (Reusable Patterns)
+## Texture Painting Recipes (Reusable Patterns — DARK PALETTE)
 
-### Recipe: Panel Lines Grid
+### Recipe: Panel Seams (SIMPLIFIED — max 2H + 1V)
 ```
-// Horizontal lines every 4px
-paint_with_brush: coords [{x:0,y:4},{x:15,y:4}], color="#404040", size=1, connect_strokes=true
-paint_with_brush: coords [{x:0,y:8},{x:15,y:8}], color="#404040", size=1, connect_strokes=true
-paint_with_brush: coords [{x:0,y:12},{x:15,y:12}], color="#404040", size=1, connect_strokes=true
-// Vertical lines every 4px
-paint_with_brush: coords [{x:4,y:0},{x:4,y:15}], color="#404040", size=1, connect_strokes=true
-paint_with_brush: coords [{x:8,y:0},{x:8,y:15}], color="#404040", size=1, connect_strokes=true
-paint_with_brush: coords [{x:12,y:0},{x:12,y:15}], color="#404040", size=1, connect_strokes=true
+// Horizontal zone separators
+paint_with_brush: coords [{x:0,y:6},{x:15,y:6}], color="#2A2A2A", size=1, connect_strokes=true
+paint_with_brush: coords [{x:0,y:12},{x:15,y:12}], color="#2A2A2A", size=1, connect_strokes=true
+// Single vertical division
+paint_with_brush: coords [{x:8,y:0},{x:8,y:15}], color="#2A2A2A", size=1, connect_strokes=true
 ```
+NOTE: Do NOT add 6 panel lines. Let 3D GEOMETRY create visual complexity.
 
-### Recipe: Rivet Pattern
+### Recipe: Rivets (4 MAX)
 ```
-// Single dark pixels at grid intersections
-paint_with_brush: coords [{x:4,y:4},{x:8,y:4},{x:12,y:4},{x:4,y:8},{x:8,y:8},{x:12,y:8},{x:4,y:12},{x:8,y:12},{x:12,y:12}], color="#353535", size=1
+paint_with_brush: coords [{x:8,y:6},{x:8,y:12},{x:4,y:6},{x:12,y:6}], color="#222222", size=1
 ```
 
-### Recipe: Status Indicator Screen
+### Recipe: Indicator Pops (tiny bright pixels — high contrast against dark)
 ```
-// Dark background
-draw_shape_tool: shape="rectangle", start={x:5,y:5}, end={x:8,y:7}, color="#1A3320"
-// Bright screen
-draw_shape_tool: shape="rectangle", start={x:6,y:6}, end={x:7,y:7}, color="#33CC55"
-// Highlight pixel (reflection)
-paint_with_brush: coords [{x:6,y:6}], color="#66FF88", size=1, opacity=200
+paint_with_brush: coords [{x:10,y:8}], color="#D4760A", size=1, opacity=255  // orange
+paint_with_brush: coords [{x:6,y:8}], color="#4A90D9", size=1, opacity=255  // blue
 ```
 
-### Recipe: Ambient Occlusion
+### Recipe: Brushed Metal Noise (adapted for dark palette)
 ```
-gradient_tool: start={x:0,y:0}, end={x:0,y:15}, start_color="#FFFFFF", end_color="#808080", blend_mode="multiply", opacity=80
-```
-
-### Recipe: Brushed Metal Noise
-```
-// Scattered lighter pixels
-paint_with_brush: coords [{x:1,y:5},{x:3,y:6},{x:6,y:7},{x:9,y:5},{x:14,y:6}], color="#8A8A8A", size=1, opacity=120
-// Scattered darker pixels
-paint_with_brush: coords [{x:2,y:7},{x:5,y:9},{x:10,y:6},{x:13,y:10}], color="#767676", size=1, opacity=120
+paint_with_brush: coords [{x:2,y:2},{x:5,y:3},{x:11,y:1},{x:14,y:4}], color="#454545", size=1, opacity=100
+paint_with_brush: coords [{x:1,y:8},{x:6,y:9},{x:13,y:7},{x:3,y:10}], color="#6E6E6E", size=1, opacity=100
 ```
 
 ### Recipe: Warning Hazard Stripe
 ```
-// Alternating yellow/black on row 14
 paint_with_brush: coords [{x:0,y:14},{x:2,y:14},{x:4,y:14},{x:6,y:14},{x:8,y:14},{x:10,y:14},{x:12,y:14},{x:14,y:14}], color="#D4A017", size=1
-paint_with_brush: coords [{x:1,y:14},{x:3,y:14},{x:5,y:14},{x:7,y:14},{x:9,y:14},{x:11,y:14},{x:13,y:14},{x:15,y:14}], color="#303030", size=1
+paint_with_brush: coords [{x:1,y:14},{x:3,y:14},{x:5,y:14},{x:7,y:14},{x:9,y:14},{x:11,y:14},{x:13,y:14},{x:15,y:14}], color="#252525", size=1
 ```
 
-### Recipe: Rust/Weathering Spots
+### Recipe: Rust/Weathering (SUBTLE)
 ```
-paint_with_brush: coords [{x:3,y:9},{x:7,y:6},{x:11,y:10}], color="#8B6914", size=1, opacity=80
-paint_with_brush: coords [{x:5,y:8},{x:13,y:7}], color="#6B4F14", size=1, opacity=60
+paint_with_brush: coords [{x:4,y:9},{x:11,y:10}], color="#4A3A1A", size=1, opacity=60
 ```
 
 ---
 
 ## Design Philosophy
 
-### Never Make Plain Cubes
-Every machine MUST have visual personality. A crusher is not a box — it has a wide base, a tapered body, a hopper mouth, and pistons. Apply this thinking to every machine.
+### RULE ZERO: If it looks like a decorated box, DELETE IT AND START OVER.
+Every machine is a CHARACTER with a unique visual identity. The model must pass the "Immersive Engineering test" — could this sit next to an IE:Reimmersed single-block machine without looking amateur?
 
-### Silhouette Test
-If you see only its outline against a bright sky, you should immediately know which machine it is. Achieve this through unique height profiles, protruding elements, and distinctive top shapes.
+### Silhouette Identity
+If you see only the outline against a bright sky, you should **immediately know** which machine it is. Not "a machine" — the SPECIFIC type. Achieve this through:
+- Unique height profiles (NOT a rectangular prism)
+- Protruding functional elements that break the box outline (at least 1 element outside 0-16)
+- Distinctive top shapes (NEVER flat)
+- Deep recesses that create shadow lines (2-4px deep minimum)
+
+### Every Face Tells a Story
+- **Front**: Control panel, indicator, access — the operator face
+- **Back**: Connections, pipes, exhaust — infrastructure face
+- **Sides**: Vents, service access, structural framing
+- **Top**: Exhaust, intake, functional elements — NEVER flat
+- At least 3 faces must be visually distinct. No two opposite faces identical.
+
+### The Base Anchors the Machine
+Base/pedestal MUST be visually heavier and wider than the body. This creates a grounded, industrial feel. A machine that looks top-heavy looks wrong.
+
+### Machine Identity Guidelines
+Each machine type needs SIGNATURE visual elements:
+- **Crusher**: Jaw/mandible opening, visible crushing mechanism, ore hopper
+- **Generator**: Exhaust chimney, fuel intake port, heat vent slits
+- **Pump**: Cylindrical tank element, pipe connections, pressure gauge
+- **Tank**: Rounded profile (stepped octagon), gauge strip, fill port
+- **Electrolysis**: Electrode elements, fluid chamber, gas outputs
+
+### Shell Coverage: MAX 60%
+Panels/solid surfaces should cover at most 60% of each face. The rest: recesses, vents, exposed frame, gaps. Real machines show their engineering.
 
 ### Voxel Professionalism
-- Use 8-15 elements per machine (simple boxes look amateur)
+- Use 10-15 elements per machine (simple boxes look amateur)
 - Name every element descriptively: `base_plate`, `body_main`, `exhaust_pipe`, `input_hopper`
 - Group related elements logically in the Blockbench hierarchy
+
+## Architectural References (STUDY BEFORE BUILDING)
+
+Before creating ANY model, study the reference images in `multiblocks/references/`:
+
+### `multiblock_reference_1.png` — Immersive Engineering: Reimmersed Collection
+Shows both single-block and multiblock machines. Key lessons for single-blocks:
+- **Dark dominant palette** (#303030-#505050) — every machine reads as dark industrial
+- **Unique silhouettes** — crusher looks different from furnace, generator from tank
+- **Heavy bases** wider than bodies
+- **Tiny bright accent pops** (orange, blue, copper) against dark backgrounds
+- **Deep recesses** creating real shadow lines, not surface decoration
+
+### `multiblock_reference_3.png` — Retronism Mega Crusher (Our Quality Benchmark)
+Our own best machine — single-block machines should match this quality level scaled down:
+- **Compact, heavy, dark** design language
+- **Deep front recess** showing internal mechanism
+- **Multiple visible depth layers**
+- **Dark charcoal frame** with medium-gray panel contrast
+- **Minimal accent** (tiny yellow indicator)
+
+### `multiblock_reference_4.png` — Advanced Industrial Machine
+Aspirational complexity — extract lessons for single-block scale:
+- **Open cavities** showing internal machinery (adapt: 2-3px recesses at single-block scale)
+- **Hazard stripes** as subtle base detail
+- **Multiple material types** visible (dark frame + medium panels + bright conduits)
+- **Functional pipes/conduits** as external detail elements
+
+### Design Principles Extracted
+1. **Dark is king** — frame #303030, panels #606060, never lighter than #808080
+2. **Accents are TINY** — 1-2 pixel indicators, not large colored zones
+3. **Depth is real** — recesses 2-4px deep at single-block scale
+4. **Silhouette is identity** — every machine recognizable from outline
+5. **Base anchors everything** — always wider, always heavier
+6. **Top is never flat** — exhaust, vent, functional element
+7. **Faces are unique** — front≠back≠sides
+
+---
 
 ## Geometric Techniques — with Tool Sequences
 
@@ -542,53 +725,82 @@ place_cube: elements=[{name:"taper_3", from:[7,14,7], to:[9,15,9]}], group, text
 
 Use for: funnel/hopper mouths, tapered exhausts, machine bases, beveled edges.
 
-### Recessed Panels (create depth on flat faces)
-Never leave a large face flat. Break it up with inset panels that sit 1-2px behind the outer surface.
+### Deep Recessed Panels (2-4px depth minimum)
+A recess must be deep enough to cast a visible shadow. On a 16px block, 2px = 12.5% of the face — clearly visible. 1px recesses are barely noticeable and should be avoided.
 
 **Tool sequence:**
 ```
-place_cube: elements=[{name:"front_panel", from:[4,4,1], to:[12,9,2]}], group, texture, faces=true
+// 3px deep recess on front face (from z=0 inward to z=3)
+place_cube: elements=[{name:"recess_panel", from:[4,4,0], to:[12,10,3]}], group, texture, faces=true
+// Note: the body_main goes from z=3 to z=13, so the recess creates a 3px gap visible from front
 ```
 
-Creates a visible shadow line around the panel. Use for: control panels, display screens, access doors, vent grilles.
+Creates a deep shadow pocket. Use for: control panels, display areas, access doors, intake openings. NEVER use 1px recesses — they are invisible in-game.
 
-### Layered Shells (structural depth)
-Build machines as layers, not single blocks. An outer shell wraps an inner body with visible separation.
+### Frame-and-Recess Composition
+The most important technique. Build frames FIRST, then fill with recessed panels. The frame is the structural skeleton; panels sit behind it.
 
 **Tool sequence:**
 ```
-place_cube: elements=[{name:"inner_body", from:[3,2,3], to:[13,10,13]}], group, texture, faces=true
-place_cube: elements=[{name:"outer_frame", from:[1,0,1], to:[15,12,15]}], group, texture, faces=true
-place_cube: elements=[{name:"top_cap", from:[0,12,0], to:[16,14,16]}], group, texture, faces=true
+// Frame members (at block boundary, dark material)
+place_cube: elements=[
+  {name:"frame_left", from:[0,2,0], to:[2,14,16]},
+  {name:"frame_right", from:[14,2,0], to:[16,14,16]},
+  {name:"frame_top", from:[2,12,0], to:[14,14,16]},
+  {name:"frame_bottom", from:[2,2,0], to:[14,4,16]}
+], group, texture, faces=true
+
+// Recessed panel (2px behind frame on front face)
+place_cube: elements=[{name:"panel_front", from:[3,5,2], to:[13,11,3]}], group, texture, faces=true
 ```
 
-### Protruding Functional Elements
-Machines have things sticking out — pipes, handles, vents, ports. These break the box silhouette.
+The frame sits at z=0-16, the panel sits at z=2-3. From the front, you see thick dark frame members surrounding a lighter recessed panel. This is the Immersive Engineering look.
+
+### Deep Cavities (open machine internals)
+Leave intentional openings where the player can see "into" the machine. Build walls/frame around an empty space.
 
 **Tool sequence:**
 ```
-// Pipe from left face
-place_cube: elements=[{name:"left_pipe", from:[0,6,6], to:[3,10,10]}], group, texture, faces=true
-// Vent slits on back (thin bars with gaps)
+// Cavity frame on front face (open center = you can see inside)
+place_cube: elements=[
+  {name:"cavity_left", from:[2,4,0], to:[5,10,4]},
+  {name:"cavity_right", from:[11,4,0], to:[14,10,4]},
+  {name:"cavity_top", from:[5,8,0], to:[11,10,4]},
+  {name:"cavity_floor", from:[5,4,0], to:[11,5,4]}
+], group, texture, faces=true
+// Interior element visible through cavity
+place_cube: elements=[{name:"internal_mechanism", from:[6,5,2], to:[10,8,6]}], group, texture, faces=true
+```
+
+The cavity is 6x4px opening, 4px deep. Inside, a smaller element represents internal machinery. The negative space is the visual interest.
+
+### Protruding Functional Elements (beyond 0-16 boundary)
+Machines have elements that extend beyond the block. This is the single most effective way to break the box silhouette. Use coordinates outside 0-16 range.
+
+**Tool sequence:**
+```
+// Pipe stub extending 2px from left face
+place_cube: elements=[{name:"pipe_stub", from:[-2,6,6], to:[2,10,10]}], group, texture, faces=true
+// Chimney extending 4px above block
+place_cube: elements=[{name:"chimney", from:[5,14,5], to:[9,20,9]}], group, texture, faces=true
+// Connector extending 1px from back
+place_cube: elements=[{name:"back_connector", from:[6,3,16], to:[10,7,18]}], group, texture, faces=true
+```
+
+EVERY machine must have at least ONE element beyond 0-16. This is mandatory.
+
+### Ventilation Grates (geometry, not texture)
+Grates are made with GEOMETRY: thin bars with real gaps between them. Never try to paint a grate texture on a flat face.
+
+**Tool sequence:**
+```
+// Three 1px-tall bars with 1px gaps between them
 place_cube: elements=[
   {name:"vent_1", from:[3,5,14], to:[13,6,16]},
   {name:"vent_2", from:[3,7,14], to:[13,8,16]},
   {name:"vent_3", from:[3,9,14], to:[13,10,16]}
 ], group, texture, faces=true
-// Small handle on front
-place_cube: elements=[{name:"handle", from:[7,6,0], to:[9,7,1]}], group, texture, faces=true
-```
-
-### Frame-and-Panel Composition
-Visible structural frame with panel fills between them:
-
-**Tool sequence:**
-```
-place_cube: elements=[
-  {name:"frame_left", from:[0,0,0], to:[2,16,16]},
-  {name:"frame_right", from:[14,0,0], to:[16,16,16]},
-  {name:"panel_fill", from:[2,2,1], to:[14,14,2]}
-], group, texture, faces=true
+// The gaps at y=6-7 and y=8-9 ARE the ventilation openings
 ```
 
 ### Overhangs and Lips
@@ -608,49 +820,83 @@ Leave intentional gaps between elements:
 - Gap between body and frame
 
 ### Asymmetry with Purpose
-Break symmetry with functional elements on different sides:
-- Input hopper on top-left, exhaust pipe on top-right
-- Control panel on front, cable port on back
+MANDATORY: every machine must have asymmetric top profile. Place functional elements off-center.
+
+**Tool sequence:**
+```
+// Input hopper offset to back-right
+place_cube: elements=[{name:"hopper", from:[8,13,8], to:[14,16,14]}], group, texture, faces=true
+// Motor housing offset to front-left
+place_cube: elements=[{name:"motor", from:[2,11,2], to:[7,14,6]}], group, texture, faces=true
+// Result: top-down view shows diagonal weight distribution
+```
+
+### Cylindrical Approximation (for tanks and drums)
+Approximate a cylinder using overlapping boxes at 45-degree offsets. Minimum 3 layers for a convincing effect.
+
+**Tool sequence:**
+```
+// Layer 1: main box
+place_cube: elements=[{name:"cyl_main", from:[2,2,2], to:[14,14,14]}], group, texture, faces=true
+// Layer 2: 45-degree rotated (corner-cut box)
+place_cube: elements=[{name:"cyl_45", from:[4,2,0], to:[12,14,16]}], group, texture, faces=true
+// Layer 3: other 45-degree
+place_cube: elements=[{name:"cyl_45b", from:[0,2,4], to:[16,14,12]}], group, texture, faces=true
+```
+
+The three overlapping boxes create an octagonal profile from top-down view. Use for tanks, drums, pipes, cylindrical machine elements.
 
 ---
 
 ## Texture Craft — Color Palette
 
-### Texture Zone Layout
+### Texture Zone Layout (DARK INDUSTRIAL — matches Immersive Engineering)
 ```
 ┌──────────────────┐
-│  Top (light)     │  rows 0-3: #A8A8A8 lighter metal for top-facing
-│  Body (medium)   │  rows 4-11: #808080 primary machine color with details
-│  Base (dark)     │  rows 12-13: #505050 darker base/feet
-│  Accent          │  rows 14-15: machine-specific color (copper/blue/green)
+│  Frame (dark)    │  rows 0-5: #353535-#404040 dark charcoal for frame/structural
+│  Body (med-dark) │  rows 6-11: #606060-#707070 medium-dark panels
+│  Accent/detail   │  rows 12-15: machine-specific accent (sparingly)
 └──────────────────┘
 ```
 
+The overall model should read as DARK with medium-gray panels and tiny bright accent pops. NOT gray-on-gray.
+
 ### Color Palette Rules
-- **Primary body**: #808080 to #A0A0A0 (brushed metal)
-- **Structural frame**: #404040 to #505050 (charcoal)
-- **Accent details**: Machine-specific — copper #B87333, blue #4A90D9, green #5B8C5A
-- **Highlights**: #C0C0C0 (1-2px along top edges)
-- **Shadows**: #606060 (1-2px along bottom edges)
-- **Indicators**: green #33CC55, red #FF3333, cyan #33CCCC
-- **NEVER** use pure #000000 or #FFFFFF — they look artificial
+- **Structural frame (DOMINANT)**: #303030 to #404040 (dark charcoal)
+- **Primary body panels**: #606060 to #707070 (medium-dark gray)
+- **Top surfaces**: #707070 to #808080 (medium gray, NOT light)
+- **Accent details**: Machine-specific, SPARINGLY (2-3 pixels) — copper #B87333, orange #D4760A, blue #4A90D9
+- **Highlights**: #505050 (1px along top edges — subtle against dark)
+- **Shadows**: #2A2A2A (1px along bottom edges)
+- **Indicators**: orange #D4760A (1-2px pop), blue #4A90D9 (1-2px pop) — tiny bright against dark
+- **NEVER** use pure #000000 or #FFFFFF
+- **NEVER** use #A8A8A8 or lighter as the dominant color — mod aesthetic is dark industrial
 
 ---
 
 ## Technical Constraints (Beta 1.7.3)
 
-### Boxes Only — No Rotations
-The render system uses `setBlockBounds` + `renderStandardBlock`:
-- **Only axis-aligned rectangular boxes** (no rotated elements, no polygons, no curves)
-- Each element: `from: [x0, y0, z0]` and `to: [x1, y1, z1]`
-- **Coordinates range 0-16 per axis** (1 unit = 1/16 of a block)
+### Default Render: Axis-Aligned Boxes
+Our standard render pipeline uses `setBlockBounds` + `renderStandardBlock`:
+- **Axis-aligned rectangular boxes** — each element: `from: [x0, y0, z0]` and `to: [x1, y1, z1]`
+- **Coordinates can extend beyond 0-16** for protruding elements (this is encouraged!)
 - Simulate angles with stepped boxes (1-2px increments)
+
+### Advanced Render: Rotations & Animations
+For rotated elements or animations, use **`TileEntitySpecialRenderer`** with manual Tessellator + GL11 transforms:
+- `GL11.glRotatef(angle, x, y, z)` for arbitrary rotations
+- `GL11.glTranslatef(x, y, z)` for positioning
+- Tessellator for drawing individual quads/faces
+- Supports animated parts (e.g., spinning blades, rotating shafts) by updating angle in `updateEntity()`
+- Examples in other mods: BTW windmill/watermill, BuildCraft gears
+- **Trade-off**: more complex code, no auto-lighting (must handle shading manually)
 
 ### Texture System
 - Each machine uses a **single 16x16 block texture** (the block's registered texture)
 - All faces reference this same texture via `#0`
 - The texture is applied via `renderStandardBlock` which handles lighting/shading automatically
 - Use UV offsets to select WHICH PART of the texture each face displays
+- The auto-lighting means dark textures still look good — Minecraft adds directional light per face
 
 ### UV Rules
 UVs must be proportional to the face dimensions. For a box from `[x0, y0, z0]` to `[x1, y1, z1]`:
@@ -669,8 +915,10 @@ Format: `"uv": [0, 0, width, height]` — always start at `[0, 0]`.
 **Never stretch UVs** — a 2x5 face must have UV `[0, 0, 2, 5]`, not `[0, 0, 16, 16]`.
 
 ### Performance
-- Keep element count under 20 (each element = 6 draw calls)
+- Keep element count under 25 (each element = 6 draw calls)
+- Target 12-20 elements: fewer than 12 looks amateur, more than 25 hurts performance
 - Avoid unnecessary hidden faces (boxes completely inside other boxes)
+- Elements extending beyond 0-16 are fine for rendering but increase draw distance
 
 ---
 
@@ -682,10 +930,20 @@ Convert elements to a Java `float[][]` array in the render class:
 ```java
 private static final float[][] MACHINE_PARTS = {
     // {fromX, fromY, fromZ, toX, toY, toZ}
-    {0, 0, 0, 16, 3, 16},       // base_plate
-    {2, 3, 2, 14, 10, 14},      // body_main
-    {1, 10, 1, 15, 13, 15},     // upper_section
+    {0, 0, 0, 16, 2, 16},       // base_slab
+    {0, 2, 0, 16, 4, 2},        // base_rim_north
+    {0, 2, 14, 16, 4, 16},      // base_rim_south
+    {14, 2, 2, 16, 4, 14},      // base_rim_east
+    {0, 2, 2, 2, 4, 14},        // base_rim_west
+    {3, 4, 3, 13, 10, 13},      // body_main
+    // ... etc for all elements
 };
+```
+
+Note: elements extending beyond 0-16 use negative values or values > 16:
+```java
+    {-1, 6, 5, 3, 10, 11},      // piston_left_mount (extends 1px past boundary)
+    {-2, 7, 7, 0, 9, 9},        // piston_rod_left (extends 2px past boundary)
 ```
 
 ### Step 2: World Render Handler
@@ -737,50 +995,94 @@ public void renderInventory(RenderBlocks renderer, Block block, int metadata) {
 ## Design Examples
 
 ### Crusher (reference model — see Phase B above)
-- Wide base plate (full 16x16, 3px tall)
-- Narrower body (2-14 range, 7px tall)
-- Wider upper section (1-15, 3px tall) — creates stepped profile
-- Open hopper top (4 wall pieces, hollow center)
-- Side pistons protruding from body
-- Exhaust pipe on one corner
-- Support legs at 4 corners
+- **24 elements** with deep jaw cavity, protruding pistons, asymmetric top
+- Heavy base platform: full-width slab + raised rim creating tray profile
+- Deep jaw opening (3px) on front with internal teeth elements
+- Hydraulic pistons extending 2px beyond block on both sides
+- Ventilation grate on right side (3 geometric bars with gaps)
+- Asymmetric top: input hopper back-right, motor housing front-left
+- Exhaust stub extending 2px above block on rear corner
+- Reinforcement ribs flanking the jaw opening
+- Every face is geometrically different
 
 ### Generator
-- Solid base with slight inset body
-- Exhaust chimney on top (4-12 range, extends above body)
-- Side fuel port (protruding 2px)
-- Front panel recessed 1px
-- Vent slits on back (thin horizontal boxes with gaps)
+- Heavy ribbed base (full width, 4px tall, with horizontal rib channels)
+- Recessed body (3px inset from base) with frame-and-panel composition
+- Exhaust chimney on top extending 4px above block (to Y=20), offset to rear-left
+- Fuel intake port protruding 2px from right side (pipe stub)
+- Front face: deep control panel recess (3px) with status LED pixel
+- Back face: ventilation grate (4 horizontal bars with gaps)
+- Left side: electrical connection box protruding 1px
+- Top: chimney + air intake louver (thin box with gap) — asymmetric layout
 
-### Tank
-- Cylindrical approximation: octagonal cross-section using 4 overlapping boxes
-- Visible level gauge strip on front (thin recessed panel)
-- Top cap slightly wider than body
-- Bottom legs/supports (4 small corner boxes)
+### Pump
+- Cylindrical tank body using 3-layer octagonal approximation (center section)
+- Heavy square anchor base (wider than cylinder, 3px tall)
+- Motor housing on top-front (rectangular box, breaks the round profile)
+- Pipe stubs extending from left and right sides (2px each beyond boundary)
+- Front: pressure gauge recess (2x3px, 2px deep)
+- Back: large pipe connection protruding 3px
+- Top: motor + small valve offset to one corner — asymmetric
+
+### Fluid Tank
+- Octagonal cross-section using 3 overlapping box layers (full height)
+- Heavy square base plate (2px wider than widest cylinder layer)
+- Banded reinforcement rings: 3 horizontal frame members at 1/4, 1/2, 3/4 height
+- Vertical gauge strip: thin 1px-wide recessed channel running full height on front
+- Top cap: slightly smaller than body, with valve protruding 2px above block
+- Bottom: 4 corner support legs (small cubes under base)
+- Asymmetry: filling port on one side, drain on another
+
+### Electrolysis Chamber
+- Frame-and-glass composition: dark frame members on all edges, recessed "chamber" panels
+- At least 2 faces have open-frame sections (frame without fill = you can "see" inside)
+- Internal electrode elements: 2 thin vertical cubes inside the chamber, visible through openings
+- Fluid inlet pipe stub on bottom-left, outlet on bottom-right
+- Electrical connector box protruding from top-rear
+- Front face: observation window (deep 3px recess suggesting glass panel)
+- Heavy industrial base, wider than chamber body
+
+### Gas Tank
+- Tall narrow profile: body is 8x8 cross-section but 12px tall
+- Heavy circular anchor base (12x12, 3px tall)
+- 3 horizontal reinforcement bands (frame-colored, 1px tall each)
+- Pressure relief valve protruding 3px above block (offset to one corner)
+- Pressure gauge recess on front (2px deep)
+- Pipe connection protruding from bottom-rear
+- Overall silhouette: tall and narrow, instantly distinct from wide/squat machines
 
 ---
 
 ## Rules
 
-- **ALWAYS stop at every ⏸️ CHECKPOINT and wait for user feedback — NEVER skip checkpoints**
+- **ALWAYS stop at every CHECKPOINT and wait for user feedback — NEVER skip checkpoints**
 - **NEVER proceed to the next phase without explicit user confirmation**
 - **NEVER export a model without user approval** — always show screenshots and ask first
 - **ALWAYS offer to iterate** — if the user suggests a change, make it, screenshot, and show again
-- ALWAYS follow the Complete Build Sequence (Phases A→E) in order
+- ALWAYS follow the Complete Build Sequence (Phases A through E) in order
 - ALWAYS pass `faces: true`, `texture`, and `group` on every `place_cube` call
 - ALWAYS call `export_model_context` before starting a model — never design blind
 - ALWAYS use descriptive element names (never "cube1", "box_2")
 - ALWAYS pass all 3 Quality Gates before exporting — take screenshots and evaluate
-- ALWAYS paint the texture with zones, panel lines, rivets, indicators (use the Texture Painting Recipes)
+- ALWAYS use the dark industrial palette (#505050 base, NEVER lighter than #909090 for zones)
 - ALWAYS use UV offsets via `modify_cube` to map different elements to different texture regions
+- ALWAYS include at least 1 element extending beyond 0-16 boundary
+- ALWAYS include at least 1 cavity/opening 2-4px deep
+- ALWAYS create asymmetric top profile (no centered symmetric tops)
+- ALWAYS make the base wider/heavier than the body
+- ALWAYS make each face geometrically different from its opposite
 - ALWAYS use at least 3 geometric techniques per model
+- ALWAYS target 12-20 elements per machine (12 minimum, 25 maximum)
 - ALWAYS save the model JSON to `src/retronism/assets/models/`
 - ALWAYS generate both world render AND inventory render handlers
 - ALWAYS reset block bounds to 0-1 after rendering all parts
+- NEVER use `#A8A8A8` or lighter as a dominant zone color
+- NEVER use more than 4 rivets or more than 2+2 seam lines on the texture
 - NEVER use rotated elements — the render system doesn't support them
-- NEVER exceed 16px on any axis
-- NEVER leave the model as a plain cube — every machine needs character
-- NEVER leave UV mapping at default for all faces — each face must reference the appropriate texture region
-- NEVER use flat single-color textures — minimum: panel lines, edge shading, one accent detail
+- NEVER leave the model as a decorated box — it must have a UNIQUE recognizable silhouette
+- NEVER rely on texture to create depth — use geometry, let texture support it
+- NEVER make opposite faces look the same
+- NEVER use 1px recesses — minimum 2px depth for any recess/cavity
+- NEVER use flat single-color textures — minimum: 3 dark zones, 2+2 seam lines, 4 rivets
 - NEVER export a model that fails any Quality Gate
-- Target 8-15 elements per machine
+- NEVER use accent colors on more than 3-5 pixels total

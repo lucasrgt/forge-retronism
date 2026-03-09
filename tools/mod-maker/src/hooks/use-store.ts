@@ -466,6 +466,16 @@ export const useStore = create<MultiblockStore>((set, get) => ({
       }
     }
 
+    // Legacy compat: portTypes on air positions → create machine_port blocks
+    if (data.portTypes) {
+      for (const [key, ioType] of Object.entries(data.portTypes)) {
+        if (!blocks.has(key)) {
+          const mode = (data.portModes?.[key] || 'input_output') as PortMode
+          blocks.set(key, { type: 'machine_port', mode, portType: ioType as IOType })
+        }
+      }
+    }
+
     set((s) => ({
       projectType: data.projectType || 'multiblock',
       name: data.name,

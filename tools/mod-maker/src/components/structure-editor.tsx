@@ -254,10 +254,17 @@ export function StructureEditor() {
     loadTextures().then((ok) => {
       if (ok) {
         clearMaterialCache()
-        // Force re-render with textures by triggering a blocks update
-        const s = useStore.getState()
-        // Re-set blocks to trigger the sync effect
-        useStore.setState({ blocks: new Map(s.blocks) })
+        // Remove all existing meshes so they get recreated with textured materials
+        const sc = sceneRef.current
+        if (sc) {
+          for (const [, mesh] of sc.meshes) {
+            sc.scene.remove(mesh)
+            mesh.geometry.dispose()
+          }
+          sc.meshes.clear()
+        }
+        // Trigger the sync effect to recreate all meshes
+        useStore.setState({ blocks: new Map(useStore.getState().blocks) })
       }
     })
 
@@ -338,7 +345,8 @@ export function StructureEditor() {
       let mesh = s.meshes.get(key)
       const needsNewMaterial = mesh && (
         mesh.userData.blockType !== block.type ||
-        mesh.userData.selected !== isSelected
+        mesh.userData.selected !== isSelected ||
+        mesh.userData.portType !== portType
       )
       const needsOverlayUpdate = mesh && (
         mesh.userData.portType !== portType ||
@@ -347,7 +355,7 @@ export function StructureEditor() {
 
       if (!mesh) {
         const geom = new THREE.BoxGeometry(0.92, 0.92, 0.92)
-        const mat = getBlockMaterial(block.type, isSelected)
+        const mat = getBlockMaterial(block.type, isSelected, portType || undefined)
         mesh = new THREE.Mesh(geom, mat)
         mesh.position.set(x, y, z)
         mesh.userData.key = key
@@ -362,7 +370,7 @@ export function StructureEditor() {
       } else {
         mesh.visible = true
         if (needsNewMaterial) {
-          mesh.material = getBlockMaterial(block.type, isSelected)
+          mesh.material = getBlockMaterial(block.type, isSelected, portType || undefined)
           mesh.userData.blockType = block.type
           mesh.userData.selected = isSelected
         }
@@ -649,11 +657,11 @@ function AddBlockForm({ onDone }: { onDone: () => void }) {
       <div className="flex gap-1.5">
         <div className="flex-1">
           <Label>ID (snake_case)</Label>
-          <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="ozonizer_ctrl" />
+          <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="crusher_ctrl" />
         </div>
         <div className="flex-1">
           <Label>Label</Label>
-          <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ozonizer Controller" />
+          <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Crusher Controller" />
         </div>
       </div>
       <div className="flex gap-1.5">

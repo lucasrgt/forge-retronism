@@ -28,9 +28,7 @@ public class Retronism_TileMultiblockPort extends TileEntity
 
     public void notifyControllerRemoved() {
         TileEntity ctrl = getController();
-        if (ctrl != null && ctrl instanceof Retronism_TileOzonizer) {
-            ((Retronism_TileOzonizer) ctrl).isFormed = false;
-        }
+        // Notify other controller implementations when a port is removed if needed
     }
 
     // --- IEnergyReceiver ---

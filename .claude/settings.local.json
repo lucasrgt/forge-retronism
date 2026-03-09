@@ -61,7 +61,13 @@
       "mcp__retronism-mod-maker__unregister_block",
       "Bash(python tools/build_port_textures.py)",
       "Bash(grep -l \"extends ItemBlock\" /c/Users/lucas/RetroNism/mcp/minecraft/src/net/minecraft/src/Item*.java)",
-      "mcp__retronism-mod-maker__load_project"
+      "mcp__retronism-mod-maker__load_project",
+      "mcp__retronism-mod-maker__export_model_context",
+      "mcp__blockbench__duplicate_element",
+      "mcp__blockbench__gradient_tool",
+      "mcp__blockbench__remove_element",
+      "mcp__blockbench__apply_texture",
+      "mcp__blockbench__trigger_action"
     ]
   }
 }

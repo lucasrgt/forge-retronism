@@ -9,6 +9,13 @@ const CUSTOM_TEXTURES: Record<string, string> = {
   controller: 'src/retronism/assets/block/retronism_crusher.png',
 }
 
+// Port textures by IO type (actual in-game textures)
+const PORT_TEXTURES: Record<string, string> = {
+  energy: 'src/retronism/assets/block/retronism_port_energy.png',
+  fluid:  'src/retronism/assets/block/retronism_port_fluid.png',
+  gas:    'src/retronism/assets/block/retronism_port_gas.png',
+}
+
 // Port overlay colors
 const PORT_OVERLAYS: Record<string, string> = {
   energy_port: '#eeee00',
@@ -20,6 +27,7 @@ const PORT_OVERLAYS: Record<string, string> = {
 let terrainCanvas: HTMLCanvasElement | null = null
 const tileCache = new Map<string, HTMLCanvasElement>()
 const customCache = new Map<string, HTMLCanvasElement>()
+const portCache = new Map<string, HTMLCanvasElement>()
 const materialCache = new Map<string, THREE.Material>()
 let ready = false
 
@@ -115,6 +123,15 @@ export async function loadTextures(): Promise<boolean> {
       }
     }
 
+    // Load port textures (energy, fluid, gas)
+    for (const [ioType, path] of Object.entries(PORT_TEXTURES)) {
+      const b64 = await api.readFileBase64(`${root}/${path}`)
+      if (b64) {
+        const canvas = await loadImageFromBase64(b64)
+        if (canvas) portCache.set(ioType, canvas)
+      }
+    }
+
     ready = !!terrainCanvas
     return ready
   } catch (e) {
@@ -138,8 +155,8 @@ export function getTileDataUrl(terrainIndex: number): string | null {
   return tile.toDataURL()
 }
 
-export function getBlockMaterial(type: string, selected = false): THREE.Material {
-  const key = `${type}_${selected ? 'sel' : 'n'}`
+export function getBlockMaterial(type: string, selected = false, portType?: string): THREE.Material {
+  const key = `${type}_${portType || 'none'}_${selected ? 'sel' : 'n'}`
   if (materialCache.has(key)) return materialCache.get(key)!
 
   const blockDef = blockRegistry.get(type)
@@ -147,11 +164,15 @@ export function getBlockMaterial(type: string, selected = false): THREE.Material
   let tileCanvas: HTMLCanvasElement | null = null
 
   if (ready) {
-    // 1. Custom texture (controller, etc.)
-    if (customCache.has(type)) {
+    // 1. Port texture: use actual in-game port texture based on portType
+    if (portType && portCache.has(portType)) {
+      tileCanvas = portCache.get(portType)!
+    }
+    // 2. Custom texture (controller, etc.)
+    else if (customCache.has(type)) {
       tileCanvas = customCache.get(type)!
     }
-    // 2. terrainIndex from block registry (all blocks with terrain textures)
+    // 3. terrainIndex from block registry (all blocks with terrain textures)
     else if (blockDef?.terrainIndex !== undefined) {
       tileCanvas = extractTile(blockDef.terrainIndex)
     }

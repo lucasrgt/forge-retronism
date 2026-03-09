@@ -2,6 +2,7 @@ package retronism.block;
 
 import net.minecraft.src.*;
 import java.util.Random;
+import retronism.mod_Retronism;
 
 /**
  * Machine Port block — generic port, metadata set by controller on formation.
@@ -33,6 +34,21 @@ public class Retronism_BlockMachinePort extends Block {
     @Override
     public int idDropped(int metadata, Random random) {
         return blockID;
+    }
+
+    @Override
+    public boolean isOpaqueCube() {
+        return false;
+    }
+
+    @Override
+    public boolean renderAsNormalBlock() {
+        return false;
+    }
+
+    @Override
+    public int getRenderType() {
+        return mod_Retronism.machinePortRenderID;
     }
 
     @Override

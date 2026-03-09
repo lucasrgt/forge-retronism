@@ -2,7 +2,7 @@
 # Transpiles organized src/retronism/ -> flat mcp/minecraft/src/net/minecraft/src/
 # Rewrites packages and removes internal imports so RetroMCP can compile
 set -e
-BASE="c:/Users/lucas/Retronism"
+BASE="c:/Users/lucas/RetroNism"
 SRC="$BASE/src/retronism"
 DEST="$BASE/mcp/minecraft/src/net/minecraft/src"
 
