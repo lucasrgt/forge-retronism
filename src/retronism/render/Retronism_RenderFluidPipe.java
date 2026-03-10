@@ -1,7 +1,7 @@
 package retronism.render;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.block.*;
 import retronism.tile.*;
 
@@ -15,7 +15,7 @@ public class Retronism_RenderFluidPipe implements Retronism_IBlockRenderer {
 		float iMax = 10.0F / 16.0F;
 		float eps = 0.002F;
 		Retronism_BlockFluidPipe pipe = (Retronism_BlockFluidPipe) block;
-		int F = Retronism_SideConfig.TYPE_FLUID;
+		int F = Aero_SideConfig.TYPE_FLUID;
 
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		float fillRatio = 0.0F;

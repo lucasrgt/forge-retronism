@@ -2,7 +2,7 @@ package retronism.gui;
 
 import net.minecraft.src.*;
 import retronism.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.tile.*;
 import retronism.container.*;
 import org.lwjgl.opengl.GL11;
@@ -30,7 +30,7 @@ public class Retronism_GuiGasTank extends GuiContainer {
 
 		String tooltip = null;
 		if (relMouseX >= 7 && relMouseX < 23 && relMouseY >= 16 && relMouseY < 70) {
-			String gasName = Retronism_GasType.getName(this.tank.getGasType());
+			String gasName = Aero_GasType.getName(this.tank.getGasType());
 			tooltip = gasName + ": " + this.tank.getGasAmount() + " / " + Retronism_TileGasTank.MAX_GAS + " mB";
 		}
 
@@ -73,8 +73,8 @@ public class Retronism_GuiGasTank extends GuiContainer {
 		this.drawTexturedModalRect(x, y, 0, 0, this.xSize, this.ySize);
 
 		int gasScaled = this.tank.getGasScaled(52);
-		int gasColor = Retronism_GasType.getColor(this.tank.getGasType());
-		if (this.tank.getGasType() == Retronism_GasType.NONE) gasColor = 0xFF777777;
+		int gasColor = Aero_GasType.getColor(this.tank.getGasType());
+		if (this.tank.getGasType() == Aero_GasType.NONE) gasColor = 0xFF777777;
 		drawGasTank(x + 8, y + 17, 14, 52, gasScaled, gasColor);
 		drawTankGauge(x + 8, y + 17, 14, 52);
 	}

@@ -1,13 +1,13 @@
 package retronism.tile;
 
 import net.minecraft.src.*;
-import retronism.aero.Aero_IPort;
-import retronism.api.Retronism_IEnergyReceiver;
+import aero.machineapi.Aero_IPort;
+import aero.machineapi.Aero_IEnergyReceiver;
 
 /**
  * AeroPort System: Redireciona tudo (Energia, Itens, Fluidos) para o Core.
  */
-public class Retronism_TileMultiblockPort extends TileEntity implements Aero_IPort, Retronism_IEnergyReceiver {
+public class Retronism_TileMultiblockPort extends TileEntity implements Aero_IPort, Aero_IEnergyReceiver {
     
     public int coreX, coreY, coreZ;
     public boolean hasCore = false;
@@ -40,8 +40,8 @@ public class Retronism_TileMultiblockPort extends TileEntity implements Aero_IPo
     @Override
     public int receiveEnergy(int amount) {
         TileEntity core = getCore();
-        if (core instanceof Retronism_IEnergyReceiver) {
-            return ((Retronism_IEnergyReceiver) core).receiveEnergy(amount);
+        if (core instanceof Aero_IEnergyReceiver) {
+            return ((Aero_IEnergyReceiver) core).receiveEnergy(amount);
         }
         return 0;
     }
@@ -49,8 +49,8 @@ public class Retronism_TileMultiblockPort extends TileEntity implements Aero_IPo
     @Override
     public int getStoredEnergy() {
         TileEntity core = getCore();
-        if (core instanceof Retronism_IEnergyReceiver) {
-            return ((Retronism_IEnergyReceiver) core).getStoredEnergy();
+        if (core instanceof Aero_IEnergyReceiver) {
+            return ((Aero_IEnergyReceiver) core).getStoredEnergy();
         }
         return 0;
     }
@@ -58,8 +58,8 @@ public class Retronism_TileMultiblockPort extends TileEntity implements Aero_IPo
     @Override
     public int getMaxEnergy() {
         TileEntity core = getCore();
-        if (core instanceof Retronism_IEnergyReceiver) {
-            return ((Retronism_IEnergyReceiver) core).getMaxEnergy();
+        if (core instanceof Aero_IEnergyReceiver) {
+            return ((Aero_IEnergyReceiver) core).getMaxEnergy();
         }
         return 0;
     }

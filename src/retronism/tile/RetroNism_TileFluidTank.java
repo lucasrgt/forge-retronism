@@ -1,9 +1,9 @@
 package retronism.tile;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 
-public class Retronism_TileFluidTank extends TileEntity implements Retronism_IFluidHandler, IInventory, Retronism_ISideConfigurable, Retronism_ISlotAccess {
+public class Retronism_TileFluidTank extends TileEntity implements Aero_IFluidHandler, IInventory, Aero_ISideConfigurable, Aero_ISlotAccess {
 	private ItemStack[] tankItems = new ItemStack[1];
 	private int fluidAmount = 0;
 
@@ -13,8 +13,8 @@ public class Retronism_TileFluidTank extends TileEntity implements Retronism_IFl
 
 	{
 		for (int s = 0; s < 6; s++) {
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_FLUID, Retronism_SideConfig.MODE_INPUT_OUTPUT);
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ITEM, Retronism_SideConfig.MODE_INPUT_OUTPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_FLUID, Aero_SideConfig.MODE_INPUT_OUTPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_ITEM, Aero_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
@@ -22,22 +22,22 @@ public class Retronism_TileFluidTank extends TileEntity implements Retronism_IFl
 	public void setSideMode(int side, int type, int mode) {
 		if (!supportsType(type)) return;
 		int[] allowed = getAllowedModes(type);
-		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
+		for (int m : allowed) { if (m == mode) { Aero_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
-		return type == Retronism_SideConfig.TYPE_FLUID || type == Retronism_SideConfig.TYPE_ITEM;
+		return type == Aero_SideConfig.TYPE_FLUID || type == Aero_SideConfig.TYPE_ITEM;
 	}
 	public int[] getAllowedModes(int type) {
-		if (type == Retronism_SideConfig.TYPE_FLUID) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
-		if (type == Retronism_SideConfig.TYPE_ITEM) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
-		return new int[]{Retronism_SideConfig.MODE_NONE};
+		if (type == Aero_SideConfig.TYPE_FLUID) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_INPUT, Aero_SideConfig.MODE_OUTPUT, Aero_SideConfig.MODE_INPUT_OUTPUT};
+		if (type == Aero_SideConfig.TYPE_ITEM) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_INPUT, Aero_SideConfig.MODE_OUTPUT, Aero_SideConfig.MODE_INPUT_OUTPUT};
+		return new int[]{Aero_SideConfig.MODE_NONE};
 	}
 
 	public int[] getInsertSlots() { return new int[]{0}; }
 	public int[] getExtractSlots() { return new int[]{0}; }
 
 	public int receiveFluid(int fluidType, int amountMB) {
-		if (fluidType != Retronism_FluidType.WATER) return 0;
+		if (fluidType != Aero_FluidType.WATER) return 0;
 		int space = MAX_FLUID - fluidAmount;
 		int accepted = Math.min(amountMB, space);
 		fluidAmount += accepted;
@@ -45,14 +45,14 @@ public class Retronism_TileFluidTank extends TileEntity implements Retronism_IFl
 	}
 
 	public int extractFluid(int fluidType, int amountMB) {
-		if (fluidType != Retronism_FluidType.WATER || fluidAmount <= 0) return 0;
+		if (fluidType != Aero_FluidType.WATER || fluidAmount <= 0) return 0;
 		int extracted = Math.min(amountMB, fluidAmount);
 		fluidAmount -= extracted;
 		return extracted;
 	}
 
 	public int getFluidType() {
-		return fluidAmount > 0 ? Retronism_FluidType.WATER : Retronism_FluidType.NONE;
+		return fluidAmount > 0 ? Aero_FluidType.WATER : Aero_FluidType.NONE;
 	}
 
 	public int getFluidAmount() { return fluidAmount; }

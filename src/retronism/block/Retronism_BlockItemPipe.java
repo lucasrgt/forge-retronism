@@ -2,7 +2,7 @@ package retronism.block;
 
 import net.minecraft.src.*;
 import retronism.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.tile.*;
 import retronism.gui.*;
 
@@ -76,15 +76,15 @@ public class Retronism_BlockItemPipe extends BlockContainer {
 		int nx = myX + DIRS[side][0], ny = myY + DIRS[side][1], nz = myZ + DIRS[side][2];
 		if (!canConnectTo(world, nx, ny, nz)) return false;
 		TileEntity myTe = world.getBlockTileEntity(myX, myY, myZ);
-		if (myTe instanceof Retronism_ISideConfigurable) {
-			int mode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) myTe).getSideConfig(), side, Retronism_SideConfig.TYPE_ITEM);
-			if (mode == Retronism_SideConfig.MODE_NONE) return false;
+		if (myTe instanceof Aero_ISideConfigurable) {
+			int mode = Aero_SideConfig.get(((Aero_ISideConfigurable) myTe).getSideConfig(), side, Aero_SideConfig.TYPE_ITEM);
+			if (mode == Aero_SideConfig.MODE_NONE) return false;
 		}
 		TileEntity nTe = world.getBlockTileEntity(nx, ny, nz);
-		if (nTe instanceof Retronism_ISideConfigurable) {
-			int opp = Retronism_SideConfig.oppositeSide(side);
-			int mode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) nTe).getSideConfig(), opp, Retronism_SideConfig.TYPE_ITEM);
-			if (mode == Retronism_SideConfig.MODE_NONE) return false;
+		if (nTe instanceof Aero_ISideConfigurable) {
+			int opp = Aero_SideConfig.oppositeSide(side);
+			int mode = Aero_SideConfig.get(((Aero_ISideConfigurable) nTe).getSideConfig(), opp, Aero_SideConfig.TYPE_ITEM);
+			if (mode == Aero_SideConfig.MODE_NONE) return false;
 		}
 		return true;
 	}

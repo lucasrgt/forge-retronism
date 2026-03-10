@@ -16,7 +16,7 @@ public class PumpTest {
 	public void testInitialState() {
 		assertEquals(0, pump.getStoredEnergy());
 		assertEquals(0, pump.getFluidAmount());
-		assertEquals(Retronism_FluidType.NONE, pump.getFluidType());
+		assertEquals(Aero_FluidType.NONE, pump.getFluidType());
 	}
 
 	@Test
@@ -35,7 +35,7 @@ public class PumpTest {
 
 	@Test
 	public void testRejectFluidInput() {
-		int accepted = pump.receiveFluid(Retronism_FluidType.WATER, 100);
+		int accepted = pump.receiveFluid(Aero_FluidType.WATER, 100);
 		assertEquals("Pump should not accept fluid input (it produces fluid)", 0, accepted);
 	}
 
@@ -43,7 +43,7 @@ public class PumpTest {
 	public void testExtractWater() {
 		// Manually set fluid via extractFluid behavior test
 		// We can't easily set internal state, but we can test extract on empty
-		int extracted = pump.extractFluid(Retronism_FluidType.WATER, 100);
+		int extracted = pump.extractFluid(Aero_FluidType.WATER, 100);
 		assertEquals(0, extracted);
 	}
 
@@ -55,7 +55,7 @@ public class PumpTest {
 
 	@Test
 	public void testFluidTypeWhenEmpty() {
-		assertEquals(Retronism_FluidType.NONE, pump.getFluidType());
+		assertEquals(Aero_FluidType.NONE, pump.getFluidType());
 	}
 
 	@Test

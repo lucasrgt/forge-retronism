@@ -1,7 +1,7 @@
 package retronism.render;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.block.*;
 
 
@@ -14,7 +14,7 @@ public class Retronism_RenderCable implements Retronism_IBlockRenderer {
 		float pMax = Retronism_RenderUtils.CABLE_PLATE_MAX;
 		float pT = Retronism_RenderUtils.PLATE_THICK;
 		Retronism_BlockCable cable = (Retronism_BlockCable) block;
-		int E = Retronism_SideConfig.TYPE_ENERGY;
+		int E = Aero_SideConfig.TYPE_ENERGY;
 
 		// Center piece
 		block.setBlockBounds(min, min, min, max, max, max);
@@ -23,8 +23,8 @@ public class Retronism_RenderCable implements Retronism_IBlockRenderer {
 		// Down (-Y) = SIDE_BOTTOM(0)
 		if(cable.canConnectToSide(world, x, y, z, 0)) {
 			int mode = Retronism_RenderUtils.getPipeSideMode(world, x, y, z, 0, E);
-			if (mode != Retronism_SideConfig.MODE_NONE) {
-				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? Retronism_RenderUtils.INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? -Retronism_RenderUtils.INSET : 0.0F;
+			if (mode != Aero_SideConfig.MODE_NONE) {
+				float end = (mode == Aero_SideConfig.MODE_INPUT) ? Retronism_RenderUtils.INSET : (mode == Aero_SideConfig.MODE_OUTPUT) ? -Retronism_RenderUtils.INSET : 0.0F;
 				block.setBlockBounds(min, end, min, max, min, max);
 				renderer.renderStandardBlock(block, x, y, z);
 				if (cable.isNeighborMachine(world, x, y - 1, z)) {
@@ -36,8 +36,8 @@ public class Retronism_RenderCable implements Retronism_IBlockRenderer {
 		// Up (+Y) = SIDE_TOP(1)
 		if(cable.canConnectToSide(world, x, y, z, 1)) {
 			int mode = Retronism_RenderUtils.getPipeSideMode(world, x, y, z, 1, E);
-			if (mode != Retronism_SideConfig.MODE_NONE) {
-				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? 1.0F - Retronism_RenderUtils.INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? 1.0F + Retronism_RenderUtils.INSET : 1.0F;
+			if (mode != Aero_SideConfig.MODE_NONE) {
+				float end = (mode == Aero_SideConfig.MODE_INPUT) ? 1.0F - Retronism_RenderUtils.INSET : (mode == Aero_SideConfig.MODE_OUTPUT) ? 1.0F + Retronism_RenderUtils.INSET : 1.0F;
 				block.setBlockBounds(min, max, min, max, end, max);
 				renderer.renderStandardBlock(block, x, y, z);
 				if (cable.isNeighborMachine(world, x, y + 1, z)) {
@@ -49,8 +49,8 @@ public class Retronism_RenderCable implements Retronism_IBlockRenderer {
 		// North (-Z) = SIDE_NORTH(2)
 		if(cable.canConnectToSide(world, x, y, z, 2)) {
 			int mode = Retronism_RenderUtils.getPipeSideMode(world, x, y, z, 2, E);
-			if (mode != Retronism_SideConfig.MODE_NONE) {
-				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? Retronism_RenderUtils.INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? -Retronism_RenderUtils.INSET : 0.0F;
+			if (mode != Aero_SideConfig.MODE_NONE) {
+				float end = (mode == Aero_SideConfig.MODE_INPUT) ? Retronism_RenderUtils.INSET : (mode == Aero_SideConfig.MODE_OUTPUT) ? -Retronism_RenderUtils.INSET : 0.0F;
 				block.setBlockBounds(min, min, end, max, max, min);
 				renderer.renderStandardBlock(block, x, y, z);
 				if (cable.isNeighborMachine(world, x, y, z - 1)) {
@@ -62,8 +62,8 @@ public class Retronism_RenderCable implements Retronism_IBlockRenderer {
 		// South (+Z) = SIDE_SOUTH(3)
 		if(cable.canConnectToSide(world, x, y, z, 3)) {
 			int mode = Retronism_RenderUtils.getPipeSideMode(world, x, y, z, 3, E);
-			if (mode != Retronism_SideConfig.MODE_NONE) {
-				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? 1.0F - Retronism_RenderUtils.INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? 1.0F + Retronism_RenderUtils.INSET : 1.0F;
+			if (mode != Aero_SideConfig.MODE_NONE) {
+				float end = (mode == Aero_SideConfig.MODE_INPUT) ? 1.0F - Retronism_RenderUtils.INSET : (mode == Aero_SideConfig.MODE_OUTPUT) ? 1.0F + Retronism_RenderUtils.INSET : 1.0F;
 				block.setBlockBounds(min, min, max, max, max, end);
 				renderer.renderStandardBlock(block, x, y, z);
 				if (cable.isNeighborMachine(world, x, y, z + 1)) {
@@ -75,8 +75,8 @@ public class Retronism_RenderCable implements Retronism_IBlockRenderer {
 		// West (-X) = SIDE_WEST(4)
 		if(cable.canConnectToSide(world, x, y, z, 4)) {
 			int mode = Retronism_RenderUtils.getPipeSideMode(world, x, y, z, 4, E);
-			if (mode != Retronism_SideConfig.MODE_NONE) {
-				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? Retronism_RenderUtils.INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? -Retronism_RenderUtils.INSET : 0.0F;
+			if (mode != Aero_SideConfig.MODE_NONE) {
+				float end = (mode == Aero_SideConfig.MODE_INPUT) ? Retronism_RenderUtils.INSET : (mode == Aero_SideConfig.MODE_OUTPUT) ? -Retronism_RenderUtils.INSET : 0.0F;
 				block.setBlockBounds(end, min, min, min, max, max);
 				renderer.renderStandardBlock(block, x, y, z);
 				if (cable.isNeighborMachine(world, x - 1, y, z)) {
@@ -88,8 +88,8 @@ public class Retronism_RenderCable implements Retronism_IBlockRenderer {
 		// East (+X) = SIDE_EAST(5)
 		if(cable.canConnectToSide(world, x, y, z, 5)) {
 			int mode = Retronism_RenderUtils.getPipeSideMode(world, x, y, z, 5, E);
-			if (mode != Retronism_SideConfig.MODE_NONE) {
-				float end = (mode == Retronism_SideConfig.MODE_INPUT) ? 1.0F - Retronism_RenderUtils.INSET : (mode == Retronism_SideConfig.MODE_OUTPUT) ? 1.0F + Retronism_RenderUtils.INSET : 1.0F;
+			if (mode != Aero_SideConfig.MODE_NONE) {
+				float end = (mode == Aero_SideConfig.MODE_INPUT) ? 1.0F - Retronism_RenderUtils.INSET : (mode == Aero_SideConfig.MODE_OUTPUT) ? 1.0F + Retronism_RenderUtils.INSET : 1.0F;
 				block.setBlockBounds(max, min, min, end, max, max);
 				renderer.renderStandardBlock(block, x, y, z);
 				if (cable.isNeighborMachine(world, x + 1, y, z)) {

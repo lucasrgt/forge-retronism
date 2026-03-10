@@ -7,20 +7,20 @@ public class FluidTypeTest {
 
 	@Test
 	public void testConstants() {
-		assertEquals(0, Retronism_FluidType.NONE);
-		assertEquals(1, Retronism_FluidType.WATER);
+		assertEquals(0, Aero_FluidType.NONE);
+		assertEquals(1, Aero_FluidType.WATER);
 	}
 
 	@Test
 	public void testGetName() {
-		assertEquals("None", Retronism_FluidType.getName(Retronism_FluidType.NONE));
-		assertEquals("Water", Retronism_FluidType.getName(Retronism_FluidType.WATER));
-		assertEquals("None", Retronism_FluidType.getName(999));
+		assertEquals("None", Aero_FluidType.getName(Aero_FluidType.NONE));
+		assertEquals("Water", Aero_FluidType.getName(Aero_FluidType.WATER));
+		assertEquals("None", Aero_FluidType.getName(999));
 	}
 
 	@Test
 	public void testGetColor() {
-		assertEquals(0xFF3344FF, Retronism_FluidType.getColor(Retronism_FluidType.WATER));
-		assertEquals(0xFFFFFFFF, Retronism_FluidType.getColor(Retronism_FluidType.NONE));
+		assertEquals(0xFF3344FF, Aero_FluidType.getColor(Aero_FluidType.WATER));
+		assertEquals(0xFFFFFFFF, Aero_FluidType.getColor(Aero_FluidType.NONE));
 	}
 }

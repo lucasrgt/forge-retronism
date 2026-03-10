@@ -1,12 +1,12 @@
 package retronism.gui;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.tile.*;
 import org.lwjgl.opengl.GL11;
 
 public class Retronism_GuiPipeConfig extends GuiScreen {
-	private Retronism_ISideConfigurable tile;
+	private Aero_ISideConfigurable tile;
 	private EntityPlayer player;
 	private int selectedType = -1;
 	private int selectedTab = 0; // 0 = Config, 1 = Filters
@@ -55,7 +55,7 @@ public class Retronism_GuiPipeConfig extends GuiScreen {
 	private static final int FILTER_BTN_H = 14;
 	private static final int PRIO_LABEL_Y = 44;
 
-	public Retronism_GuiPipeConfig(EntityPlayer player, Retronism_ISideConfigurable tile) {
+	public Retronism_GuiPipeConfig(EntityPlayer player, Aero_ISideConfigurable tile) {
 		this.player = player;
 		this.tile = tile;
 		this.selectedType = getFirstSupportedType();
@@ -70,15 +70,15 @@ public class Retronism_GuiPipeConfig extends GuiScreen {
 	}
 
 	private int getFirstSupportedType() {
-		for (int t = 0; t < Retronism_SideConfig.TYPE_COUNT; t++) {
+		for (int t = 0; t < Aero_SideConfig.TYPE_COUNT; t++) {
 			if (tile.supportsType(t)) return t;
 		}
 		return 0;
 	}
 
 	private int getNextSupportedType(int current) {
-		for (int i = 1; i <= Retronism_SideConfig.TYPE_COUNT; i++) {
-			int next = (current + i) % Retronism_SideConfig.TYPE_COUNT;
+		for (int i = 1; i <= Aero_SideConfig.TYPE_COUNT; i++) {
+			int next = (current + i) % Aero_SideConfig.TYPE_COUNT;
 			if (tile.supportsType(next)) return next;
 		}
 		return current;
@@ -86,7 +86,7 @@ public class Retronism_GuiPipeConfig extends GuiScreen {
 
 	private int countSupportedTypes() {
 		int count = 0;
-		for (int t = 0; t < Retronism_SideConfig.TYPE_COUNT; t++) {
+		for (int t = 0; t < Aero_SideConfig.TYPE_COUNT; t++) {
 			if (tile.supportsType(t)) count++;
 		}
 		return count;
@@ -180,7 +180,7 @@ public class Retronism_GuiPipeConfig extends GuiScreen {
 			int fx = crossX + col * (FACE_SIZE + FACE_GAP);
 			int fy = crossY + row * (FACE_SIZE + FACE_GAP);
 
-			int mode = Retronism_SideConfig.get(config, side, selectedType);
+			int mode = Aero_SideConfig.get(config, side, selectedType);
 			int s = FACE_SIZE;
 
 			drawRect(fx, fy, fx + s, fy + s, 0xFF000000);
@@ -195,7 +195,7 @@ public class Retronism_GuiPipeConfig extends GuiScreen {
 
 			String modeLabel = MODE_LABELS[mode];
 			int modeW = this.fontRenderer.getStringWidth(modeLabel);
-			int modeColor = (mode == Retronism_SideConfig.MODE_NONE) ? 0x999999 : 0xFFFFFF;
+			int modeColor = (mode == Aero_SideConfig.MODE_NONE) ? 0x999999 : 0xFFFFFF;
 			this.fontRenderer.drawStringWithShadow(modeLabel, fx + (FACE_SIZE - modeW) / 2, fy + 20, modeColor);
 		}
 
@@ -207,10 +207,10 @@ public class Retronism_GuiPipeConfig extends GuiScreen {
 			int fy = crossY + row * (FACE_SIZE + FACE_GAP);
 
 			if (mouseX >= fx && mouseX < fx + FACE_SIZE && mouseY >= fy && mouseY < fy + FACE_SIZE) {
-				int mode = Retronism_SideConfig.get(config, side, selectedType);
-				String tip = Retronism_SideConfig.getSideName(side) + " "
+				int mode = Aero_SideConfig.get(config, side, selectedType);
+				String tip = Aero_SideConfig.getSideName(side) + " "
 					+ TYPE_NAMES[selectedType] + ": "
-					+ Retronism_SideConfig.getModeName(mode);
+					+ Aero_SideConfig.getModeName(mode);
 				int tw = this.fontRenderer.getStringWidth(tip);
 				int tx = mouseX + 8;
 				int ty = mouseY - 12;
@@ -411,7 +411,7 @@ public class Retronism_GuiPipeConfig extends GuiScreen {
 
 			if (mouseX >= fx && mouseX < fx + FACE_SIZE && mouseY >= fy && mouseY < fy + FACE_SIZE) {
 				int[] config = tile.getSideConfig();
-				int oldMode = Retronism_SideConfig.get(config, side, selectedType);
+				int oldMode = Aero_SideConfig.get(config, side, selectedType);
 				int[] allowed = tile.getAllowedModes(selectedType);
 				int newMode = cycleAllowed(oldMode, allowed);
 				tile.setSideMode(side, selectedType, newMode);

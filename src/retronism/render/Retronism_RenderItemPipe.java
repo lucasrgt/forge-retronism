@@ -1,7 +1,7 @@
 package retronism.render;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.block.*;
 
 
@@ -11,7 +11,7 @@ public class Retronism_RenderItemPipe implements Retronism_IBlockRenderer {
 		float min = 5.0F / 16.0F;
 		float max = 11.0F / 16.0F;
 		Retronism_BlockItemPipe pipe = (Retronism_BlockItemPipe) block;
-		int I = Retronism_SideConfig.TYPE_ITEM;
+		int I = Aero_SideConfig.TYPE_ITEM;
 
 		// Center shell
 		block.setBlockBounds(min, min, min, max, max, max);

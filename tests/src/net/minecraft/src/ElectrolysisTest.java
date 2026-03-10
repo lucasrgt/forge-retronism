@@ -37,7 +37,7 @@ public class ElectrolysisTest {
 
 	@Test
 	public void testReceiveWater() {
-		int accepted = tile.receiveFluid(Retronism_FluidType.WATER, 500);
+		int accepted = tile.receiveFluid(Aero_FluidType.WATER, 500);
 		assertEquals(500, accepted);
 		assertEquals(500, tile.waterStored);
 	}
@@ -50,20 +50,20 @@ public class ElectrolysisTest {
 
 	@Test
 	public void testRejectFluidNone() {
-		int accepted = tile.receiveFluid(Retronism_FluidType.NONE, 500);
+		int accepted = tile.receiveFluid(Aero_FluidType.NONE, 500);
 		assertEquals(0, accepted);
 	}
 
 	@Test
 	public void testReceiveGasRejected() {
-		int accepted = tile.receiveGas(Retronism_GasType.HYDROGEN, 100);
+		int accepted = tile.receiveGas(Aero_GasType.HYDROGEN, 100);
 		assertEquals("Electrolysis should not accept gas input", 0, accepted);
 	}
 
 	@Test
 	public void testExtractHydrogen() {
 		tile.hydrogenStored = 500;
-		int extracted = tile.extractGas(Retronism_GasType.HYDROGEN, 200);
+		int extracted = tile.extractGas(Aero_GasType.HYDROGEN, 200);
 		assertEquals(200, extracted);
 		assertEquals(300, tile.hydrogenStored);
 	}
@@ -71,7 +71,7 @@ public class ElectrolysisTest {
 	@Test
 	public void testExtractOxygen() {
 		tile.oxygenStored = 300;
-		int extracted = tile.extractGas(Retronism_GasType.OXYGEN, 200);
+		int extracted = tile.extractGas(Aero_GasType.OXYGEN, 200);
 		assertEquals(200, extracted);
 		assertEquals(100, tile.oxygenStored);
 	}
@@ -79,14 +79,14 @@ public class ElectrolysisTest {
 	@Test
 	public void testExtractWrongGasType() {
 		tile.hydrogenStored = 500;
-		int extracted = tile.extractGas(Retronism_GasType.OXYGEN, 200);
+		int extracted = tile.extractGas(Aero_GasType.OXYGEN, 200);
 		assertEquals(0, extracted);
 	}
 
 	@Test
 	public void testCannotExtractFluid() {
 		tile.waterStored = 5000;
-		int extracted = tile.extractFluid(Retronism_FluidType.WATER, 100);
+		int extracted = tile.extractFluid(Aero_FluidType.WATER, 100);
 		assertEquals("Electrolysis should not allow fluid extraction", 0, extracted);
 	}
 
@@ -107,9 +107,9 @@ public class ElectrolysisTest {
 
 	@Test
 	public void testWaterCapacity() {
-		int first = tile.receiveFluid(Retronism_FluidType.WATER, 8000);
+		int first = tile.receiveFluid(Aero_FluidType.WATER, 8000);
 		assertEquals(8000, first);
-		int second = tile.receiveFluid(Retronism_FluidType.WATER, 1);
+		int second = tile.receiveFluid(Aero_FluidType.WATER, 1);
 		assertEquals(0, second);
 	}
 

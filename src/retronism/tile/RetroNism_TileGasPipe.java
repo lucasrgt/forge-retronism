@@ -1,10 +1,10 @@
 package retronism.tile;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 
-public class Retronism_TileGasPipe extends TileEntity implements Retronism_IGasHandler, Retronism_ISideConfigurable {
-	private int gasType = Retronism_GasType.NONE;
+public class Retronism_TileGasPipe extends TileEntity implements Aero_IGasHandler, Aero_ISideConfigurable {
+	private int gasType = Aero_GasType.NONE;
 	private int gasAmount = 0;
 	private static final int MAX_GAS = 500;
 	private static final int TRANSFER_RATE = 200;
@@ -17,7 +17,7 @@ public class Retronism_TileGasPipe extends TileEntity implements Retronism_IGasH
 
 	{
 		for (int s = 0; s < 6; s++) {
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_GAS, Retronism_SideConfig.MODE_INPUT_OUTPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_GAS, Aero_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
@@ -25,19 +25,19 @@ public class Retronism_TileGasPipe extends TileEntity implements Retronism_IGasH
 	public void setSideMode(int side, int type, int mode) {
 		if (!supportsType(type)) return;
 		int[] allowed = getAllowedModes(type);
-		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
+		for (int m : allowed) { if (m == mode) { Aero_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
-		return type == Retronism_SideConfig.TYPE_GAS;
+		return type == Aero_SideConfig.TYPE_GAS;
 	}
 	public int[] getAllowedModes(int type) {
-		if (type == Retronism_SideConfig.TYPE_GAS) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
-		return new int[]{Retronism_SideConfig.MODE_NONE};
+		if (type == Aero_SideConfig.TYPE_GAS) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_INPUT, Aero_SideConfig.MODE_OUTPUT, Aero_SideConfig.MODE_INPUT_OUTPUT};
+		return new int[]{Aero_SideConfig.MODE_NONE};
 	}
 
 	public int receiveGas(int type, int amountMB) {
-		if (type == Retronism_GasType.NONE) return 0;
-		if (gasType != Retronism_GasType.NONE && gasType != type) return 0;
+		if (type == Aero_GasType.NONE) return 0;
+		if (gasType != Aero_GasType.NONE && gasType != type) return 0;
 		int canReceive = TRANSFER_RATE - receivedThisTick;
 		if (canReceive <= 0) return 0;
 		int space = MAX_GAS - gasAmount;
@@ -54,7 +54,7 @@ public class Retronism_TileGasPipe extends TileEntity implements Retronism_IGasH
 		if (gasType != type || gasAmount <= 0) return 0;
 		int extracted = Math.min(amountMB, gasAmount);
 		gasAmount -= extracted;
-		if (gasAmount == 0) gasType = Retronism_GasType.NONE;
+		if (gasAmount == 0) gasType = Aero_GasType.NONE;
 		return extracted;
 	}
 
@@ -63,15 +63,15 @@ public class Retronism_TileGasPipe extends TileEntity implements Retronism_IGasH
 	public int getGasCapacity() { return MAX_GAS; }
 
 	public int getSideMode(int side) {
-		return Retronism_SideConfig.get(sideConfig, side, Retronism_SideConfig.TYPE_GAS);
+		return Aero_SideConfig.get(sideConfig, side, Aero_SideConfig.TYPE_GAS);
 	}
 
 	private boolean canSendTo(int side, TileEntity te) {
-		if (!Retronism_SideConfig.canOutput(getSideMode(side))) return false;
-		int oppSide = Retronism_SideConfig.oppositeSide(side);
-		if (te instanceof Retronism_ISideConfigurable) {
-			int neighborMode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, Retronism_SideConfig.TYPE_GAS);
-			if (!Retronism_SideConfig.canInput(neighborMode)) return false;
+		if (!Aero_SideConfig.canOutput(getSideMode(side))) return false;
+		int oppSide = Aero_SideConfig.oppositeSide(side);
+		if (te instanceof Aero_ISideConfigurable) {
+			int neighborMode = Aero_SideConfig.get(((Aero_ISideConfigurable) te).getSideConfig(), oppSide, Aero_SideConfig.TYPE_GAS);
+			if (!Aero_SideConfig.canInput(neighborMode)) return false;
 		}
 		return true;
 	}
@@ -85,11 +85,11 @@ public class Retronism_TileGasPipe extends TileEntity implements Retronism_IGasH
 		for (int side = 0; side < 6; side++) {
 			int[] d = DIRS[side];
 			int nx = xCoord + d[0], ny = yCoord + d[1], nz = zCoord + d[2];
-			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, nx, ny, nz);
+			TileEntity te = Aero_PortRegistry.resolveHandler(worldObj, nx, ny, nz);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
-			if (te instanceof Retronism_IGasHandler && !(te instanceof Retronism_TileGasPipe)) {
-				if (((Retronism_IGasHandler) te).getGasAmount() < ((Retronism_IGasHandler) te).getGasCapacity()) receivers++;
+			if (te instanceof Aero_IGasHandler && !(te instanceof Retronism_TileGasPipe)) {
+				if (((Aero_IGasHandler) te).getGasAmount() < ((Aero_IGasHandler) te).getGasCapacity()) receivers++;
 			} else if (te instanceof Retronism_TileGasPipe) {
 				if (((Retronism_TileGasPipe) te).gasAmount < this.gasAmount) receivers++;
 			}
@@ -104,11 +104,11 @@ public class Retronism_TileGasPipe extends TileEntity implements Retronism_IGasH
 			if (gasAmount <= 0) break;
 			int[] d = DIRS[side];
 			int nx = xCoord + d[0], ny = yCoord + d[1], nz = zCoord + d[2];
-			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, nx, ny, nz);
+			TileEntity te = Aero_PortRegistry.resolveHandler(worldObj, nx, ny, nz);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
-			if (te instanceof Retronism_IGasHandler && !(te instanceof Retronism_TileGasPipe)) {
-				Retronism_IGasHandler handler = (Retronism_IGasHandler) te;
+			if (te instanceof Aero_IGasHandler && !(te instanceof Retronism_TileGasPipe)) {
+				Aero_IGasHandler handler = (Aero_IGasHandler) te;
 				if (handler.getGasAmount() < handler.getGasCapacity()) {
 					int toSend = Math.min(perReceiver, gasAmount);
 					gasAmount -= handler.receiveGas(gasType, toSend);
@@ -122,7 +122,7 @@ public class Retronism_TileGasPipe extends TileEntity implements Retronism_IGasH
 			}
 		}
 
-		if (gasAmount == 0) gasType = Retronism_GasType.NONE;
+		if (gasAmount == 0) gasType = Aero_GasType.NONE;
 	}
 
 	public void readFromNBT(NBTTagCompound nbt) {

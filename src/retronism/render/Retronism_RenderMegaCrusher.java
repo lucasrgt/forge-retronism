@@ -3,9 +3,9 @@ package retronism.render;
 import net.minecraft.src.*;
 import retronism.Retronism_Registry;
 import retronism.tile.Retronism_TileMegaCrusher;
-import retronism.aero.Aero_Model;
-import retronism.aero.Aero_ModelLoader;
-import retronism.aero.Aero_ModelRenderer;
+import aero.modellib.Aero_Model;
+import aero.modellib.Aero_ModelLoader;
+import aero.modellib.Aero_ModelRenderer;
 
 public class Retronism_RenderMegaCrusher implements Retronism_IBlockRenderer {
 

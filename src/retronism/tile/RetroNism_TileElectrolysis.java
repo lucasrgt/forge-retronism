@@ -1,9 +1,9 @@
 package retronism.tile;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 
-public class Retronism_TileElectrolysis extends TileEntity implements Retronism_IEnergyReceiver, Retronism_IFluidHandler, Retronism_IGasHandler, Retronism_ISideConfigurable {
+public class Retronism_TileElectrolysis extends TileEntity implements Aero_IEnergyReceiver, Aero_IFluidHandler, Aero_IGasHandler, Aero_ISideConfigurable {
 	public int storedEnergy = 0;
 	public int waterStored = 0;
 	public int hydrogenStored = 0;
@@ -13,9 +13,9 @@ public class Retronism_TileElectrolysis extends TileEntity implements Retronism_
 
 	{
 		for (int s = 0; s < 6; s++) {
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ENERGY, Retronism_SideConfig.MODE_INPUT);
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_FLUID, Retronism_SideConfig.MODE_INPUT);
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_GAS, Retronism_SideConfig.MODE_OUTPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_ENERGY, Aero_SideConfig.MODE_INPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_FLUID, Aero_SideConfig.MODE_INPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_GAS, Aero_SideConfig.MODE_OUTPUT);
 		}
 	}
 
@@ -23,16 +23,16 @@ public class Retronism_TileElectrolysis extends TileEntity implements Retronism_
 	public void setSideMode(int side, int type, int mode) {
 		if (!supportsType(type)) return;
 		int[] allowed = getAllowedModes(type);
-		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
+		for (int m : allowed) { if (m == mode) { Aero_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
-		return type == Retronism_SideConfig.TYPE_ENERGY || type == Retronism_SideConfig.TYPE_FLUID || type == Retronism_SideConfig.TYPE_GAS;
+		return type == Aero_SideConfig.TYPE_ENERGY || type == Aero_SideConfig.TYPE_FLUID || type == Aero_SideConfig.TYPE_GAS;
 	}
 	public int[] getAllowedModes(int type) {
-		if (type == Retronism_SideConfig.TYPE_ENERGY) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT};
-		if (type == Retronism_SideConfig.TYPE_FLUID) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT};
-		if (type == Retronism_SideConfig.TYPE_GAS) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_OUTPUT};
-		return new int[]{Retronism_SideConfig.MODE_NONE};
+		if (type == Aero_SideConfig.TYPE_ENERGY) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_INPUT};
+		if (type == Aero_SideConfig.TYPE_FLUID) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_INPUT};
+		if (type == Aero_SideConfig.TYPE_GAS) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_OUTPUT};
+		return new int[]{Aero_SideConfig.MODE_NONE};
 	}
 
 	public static final int MAX_ENERGY = 32000;
@@ -59,7 +59,7 @@ public class Retronism_TileElectrolysis extends TileEntity implements Retronism_
 
 	// Fluid (accepts water input only)
 	public int receiveFluid(int fluidType, int amountMB) {
-		if (fluidType != Retronism_FluidType.WATER) return 0;
+		if (fluidType != Aero_FluidType.WATER) return 0;
 		int space = MAX_WATER - waterStored;
 		int accepted = Math.min(amountMB, space);
 		waterStored += accepted;
@@ -70,7 +70,7 @@ public class Retronism_TileElectrolysis extends TileEntity implements Retronism_
 		return 0;
 	}
 
-	public int getFluidType() { return waterStored > 0 ? Retronism_FluidType.WATER : Retronism_FluidType.NONE; }
+	public int getFluidType() { return waterStored > 0 ? Aero_FluidType.WATER : Aero_FluidType.NONE; }
 	public int getFluidAmount() { return waterStored; }
 	public int getFluidCapacity() { return MAX_WATER; }
 
@@ -80,12 +80,12 @@ public class Retronism_TileElectrolysis extends TileEntity implements Retronism_
 	}
 
 	public int extractGas(int gasType, int amountMB) {
-		if (gasType == Retronism_GasType.HYDROGEN && hydrogenStored > 0) {
+		if (gasType == Aero_GasType.HYDROGEN && hydrogenStored > 0) {
 			int extracted = Math.min(amountMB, hydrogenStored);
 			hydrogenStored -= extracted;
 			return extracted;
 		}
-		if (gasType == Retronism_GasType.OXYGEN && oxygenStored > 0) {
+		if (gasType == Aero_GasType.OXYGEN && oxygenStored > 0) {
 			int extracted = Math.min(amountMB, oxygenStored);
 			oxygenStored -= extracted;
 			return extracted;
@@ -94,9 +94,9 @@ public class Retronism_TileElectrolysis extends TileEntity implements Retronism_
 	}
 
 	public int getGasType() {
-		if (hydrogenStored > 0) return Retronism_GasType.HYDROGEN;
-		if (oxygenStored > 0) return Retronism_GasType.OXYGEN;
-		return Retronism_GasType.NONE;
+		if (hydrogenStored > 0) return Aero_GasType.HYDROGEN;
+		if (oxygenStored > 0) return Aero_GasType.OXYGEN;
+		return Aero_GasType.NONE;
 	}
 
 	public int getGasAmount() { return hydrogenStored + oxygenStored; }
@@ -150,24 +150,24 @@ public class Retronism_TileElectrolysis extends TileEntity implements Retronism_
 		int[][] dirs = {{0,-1,0},{0,1,0},{0,0,-1},{0,0,1},{-1,0,0},{1,0,0}};
 
 		for (int side = 0; side < 6; side++) {
-			int myMode = Retronism_SideConfig.get(sideConfig, side, Retronism_SideConfig.TYPE_GAS);
-			if (!Retronism_SideConfig.canOutput(myMode)) continue;
+			int myMode = Aero_SideConfig.get(sideConfig, side, Aero_SideConfig.TYPE_GAS);
+			if (!Aero_SideConfig.canOutput(myMode)) continue;
 			int[] d = dirs[side];
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
-			if (te instanceof Retronism_IGasHandler && te != this) {
-				int oppSide = Retronism_SideConfig.oppositeSide(side);
-				if (te instanceof Retronism_ISideConfigurable) {
-					int neighborMode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, Retronism_SideConfig.TYPE_GAS);
-					if (!Retronism_SideConfig.canInput(neighborMode)) continue;
+			if (te instanceof Aero_IGasHandler && te != this) {
+				int oppSide = Aero_SideConfig.oppositeSide(side);
+				if (te instanceof Aero_ISideConfigurable) {
+					int neighborMode = Aero_SideConfig.get(((Aero_ISideConfigurable) te).getSideConfig(), oppSide, Aero_SideConfig.TYPE_GAS);
+					if (!Aero_SideConfig.canInput(neighborMode)) continue;
 				}
-				Retronism_IGasHandler handler = (Retronism_IGasHandler) te;
+				Aero_IGasHandler handler = (Aero_IGasHandler) te;
 				if (hydrogenStored > 0) {
 					int toSend = Math.min(GAS_PUSH_RATE, hydrogenStored);
-					hydrogenStored -= handler.receiveGas(Retronism_GasType.HYDROGEN, toSend);
+					hydrogenStored -= handler.receiveGas(Aero_GasType.HYDROGEN, toSend);
 				}
 				if (oxygenStored > 0) {
 					int toSend = Math.min(GAS_PUSH_RATE, oxygenStored);
-					oxygenStored -= handler.receiveGas(Retronism_GasType.OXYGEN, toSend);
+					oxygenStored -= handler.receiveGas(Aero_GasType.OXYGEN, toSend);
 				}
 			}
 		}

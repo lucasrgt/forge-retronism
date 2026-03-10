@@ -81,29 +81,29 @@ public class ItemPipeTest {
 	@Test
 	public void testSideConfigDefaultsToIO() {
 		for (int side = 0; side < 6; side++) {
-			assertEquals(Retronism_SideConfig.MODE_INPUT_OUTPUT, pipe.getSideMode(side));
+			assertEquals(Aero_SideConfig.MODE_INPUT_OUTPUT, pipe.getSideMode(side));
 		}
 	}
 
 	@Test
 	public void testSupportsOnlyItemType() {
-		assertTrue(pipe.supportsType(Retronism_SideConfig.TYPE_ITEM));
-		assertFalse(pipe.supportsType(Retronism_SideConfig.TYPE_ENERGY));
-		assertFalse(pipe.supportsType(Retronism_SideConfig.TYPE_FLUID));
-		assertFalse(pipe.supportsType(Retronism_SideConfig.TYPE_GAS));
+		assertTrue(pipe.supportsType(Aero_SideConfig.TYPE_ITEM));
+		assertFalse(pipe.supportsType(Aero_SideConfig.TYPE_ENERGY));
+		assertFalse(pipe.supportsType(Aero_SideConfig.TYPE_FLUID));
+		assertFalse(pipe.supportsType(Aero_SideConfig.TYPE_GAS));
 	}
 
 	@Test
 	public void testSetSideMode() {
-		pipe.setSideMode(0, Retronism_SideConfig.TYPE_ITEM, Retronism_SideConfig.MODE_INPUT);
-		assertEquals(Retronism_SideConfig.MODE_INPUT, pipe.getSideMode(0));
-		assertEquals(Retronism_SideConfig.MODE_INPUT_OUTPUT, pipe.getSideMode(1));
+		pipe.setSideMode(0, Aero_SideConfig.TYPE_ITEM, Aero_SideConfig.MODE_INPUT);
+		assertEquals(Aero_SideConfig.MODE_INPUT, pipe.getSideMode(0));
+		assertEquals(Aero_SideConfig.MODE_INPUT_OUTPUT, pipe.getSideMode(1));
 	}
 
 	@Test
 	public void testSetSideModeRejectsUnsupportedType() {
-		pipe.setSideMode(0, Retronism_SideConfig.TYPE_ENERGY, Retronism_SideConfig.MODE_INPUT);
-		assertEquals(Retronism_SideConfig.MODE_INPUT_OUTPUT, pipe.getSideMode(0));
+		pipe.setSideMode(0, Aero_SideConfig.TYPE_ENERGY, Aero_SideConfig.MODE_INPUT);
+		assertEquals(Aero_SideConfig.MODE_INPUT_OUTPUT, pipe.getSideMode(0));
 	}
 
 	// === Receive Item ===

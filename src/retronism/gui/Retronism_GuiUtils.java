@@ -1,7 +1,7 @@
 package retronism.gui;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 
 public class Retronism_GuiUtils extends Gui {
 
@@ -22,7 +22,7 @@ public class Retronism_GuiUtils extends Gui {
 	/**
 	 * Compute scaled energy value from an IEnergyReceiver.
 	 */
-	public static int getEnergyScaled(Retronism_IEnergyReceiver tile, int scale) {
+	public static int getEnergyScaled(Aero_IEnergyReceiver tile, int scale) {
 		int max = tile.getMaxEnergy();
 		return max > 0 ? tile.getStoredEnergy() * scale / max : 0;
 	}

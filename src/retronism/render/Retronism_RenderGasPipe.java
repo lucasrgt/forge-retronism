@@ -1,7 +1,7 @@
 package retronism.render;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.block.*;
 import retronism.tile.*;
 
@@ -14,7 +14,7 @@ public class Retronism_RenderGasPipe implements Retronism_IBlockRenderer {
 		float iMin = 6.0F / 16.0F;
 		float iMax = 10.0F / 16.0F;
 		Retronism_BlockGasPipe pipe = (Retronism_BlockGasPipe) block;
-		int G = Retronism_SideConfig.TYPE_GAS;
+		int G = Aero_SideConfig.TYPE_GAS;
 
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		boolean hasGas = false;
@@ -23,7 +23,7 @@ public class Retronism_RenderGasPipe implements Retronism_IBlockRenderer {
 			Retronism_TileGasPipe tilePipe = (Retronism_TileGasPipe) te;
 			if (tilePipe.getGasAmount() > 0) {
 				hasGas = true;
-				gasColor = Retronism_GasType.getColor(tilePipe.getGasType());
+				gasColor = Aero_GasType.getColor(tilePipe.getGasType());
 			}
 		}
 

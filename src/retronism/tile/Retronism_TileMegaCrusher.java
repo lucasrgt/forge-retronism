@@ -2,16 +2,16 @@ package retronism.tile;
 
 import net.minecraft.src.*;
 import retronism.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.recipe.*;
-import retronism.aero.Aero_AnimBundle;
-import retronism.aero.Aero_AnimationDef;
-import retronism.aero.Aero_AnimationLoader;
-import retronism.aero.Aero_AnimationState;
+import aero.modellib.Aero_AnimBundle;
+import aero.modellib.Aero_AnimationDef;
+import aero.modellib.Aero_AnimationLoader;
+import aero.modellib.Aero_AnimationState;
 
 import java.util.Random;
 
-public class Retronism_TileMegaCrusher extends TileEntity implements IInventory, Retronism_IEnergyReceiver, Retronism_ISideConfigurable, Retronism_ISlotAccess {
+public class Retronism_TileMegaCrusher extends TileEntity implements IInventory, Aero_IEnergyReceiver, Aero_ISideConfigurable, Aero_ISlotAccess {
 	private ItemStack[] inventory = new ItemStack[6]; // 0=in1, 1=out1, 2=in2, 3=out2, 4=in3, 5=out3
 	public int[] cookTime = new int[3];
 	public int storedEnergy = 0;
@@ -37,8 +37,8 @@ public class Retronism_TileMegaCrusher extends TileEntity implements IInventory,
 
 	{
 		for (int s = 0; s < 6; s++) {
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ENERGY, Retronism_SideConfig.MODE_INPUT);
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ITEM, Retronism_SideConfig.MODE_INPUT_OUTPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_ENERGY, Aero_SideConfig.MODE_INPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_ITEM, Aero_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
@@ -46,15 +46,15 @@ public class Retronism_TileMegaCrusher extends TileEntity implements IInventory,
 	public void setSideMode(int side, int type, int mode) {
 		if (!supportsType(type)) return;
 		int[] allowed = getAllowedModes(type);
-		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
+		for (int m : allowed) { if (m == mode) { Aero_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
-		return type == Retronism_SideConfig.TYPE_ENERGY || type == Retronism_SideConfig.TYPE_ITEM;
+		return type == Aero_SideConfig.TYPE_ENERGY || type == Aero_SideConfig.TYPE_ITEM;
 	}
 	public int[] getAllowedModes(int type) {
-		if (type == Retronism_SideConfig.TYPE_ENERGY) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT};
-		if (type == Retronism_SideConfig.TYPE_ITEM) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
-		return new int[]{Retronism_SideConfig.MODE_NONE};
+		if (type == Aero_SideConfig.TYPE_ENERGY) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_INPUT};
+		if (type == Aero_SideConfig.TYPE_ITEM) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_INPUT, Aero_SideConfig.MODE_OUTPUT, Aero_SideConfig.MODE_INPUT_OUTPUT};
+		return new int[]{Aero_SideConfig.MODE_NONE};
 	}
 
 	public int[] getInsertSlots() { return new int[]{0, 2, 4}; }

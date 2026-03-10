@@ -1,7 +1,7 @@
 package retronism.render;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import org.lwjgl.opengl.GL11;
 
 public class Retronism_RenderUtils {
@@ -22,31 +22,31 @@ public class Retronism_RenderUtils {
 	public static final int[][] SIDE_OFFSETS = {{0,-1,0},{0,1,0},{0,0,-1},{0,0,1},{-1,0,0},{1,0,0}};
 
 	public static float negBound(int mode) {
-		if (mode == Retronism_SideConfig.MODE_INPUT) return INSET;
-		if (mode == Retronism_SideConfig.MODE_OUTPUT) return -INSET;
+		if (mode == Aero_SideConfig.MODE_INPUT) return INSET;
+		if (mode == Aero_SideConfig.MODE_OUTPUT) return -INSET;
 		return 0.0F;
 	}
 
 	public static float posBound(int mode) {
-		if (mode == Retronism_SideConfig.MODE_INPUT) return 1.0F - INSET;
-		if (mode == Retronism_SideConfig.MODE_OUTPUT) return 1.0F + INSET;
+		if (mode == Aero_SideConfig.MODE_INPUT) return 1.0F - INSET;
+		if (mode == Aero_SideConfig.MODE_OUTPUT) return 1.0F + INSET;
 		return 1.0F;
 	}
 
 	public static int getPipeSideMode(IBlockAccess world, int x, int y, int z, int side, int type) {
 		TileEntity te = world.getBlockTileEntity(x, y, z);
-		if (te instanceof Retronism_ISideConfigurable) {
-			return Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), side, type);
+		if (te instanceof Aero_ISideConfigurable) {
+			return Aero_SideConfig.get(((Aero_ISideConfigurable) te).getSideConfig(), side, type);
 		}
-		return Retronism_SideConfig.MODE_INPUT_OUTPUT;
+		return Aero_SideConfig.MODE_INPUT_OUTPUT;
 	}
 
 	public static int getNeighborSideMode(IBlockAccess world, int nx, int ny, int nz, int oppSide, int type) {
 		TileEntity te = world.getBlockTileEntity(nx, ny, nz);
-		if (te instanceof Retronism_ISideConfigurable) {
-			return Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, type);
+		if (te instanceof Aero_ISideConfigurable) {
+			return Aero_SideConfig.get(((Aero_ISideConfigurable) te).getSideConfig(), oppSide, type);
 		}
-		return Retronism_SideConfig.MODE_INPUT_OUTPUT;
+		return Aero_SideConfig.MODE_INPUT_OUTPUT;
 	}
 
 	public static void renderConnectorPlate(RenderBlocks renderer, Block block, int x, int y, int z, int side, float pMin, float pMax, float pT) {
@@ -64,7 +64,7 @@ public class Retronism_RenderUtils {
 	public static void renderPipeArm(RenderBlocks renderer, Block block, int x, int y, int z,
 			int side, int mode, float min, float max, float iMin, float iMax,
 			float fillRatio, int fluidTex, float eps) {
-		if (mode == Retronism_SideConfig.MODE_NONE) return;
+		if (mode == Aero_SideConfig.MODE_NONE) return;
 		boolean hasFluid = fillRatio > 0 && fluidTex >= 0;
 		float fillTop = iMin + (iMax - iMin) * fillRatio;
 
@@ -148,7 +148,7 @@ public class Retronism_RenderUtils {
 
 	public static void renderGasArm(RenderBlocks renderer, Block block, int x, int y, int z,
 			int side, int mode, float min, float max, float iMin, float iMax, boolean hasGas, int gasColor) {
-		if (mode == Retronism_SideConfig.MODE_NONE) return;
+		if (mode == Aero_SideConfig.MODE_NONE) return;
 		switch (side) {
 			case 0: {
 				float end = negBound(mode);

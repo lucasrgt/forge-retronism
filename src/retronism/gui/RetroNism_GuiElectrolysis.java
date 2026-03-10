@@ -4,7 +4,7 @@ import net.minecraft.src.*;
 import retronism.*;
 import retronism.tile.*;
 import retronism.container.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import org.lwjgl.opengl.GL11;
 
 public class Retronism_GuiElectrolysis extends GuiContainer {
@@ -93,11 +93,11 @@ public class Retronism_GuiElectrolysis extends GuiContainer {
 		}
 
 		// Hydrogen tank (water texture tinted with gas color)
-		drawGasTank(x + 113, y + 17, 14, 52, tile.getHydrogenScaled(52), Retronism_GasType.getColor(Retronism_GasType.HYDROGEN));
+		drawGasTank(x + 113, y + 17, 14, 52, tile.getHydrogenScaled(52), Aero_GasType.getColor(Aero_GasType.HYDROGEN));
 		drawTankGauge(x + 113, y + 17, 14, 52);
 
 		// Oxygen tank (water texture tinted with gas color)
-		drawGasTank(x + 137, y + 17, 14, 52, tile.getOxygenScaled(52), Retronism_GasType.getColor(Retronism_GasType.OXYGEN));
+		drawGasTank(x + 137, y + 17, 14, 52, tile.getOxygenScaled(52), Aero_GasType.getColor(Aero_GasType.OXYGEN));
 		drawTankGauge(x + 137, y + 17, 14, 52);
 	}
 

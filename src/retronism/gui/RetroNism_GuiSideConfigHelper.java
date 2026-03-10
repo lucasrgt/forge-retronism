@@ -2,12 +2,12 @@ package retronism.gui;
 
 import net.minecraft.src.*;
 import retronism.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 public class Retronism_GuiSideConfigHelper extends Gui {
-	private Retronism_ISideConfigurable tile;
+	private Aero_ISideConfigurable tile;
 	private int machineBlockId;
 	public boolean configMode = false;
 	private int selectedType = -1;
@@ -52,14 +52,14 @@ public class Retronism_GuiSideConfigHelper extends Gui {
 	private static final int BTN_W = 58;
 	private static final int BTN_H = 14;
 
-	public Retronism_GuiSideConfigHelper(Retronism_ISideConfigurable tile, int machineBlockId) {
+	public Retronism_GuiSideConfigHelper(Aero_ISideConfigurable tile, int machineBlockId) {
 		this.tile = tile;
 		this.machineBlockId = machineBlockId;
 		this.selectedType = getFirstSupportedType();
 	}
 
 	private int getFirstSupportedType() {
-		for (int t = 0; t < Retronism_SideConfig.TYPE_COUNT; t++) {
+		for (int t = 0; t < Aero_SideConfig.TYPE_COUNT; t++) {
 			if (tile.supportsType(t)) return t;
 		}
 		return 0;
@@ -75,8 +75,8 @@ public class Retronism_GuiSideConfigHelper extends Gui {
 	}
 
 	private int getNextSupportedType(int current) {
-		for (int i = 1; i <= Retronism_SideConfig.TYPE_COUNT; i++) {
-			int next = (current + i) % Retronism_SideConfig.TYPE_COUNT;
+		for (int i = 1; i <= Aero_SideConfig.TYPE_COUNT; i++) {
+			int next = (current + i) % Aero_SideConfig.TYPE_COUNT;
 			if (tile.supportsType(next)) return next;
 		}
 		return current;
@@ -225,7 +225,7 @@ public class Retronism_GuiSideConfigHelper extends Gui {
 			int fx = crossX + col * (FACE_SIZE + FACE_GAP);
 			int fy = crossY + row * (FACE_SIZE + FACE_GAP);
 
-			int mode = Retronism_SideConfig.get(config, side, selectedType);
+			int mode = Aero_SideConfig.get(config, side, selectedType);
 			int s = FACE_SIZE;
 
 			// MC-style 3D raised button
@@ -243,7 +243,7 @@ public class Retronism_GuiSideConfigHelper extends Gui {
 			// Mode label centered below
 			String modeLabel = MODE_LABELS[mode];
 			int modeW = font.getStringWidth(modeLabel);
-			int modeColor = (mode == Retronism_SideConfig.MODE_NONE) ? 0x999999 : 0xFFFFFF;
+			int modeColor = (mode == Aero_SideConfig.MODE_NONE) ? 0x999999 : 0xFFFFFF;
 			font.drawStringWithShadow(modeLabel, fx + (FACE_SIZE - modeW) / 2, fy + 20, modeColor);
 		}
 
@@ -255,10 +255,10 @@ public class Retronism_GuiSideConfigHelper extends Gui {
 			int fy = crossY + row * (FACE_SIZE + FACE_GAP);
 
 			if (mouseX >= fx && mouseX < fx + FACE_SIZE && mouseY >= fy && mouseY < fy + FACE_SIZE) {
-				int mode = Retronism_SideConfig.get(config, side, selectedType);
-				String tip = Retronism_SideConfig.getSideName(side) + " "
+				int mode = Aero_SideConfig.get(config, side, selectedType);
+				String tip = Aero_SideConfig.getSideName(side) + " "
 					+ TYPE_NAMES[selectedType] + ": "
-					+ Retronism_SideConfig.getModeName(mode);
+					+ Aero_SideConfig.getModeName(mode);
 				int tw = font.getStringWidth(tip);
 				int tx = mouseX + 8;
 				int ty = mouseY - 12;
@@ -320,7 +320,7 @@ public class Retronism_GuiSideConfigHelper extends Gui {
 
 			if (mouseX >= fx && mouseX < fx + FACE_SIZE && mouseY >= fy && mouseY < fy + FACE_SIZE) {
 				int[] config = tile.getSideConfig();
-				int oldMode = Retronism_SideConfig.get(config, side, selectedType);
+				int oldMode = Aero_SideConfig.get(config, side, selectedType);
 				int[] allowed = tile.getAllowedModes(selectedType);
 				int newMode = cycleAllowed(oldMode, allowed);
 				tile.setSideMode(side, selectedType, newMode);

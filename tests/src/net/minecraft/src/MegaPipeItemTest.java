@@ -45,24 +45,24 @@ public class MegaPipeItemTest {
 
 	@Test
 	public void testSupportsAllTypes() {
-		assertTrue(pipe.supportsType(Retronism_SideConfig.TYPE_ENERGY));
-		assertTrue(pipe.supportsType(Retronism_SideConfig.TYPE_FLUID));
-		assertTrue(pipe.supportsType(Retronism_SideConfig.TYPE_GAS));
-		assertTrue(pipe.supportsType(Retronism_SideConfig.TYPE_ITEM));
+		assertTrue(pipe.supportsType(Aero_SideConfig.TYPE_ENERGY));
+		assertTrue(pipe.supportsType(Aero_SideConfig.TYPE_FLUID));
+		assertTrue(pipe.supportsType(Aero_SideConfig.TYPE_GAS));
+		assertTrue(pipe.supportsType(Aero_SideConfig.TYPE_ITEM));
 	}
 
 	@Test
 	public void testSideConfigDefaultsToIO() {
 		int[] config = pipe.getSideConfig();
 		for (int side = 0; side < 6; side++) {
-			assertEquals(Retronism_SideConfig.MODE_INPUT_OUTPUT,
-				Retronism_SideConfig.get(config, side, Retronism_SideConfig.TYPE_ITEM));
-			assertEquals(Retronism_SideConfig.MODE_INPUT_OUTPUT,
-				Retronism_SideConfig.get(config, side, Retronism_SideConfig.TYPE_ENERGY));
-			assertEquals(Retronism_SideConfig.MODE_INPUT_OUTPUT,
-				Retronism_SideConfig.get(config, side, Retronism_SideConfig.TYPE_FLUID));
-			assertEquals(Retronism_SideConfig.MODE_INPUT_OUTPUT,
-				Retronism_SideConfig.get(config, side, Retronism_SideConfig.TYPE_GAS));
+			assertEquals(Aero_SideConfig.MODE_INPUT_OUTPUT,
+				Aero_SideConfig.get(config, side, Aero_SideConfig.TYPE_ITEM));
+			assertEquals(Aero_SideConfig.MODE_INPUT_OUTPUT,
+				Aero_SideConfig.get(config, side, Aero_SideConfig.TYPE_ENERGY));
+			assertEquals(Aero_SideConfig.MODE_INPUT_OUTPUT,
+				Aero_SideConfig.get(config, side, Aero_SideConfig.TYPE_FLUID));
+			assertEquals(Aero_SideConfig.MODE_INPUT_OUTPUT,
+				Aero_SideConfig.get(config, side, Aero_SideConfig.TYPE_GAS));
 		}
 	}
 
@@ -82,17 +82,17 @@ public class MegaPipeItemTest {
 
 	@Test
 	public void testFluidReceive() {
-		int accepted = pipe.receiveFluid(Retronism_FluidType.WATER, 100);
+		int accepted = pipe.receiveFluid(Aero_FluidType.WATER, 100);
 		assertEquals(100, accepted);
 		assertEquals(100, pipe.getFluidAmount());
-		assertEquals(Retronism_FluidType.WATER, pipe.getFluidType());
+		assertEquals(Aero_FluidType.WATER, pipe.getFluidType());
 	}
 
 	@Test
 	public void testGasReceive() {
-		int accepted = pipe.receiveGas(Retronism_GasType.HYDROGEN, 100);
+		int accepted = pipe.receiveGas(Aero_GasType.HYDROGEN, 100);
 		assertEquals(100, accepted);
 		assertEquals(100, pipe.getGasAmount());
-		assertEquals(Retronism_GasType.HYDROGEN, pipe.getGasType());
+		assertEquals(Aero_GasType.HYDROGEN, pipe.getGasType());
 	}
 }

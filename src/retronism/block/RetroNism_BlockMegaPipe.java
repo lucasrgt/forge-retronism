@@ -3,7 +3,7 @@ package retronism.block;
 import net.minecraft.src.*;
 import net.minecraft.client.Minecraft;
 import retronism.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.tile.*;
 import retronism.gui.*;
 
@@ -38,9 +38,9 @@ public class Retronism_BlockMegaPipe extends BlockContainer {
 		if (held != null && held.itemID == Retronism_Registry.wrench.shiftedIndex) {
 			if (world.multiplayerWorld) return true;
 			TileEntity te = world.getBlockTileEntity(x, y, z);
-			if (te instanceof Retronism_ISideConfigurable) {
+			if (te instanceof Aero_ISideConfigurable) {
 				ModLoader.getMinecraftInstance().displayGuiScreen(
-					new Retronism_GuiPipeConfig(player, (Retronism_ISideConfigurable) te));
+					new Retronism_GuiPipeConfig(player, (Aero_ISideConfigurable) te));
 			}
 			return true;
 		}
@@ -59,12 +59,12 @@ public class Retronism_BlockMegaPipe extends BlockContainer {
 
 	public boolean canConnectTo(IBlockAccess world, int x, int y, int z) {
 		TileEntity te = world.getBlockTileEntity(x, y, z);
-		if (te instanceof Retronism_IEnergyReceiver) return true;
+		if (te instanceof Aero_IEnergyReceiver) return true;
 		if (te instanceof Retronism_TileGenerator) return true;
-		if (te instanceof Retronism_IFluidHandler) return true;
-		if (te instanceof Retronism_IGasHandler) return true;
+		if (te instanceof Aero_IFluidHandler) return true;
+		if (te instanceof Aero_IGasHandler) return true;
 		if (te instanceof IInventory) return true;
-		if (Retronism_PortRegistry.isPort(x, y, z)) return true;
+		if (Aero_PortRegistry.isPort(x, y, z)) return true;
 		int id = world.getBlockId(x, y, z);
 		return id == Retronism_Registry.cableBlock.blockID
 			|| id == Retronism_Registry.fluidPipeBlock.blockID

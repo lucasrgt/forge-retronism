@@ -1,9 +1,9 @@
 package retronism.tile;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 
-public class Retronism_TileItemPipe extends TileEntity implements IInventory, Retronism_ISideConfigurable {
+public class Retronism_TileItemPipe extends TileEntity implements IInventory, Aero_ISideConfigurable {
 	private ItemStack buffer = null;
 	private static final int TRANSFER_COOLDOWN = 8;
 	private int cooldown = 0;
@@ -24,7 +24,7 @@ public class Retronism_TileItemPipe extends TileEntity implements IInventory, Re
 
 	{
 		for (int s = 0; s < 6; s++) {
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ITEM, Retronism_SideConfig.MODE_INPUT_OUTPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_ITEM, Aero_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
@@ -63,49 +63,49 @@ public class Retronism_TileItemPipe extends TileEntity implements IInventory, Re
 	public void setSideMode(int side, int type, int mode) {
 		if (!supportsType(type)) return;
 		int[] allowed = getAllowedModes(type);
-		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
+		for (int m : allowed) { if (m == mode) { Aero_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
-		return type == Retronism_SideConfig.TYPE_ITEM;
+		return type == Aero_SideConfig.TYPE_ITEM;
 	}
 	public int[] getAllowedModes(int type) {
-		if (type == Retronism_SideConfig.TYPE_ITEM) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
-		return new int[]{Retronism_SideConfig.MODE_NONE};
+		if (type == Aero_SideConfig.TYPE_ITEM) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_INPUT, Aero_SideConfig.MODE_OUTPUT, Aero_SideConfig.MODE_INPUT_OUTPUT};
+		return new int[]{Aero_SideConfig.MODE_NONE};
 	}
 
 	public int getSideMode(int side) {
-		return Retronism_SideConfig.get(sideConfig, side, Retronism_SideConfig.TYPE_ITEM);
+		return Aero_SideConfig.get(sideConfig, side, Aero_SideConfig.TYPE_ITEM);
 	}
 
 	private boolean canSendTo(int side, TileEntity te) {
-		if (!Retronism_SideConfig.canOutput(getSideMode(side))) return false;
-		int oppSide = Retronism_SideConfig.oppositeSide(side);
-		if (te instanceof Retronism_ISideConfigurable) {
-			int neighborMode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, Retronism_SideConfig.TYPE_ITEM);
-			if (!Retronism_SideConfig.canInput(neighborMode)) return false;
+		if (!Aero_SideConfig.canOutput(getSideMode(side))) return false;
+		int oppSide = Aero_SideConfig.oppositeSide(side);
+		if (te instanceof Aero_ISideConfigurable) {
+			int neighborMode = Aero_SideConfig.get(((Aero_ISideConfigurable) te).getSideConfig(), oppSide, Aero_SideConfig.TYPE_ITEM);
+			if (!Aero_SideConfig.canInput(neighborMode)) return false;
 		}
 		return true;
 	}
 
 	private boolean canReceiveFrom(int side) {
-		return Retronism_SideConfig.canInput(getSideMode(side));
+		return Aero_SideConfig.canInput(getSideMode(side));
 	}
 
 	private int[] getExtractSlotsFor(TileEntity te) {
-		if (te instanceof Retronism_ISlotAccess) return ((Retronism_ISlotAccess) te).getExtractSlots();
+		if (te instanceof Aero_ISlotAccess) return ((Aero_ISlotAccess) te).getExtractSlots();
 		if (te instanceof TileEntityFurnace) return new int[]{2};
 		return null;
 	}
 
 	private int[] getInsertSlotsFor(TileEntity te) {
-		if (te instanceof Retronism_ISlotAccess) return ((Retronism_ISlotAccess) te).getInsertSlots();
+		if (te instanceof Aero_ISlotAccess) return ((Aero_ISlotAccess) te).getInsertSlots();
 		if (te instanceof TileEntityFurnace) return new int[]{0};
 		return null;
 	}
 
 	private boolean hasViableOutput(int excludeX, int excludeY, int excludeZ) {
 		for (int side = 0; side < 6; side++) {
-			if (!Retronism_SideConfig.canOutput(getSideMode(side))) continue;
+			if (!Aero_SideConfig.canOutput(getSideMode(side))) continue;
 			int[] d = DIRS[side];
 			int nx = xCoord + d[0], ny = yCoord + d[1], nz = zCoord + d[2];
 			if (nx == excludeX && ny == excludeY && nz == excludeZ) continue;
@@ -140,7 +140,7 @@ public class Retronism_TileItemPipe extends TileEntity implements IInventory, Re
 		int count = 0;
 		for (int side = 0; side < 6; side++) {
 			if (side == lastReceivedFrom) continue;
-			if (!Retronism_SideConfig.canOutput(getSideMode(side))) continue;
+			if (!Aero_SideConfig.canOutput(getSideMode(side))) continue;
 			int[] d = DIRS[side];
 			TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
 			if (te == null) continue;
@@ -179,10 +179,10 @@ public class Retronism_TileItemPipe extends TileEntity implements IInventory, Re
 				TileEntity te = worldObj.getBlockTileEntity(xCoord + d[0], yCoord + d[1], zCoord + d[2]);
 				if (te == null || te instanceof Retronism_TileItemPipe || te instanceof Retronism_TileMegaPipe) continue;
 				if (!(te instanceof IInventory)) continue;
-				int oppSide = Retronism_SideConfig.oppositeSide(side);
-				if (te instanceof Retronism_ISideConfigurable) {
-					int neighborMode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, Retronism_SideConfig.TYPE_ITEM);
-					if (!Retronism_SideConfig.canOutput(neighborMode)) continue;
+				int oppSide = Aero_SideConfig.oppositeSide(side);
+				if (te instanceof Aero_ISideConfigurable) {
+					int neighborMode = Aero_SideConfig.get(((Aero_ISideConfigurable) te).getSideConfig(), oppSide, Aero_SideConfig.TYPE_ITEM);
+					if (!Aero_SideConfig.canOutput(neighborMode)) continue;
 				}
 				// Only extract if there's somewhere else to send the item
 				if (!hasViableOutput(xCoord + d[0], yCoord + d[1], zCoord + d[2])) continue;
@@ -227,7 +227,7 @@ public class Retronism_TileItemPipe extends TileEntity implements IInventory, Re
 
 			if (te instanceof Retronism_TileItemPipe) {
 				Retronism_TileItemPipe other = (Retronism_TileItemPipe) te;
-				int oppSide = Retronism_SideConfig.oppositeSide(side);
+				int oppSide = Aero_SideConfig.oppositeSide(side);
 				if (other.receiveItem(buffer, oppSide)) {
 					buffer = null;
 					lastReceivedFrom = -1;
@@ -235,7 +235,7 @@ public class Retronism_TileItemPipe extends TileEntity implements IInventory, Re
 			} else if (te instanceof Retronism_TileMegaPipe) {
 				Retronism_TileMegaPipe mega = (Retronism_TileMegaPipe) te;
 				if (mega.itemBuffer == null) {
-					int oppSide = Retronism_SideConfig.oppositeSide(side);
+					int oppSide = Aero_SideConfig.oppositeSide(side);
 					mega.receiveItem(buffer, oppSide);
 					buffer = null;
 					lastReceivedFrom = -1;

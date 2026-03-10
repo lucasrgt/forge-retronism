@@ -1,7 +1,7 @@
 package retronism.render;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.block.*;
 
 import org.lwjgl.opengl.GL11;
@@ -17,8 +17,8 @@ public class Retronism_RenderMegaPipe implements Retronism_IBlockRenderer {
 		{8.0F/16, 11.0F/16, 8.0F/16, 11.0F/16}, // item
 	};
 	private static final int[] MEGA_TUBE_TYPES = {
-		Retronism_SideConfig.TYPE_ENERGY, Retronism_SideConfig.TYPE_FLUID,
-		Retronism_SideConfig.TYPE_GAS, Retronism_SideConfig.TYPE_ITEM
+		Aero_SideConfig.TYPE_ENERGY, Aero_SideConfig.TYPE_FLUID,
+		Aero_SideConfig.TYPE_GAS, Aero_SideConfig.TYPE_ITEM
 	};
 
 	private void renderTubeSegment(RenderBlocks renderer, Block block, int x, int y, int z,
@@ -69,11 +69,11 @@ public class Retronism_RenderMegaPipe implements Retronism_IBlockRenderer {
 			for (int side = 0; side < 6; side++) {
 				if (!connected[side]) continue;
 				int mode = Retronism_RenderUtils.getPipeSideMode(world, x, y, z, side, type);
-				if (mode == Retronism_SideConfig.MODE_NONE) continue;
+				if (mode == Aero_SideConfig.MODE_NONE) continue;
 				int[] d = Retronism_RenderUtils.SIDE_OFFSETS[side];
-				int oppSide = Retronism_SideConfig.oppositeSide(side);
+				int oppSide = Aero_SideConfig.oppositeSide(side);
 				int neighborMode = Retronism_RenderUtils.getNeighborSideMode(world, x+d[0], y+d[1], z+d[2], oppSide, type);
-				if (neighborMode == Retronism_SideConfig.MODE_NONE) continue;
+				if (neighborMode == Aero_SideConfig.MODE_NONE) continue;
 				sideHasArm[side] = true;
 
 				switch (side) {

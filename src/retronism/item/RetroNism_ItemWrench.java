@@ -2,7 +2,7 @@ package retronism.item;
 
 import net.minecraft.src.*;
 import retronism.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.tile.*;
 import retronism.gui.*;
 

@@ -4,7 +4,7 @@ import net.minecraft.src.*;
 import retronism.*;
 import retronism.tile.*;
 import retronism.container.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import org.lwjgl.opengl.GL11;
 
 public class Retronism_GuiItemPipe extends GuiContainer {

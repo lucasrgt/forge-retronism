@@ -2,11 +2,11 @@ package retronism.tile;
 
 import net.minecraft.src.*;
 import retronism.*;
-import retronism.api.*;
+import aero.machineapi.*;
 
-public class Retronism_TileGasTank extends TileEntity implements Retronism_IGasHandler, IInventory, Retronism_ISideConfigurable, Retronism_ISlotAccess {
+public class Retronism_TileGasTank extends TileEntity implements Aero_IGasHandler, IInventory, Aero_ISideConfigurable, Aero_ISlotAccess {
 	private ItemStack[] tankItems = new ItemStack[1];
-	private int gasType = Retronism_GasType.NONE;
+	private int gasType = Aero_GasType.NONE;
 	private int gasAmount = 0;
 
 	public static final int MAX_GAS = 16000;
@@ -15,8 +15,8 @@ public class Retronism_TileGasTank extends TileEntity implements Retronism_IGasH
 
 	{
 		for (int s = 0; s < 6; s++) {
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_GAS, Retronism_SideConfig.MODE_INPUT_OUTPUT);
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ITEM, Retronism_SideConfig.MODE_INPUT_OUTPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_GAS, Aero_SideConfig.MODE_INPUT_OUTPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_ITEM, Aero_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
@@ -24,23 +24,23 @@ public class Retronism_TileGasTank extends TileEntity implements Retronism_IGasH
 	public void setSideMode(int side, int type, int mode) {
 		if (!supportsType(type)) return;
 		int[] allowed = getAllowedModes(type);
-		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
+		for (int m : allowed) { if (m == mode) { Aero_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
-		return type == Retronism_SideConfig.TYPE_GAS || type == Retronism_SideConfig.TYPE_ITEM;
+		return type == Aero_SideConfig.TYPE_GAS || type == Aero_SideConfig.TYPE_ITEM;
 	}
 	public int[] getAllowedModes(int type) {
-		if (type == Retronism_SideConfig.TYPE_GAS) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
-		if (type == Retronism_SideConfig.TYPE_ITEM) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
-		return new int[]{Retronism_SideConfig.MODE_NONE};
+		if (type == Aero_SideConfig.TYPE_GAS) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_INPUT, Aero_SideConfig.MODE_OUTPUT, Aero_SideConfig.MODE_INPUT_OUTPUT};
+		if (type == Aero_SideConfig.TYPE_ITEM) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_INPUT, Aero_SideConfig.MODE_OUTPUT, Aero_SideConfig.MODE_INPUT_OUTPUT};
+		return new int[]{Aero_SideConfig.MODE_NONE};
 	}
 
 	public int[] getInsertSlots() { return new int[]{0}; }
 	public int[] getExtractSlots() { return new int[]{0}; }
 
 	public int receiveGas(int type, int amountMB) {
-		if (type == Retronism_GasType.NONE) return 0;
-		if (gasType != Retronism_GasType.NONE && gasType != type) return 0;
+		if (type == Aero_GasType.NONE) return 0;
+		if (gasType != Aero_GasType.NONE && gasType != type) return 0;
 		int space = MAX_GAS - gasAmount;
 		int accepted = Math.min(amountMB, space);
 		if (accepted > 0) {
@@ -54,7 +54,7 @@ public class Retronism_TileGasTank extends TileEntity implements Retronism_IGasH
 		if (gasType != type || gasAmount <= 0) return 0;
 		int extracted = Math.min(amountMB, gasAmount);
 		gasAmount -= extracted;
-		if (gasAmount == 0) gasType = Retronism_GasType.NONE;
+		if (gasAmount == 0) gasType = Aero_GasType.NONE;
 		return extracted;
 	}
 
@@ -77,14 +77,14 @@ public class Retronism_TileGasTank extends TileEntity implements Retronism_IGasH
 		if (tankItems[0] != null
 			&& tankItems[0].itemID == Retronism_Registry.gasCellEmpty.shiftedIndex
 			&& gasAmount >= CELL_AMOUNT
-			&& (gasType == Retronism_GasType.HYDROGEN || gasType == Retronism_GasType.OXYGEN)) {
+			&& (gasType == Aero_GasType.HYDROGEN || gasType == Aero_GasType.OXYGEN)) {
 			gasAmount -= CELL_AMOUNT;
-			if (gasType == Retronism_GasType.HYDROGEN) {
+			if (gasType == Aero_GasType.HYDROGEN) {
 				tankItems[0] = new ItemStack(Retronism_Registry.gasCellHydrogen);
 			} else {
 				tankItems[0] = new ItemStack(Retronism_Registry.gasCellOxygen);
 			}
-			if (gasAmount == 0) gasType = Retronism_GasType.NONE;
+			if (gasAmount == 0) gasType = Aero_GasType.NONE;
 			this.onInventoryChanged();
 		}
 	}

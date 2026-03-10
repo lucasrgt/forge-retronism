@@ -1,7 +1,7 @@
 package retronism.gui;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.tile.*;
 import org.lwjgl.opengl.GL11;
 
@@ -79,8 +79,8 @@ public class Retronism_GuiMegaPipeConfig extends GuiScreen {
 			for (int type = 0; type < 4; type++) {
 				int cx = fx + 4 + (type % 2) * (CELL_SIZE + 2);
 				int cy = fy + 14 + (type / 2) * (CELL_SIZE + 2);
-				int mode = Retronism_SideConfig.get(config, side, type);
-				int color = Retronism_SideConfig.getColor(type, mode);
+				int mode = Aero_SideConfig.get(config, side, type);
+				int color = Aero_SideConfig.getColor(type, mode);
 
 				// Cell background (color)
 				drawRect(cx, cy, cx + CELL_SIZE, cy + CELL_SIZE, 0xFF000000);
@@ -104,9 +104,9 @@ public class Retronism_GuiMegaPipeConfig extends GuiScreen {
 				int cx = fx + 4 + (type % 2) * (CELL_SIZE + 2);
 				int cy = fy + 14 + (type / 2) * (CELL_SIZE + 2);
 				if (mouseX >= cx && mouseX < cx + CELL_SIZE && mouseY >= cy && mouseY < cy + CELL_SIZE) {
-					int mode = Retronism_SideConfig.get(config, side, type);
-					String tip = SIDE_LABELS[side] + " " + Retronism_SideConfig.getTypeName(type)
-						+ ": " + Retronism_SideConfig.getModeName(mode);
+					int mode = Aero_SideConfig.get(config, side, type);
+					String tip = SIDE_LABELS[side] + " " + Aero_SideConfig.getTypeName(type)
+						+ ": " + Aero_SideConfig.getModeName(mode);
 					int tw = this.fontRenderer.getStringWidth(tip);
 					int tx = mouseX + 8;
 					int ty = mouseY - 12;
@@ -134,7 +134,7 @@ public class Retronism_GuiMegaPipeConfig extends GuiScreen {
 				int cy = fy + 14 + (type / 2) * (CELL_SIZE + 2);
 				if (mouseX >= cx && mouseX < cx + CELL_SIZE && mouseY >= cy && mouseY < cy + CELL_SIZE) {
 					int[] config = tile.getSideConfig();
-					int oldMode = Retronism_SideConfig.get(config, side, type);
+					int oldMode = Aero_SideConfig.get(config, side, type);
 					int[] allowed = tile.getAllowedModes(type);
 					int newMode = cycleAllowed(oldMode, allowed);
 					tile.setSideMode(side, type, newMode);

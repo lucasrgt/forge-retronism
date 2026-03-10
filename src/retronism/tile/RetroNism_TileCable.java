@@ -1,9 +1,9 @@
 package retronism.tile;
 
 import net.minecraft.src.*;
-import retronism.api.*;
+import aero.machineapi.*;
 
-public class Retronism_TileCable extends TileEntity implements Retronism_IEnergyReceiver, Retronism_ISideConfigurable {
+public class Retronism_TileCable extends TileEntity implements Aero_IEnergyReceiver, Aero_ISideConfigurable {
 	private int storedEnergy = 0;
 	private static final int MAX_ENERGY = 800;
 	private static final int TRANSFER_RATE = 200;
@@ -17,7 +17,7 @@ public class Retronism_TileCable extends TileEntity implements Retronism_IEnergy
 
 	{
 		for (int s = 0; s < 6; s++) {
-			Retronism_SideConfig.set(sideConfig, s, Retronism_SideConfig.TYPE_ENERGY, Retronism_SideConfig.MODE_INPUT_OUTPUT);
+			Aero_SideConfig.set(sideConfig, s, Aero_SideConfig.TYPE_ENERGY, Aero_SideConfig.MODE_INPUT_OUTPUT);
 		}
 	}
 
@@ -25,14 +25,14 @@ public class Retronism_TileCable extends TileEntity implements Retronism_IEnergy
 	public void setSideMode(int side, int type, int mode) {
 		if (!supportsType(type)) return;
 		int[] allowed = getAllowedModes(type);
-		for (int m : allowed) { if (m == mode) { Retronism_SideConfig.set(sideConfig, side, type, mode); return; } }
+		for (int m : allowed) { if (m == mode) { Aero_SideConfig.set(sideConfig, side, type, mode); return; } }
 	}
 	public boolean supportsType(int type) {
-		return type == Retronism_SideConfig.TYPE_ENERGY;
+		return type == Aero_SideConfig.TYPE_ENERGY;
 	}
 	public int[] getAllowedModes(int type) {
-		if (type == Retronism_SideConfig.TYPE_ENERGY) return new int[]{Retronism_SideConfig.MODE_NONE, Retronism_SideConfig.MODE_INPUT, Retronism_SideConfig.MODE_OUTPUT, Retronism_SideConfig.MODE_INPUT_OUTPUT};
-		return new int[]{Retronism_SideConfig.MODE_NONE};
+		if (type == Aero_SideConfig.TYPE_ENERGY) return new int[]{Aero_SideConfig.MODE_NONE, Aero_SideConfig.MODE_INPUT, Aero_SideConfig.MODE_OUTPUT, Aero_SideConfig.MODE_INPUT_OUTPUT};
+		return new int[]{Aero_SideConfig.MODE_NONE};
 	}
 
 	public int receiveEnergy(int amount) {
@@ -54,15 +54,15 @@ public class Retronism_TileCable extends TileEntity implements Retronism_IEnergy
 	}
 
 	public int getSideMode(int side) {
-		return Retronism_SideConfig.get(sideConfig, side, Retronism_SideConfig.TYPE_ENERGY);
+		return Aero_SideConfig.get(sideConfig, side, Aero_SideConfig.TYPE_ENERGY);
 	}
 
 	private boolean canSendTo(int side, TileEntity te) {
-		if (!Retronism_SideConfig.canOutput(getSideMode(side))) return false;
-		int oppSide = Retronism_SideConfig.oppositeSide(side);
-		if (te instanceof Retronism_ISideConfigurable) {
-			int neighborMode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) te).getSideConfig(), oppSide, Retronism_SideConfig.TYPE_ENERGY);
-			if (!Retronism_SideConfig.canInput(neighborMode)) return false;
+		if (!Aero_SideConfig.canOutput(getSideMode(side))) return false;
+		int oppSide = Aero_SideConfig.oppositeSide(side);
+		if (te instanceof Aero_ISideConfigurable) {
+			int neighborMode = Aero_SideConfig.get(((Aero_ISideConfigurable) te).getSideConfig(), oppSide, Aero_SideConfig.TYPE_ENERGY);
+			if (!Aero_SideConfig.canInput(neighborMode)) return false;
 		}
 		return true;
 	}
@@ -76,11 +76,11 @@ public class Retronism_TileCable extends TileEntity implements Retronism_IEnergy
 		for (int side = 0; side < 6; side++) {
 			int[] d = DIRS[side];
 			int nx = xCoord + d[0], ny = yCoord + d[1], nz = zCoord + d[2];
-			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, nx, ny, nz);
+			TileEntity te = Aero_PortRegistry.resolveHandler(worldObj, nx, ny, nz);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
-			if (te instanceof Retronism_IEnergyReceiver && !(te instanceof Retronism_TileCable)) {
-				Retronism_IEnergyReceiver recv = (Retronism_IEnergyReceiver) te;
+			if (te instanceof Aero_IEnergyReceiver && !(te instanceof Retronism_TileCable)) {
+				Aero_IEnergyReceiver recv = (Aero_IEnergyReceiver) te;
 				if (recv.getStoredEnergy() < recv.getMaxEnergy()) receivers++;
 			} else if (te instanceof Retronism_TileCable) {
 				if (((Retronism_TileCable) te).storedEnergy < this.storedEnergy) receivers++;
@@ -96,11 +96,11 @@ public class Retronism_TileCable extends TileEntity implements Retronism_IEnergy
 			if (storedEnergy <= 0) break;
 			int[] d = DIRS[side];
 			int nx = xCoord + d[0], ny = yCoord + d[1], nz = zCoord + d[2];
-			TileEntity te = Retronism_PortRegistry.resolveHandler(worldObj, nx, ny, nz);
+			TileEntity te = Aero_PortRegistry.resolveHandler(worldObj, nx, ny, nz);
 			if (te == null) continue;
 			if (!canSendTo(side, te)) continue;
-			if (te instanceof Retronism_IEnergyReceiver && !(te instanceof Retronism_TileCable)) {
-				Retronism_IEnergyReceiver recv = (Retronism_IEnergyReceiver) te;
+			if (te instanceof Aero_IEnergyReceiver && !(te instanceof Retronism_TileCable)) {
+				Aero_IEnergyReceiver recv = (Aero_IEnergyReceiver) te;
 				if (recv.getStoredEnergy() < recv.getMaxEnergy()) {
 					int toSend = Math.min(perReceiver, storedEnergy);
 					storedEnergy -= recv.receiveEnergy(toSend);

@@ -3,9 +3,9 @@ package retronism.render;
 import net.minecraft.src.*;
 import net.minecraft.client.Minecraft;
 import retronism.tile.Retronism_TileMegaCrusher;
-import retronism.aero.Aero_MeshModel;
-import retronism.aero.Aero_MeshRenderer;
-import retronism.aero.Aero_ObjLoader;
+import aero.modellib.Aero_MeshModel;
+import aero.modellib.Aero_MeshRenderer;
+import aero.modellib.Aero_ObjLoader;
 
 public class Retronism_TileEntityRenderMegaCrusher extends TileEntitySpecialRenderer {
 

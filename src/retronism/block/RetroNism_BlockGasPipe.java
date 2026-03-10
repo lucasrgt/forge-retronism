@@ -2,7 +2,7 @@ package retronism.block;
 
 import net.minecraft.src.*;
 import retronism.*;
-import retronism.api.*;
+import aero.machineapi.*;
 import retronism.tile.*;
 import retronism.gui.*;
 
@@ -52,9 +52,9 @@ public class Retronism_BlockGasPipe extends BlockContainer {
 			if (!hasMachineNeighbor(world, x, y, z)) return false;
 			if (world.multiplayerWorld) return true;
 			TileEntity te = world.getBlockTileEntity(x, y, z);
-			if (te instanceof Retronism_ISideConfigurable) {
+			if (te instanceof Aero_ISideConfigurable) {
 				ModLoader.getMinecraftInstance().displayGuiScreen(
-					new Retronism_GuiPipeConfig(player, (Retronism_ISideConfigurable) te));
+					new Retronism_GuiPipeConfig(player, (Aero_ISideConfigurable) te));
 			}
 			return true;
 		}
@@ -73,8 +73,8 @@ public class Retronism_BlockGasPipe extends BlockContainer {
 		int id = world.getBlockId(x, y, z);
 		if (id == this.blockID || id == Retronism_Registry.megaPipeBlock.blockID) return true;
 		TileEntity te = world.getBlockTileEntity(x, y, z);
-		if (te instanceof Retronism_IGasHandler) return true;
-		return Retronism_PortRegistry.isPortOfType(x, y, z, Retronism_PortRegistry.PORT_TYPE_GAS);
+		if (te instanceof Aero_IGasHandler) return true;
+		return Aero_PortRegistry.isPortOfType(x, y, z, Aero_PortRegistry.PORT_TYPE_GAS);
 	}
 
 	public boolean isNeighborMachine(IBlockAccess world, int nx, int ny, int nz) {
@@ -87,15 +87,15 @@ public class Retronism_BlockGasPipe extends BlockContainer {
 		int nx = myX + DIRS[side][0], ny = myY + DIRS[side][1], nz = myZ + DIRS[side][2];
 		if (!canConnectTo(world, nx, ny, nz)) return false;
 		TileEntity myTe = world.getBlockTileEntity(myX, myY, myZ);
-		if (myTe instanceof Retronism_ISideConfigurable) {
-			int mode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) myTe).getSideConfig(), side, Retronism_SideConfig.TYPE_GAS);
-			if (mode == Retronism_SideConfig.MODE_NONE) return false;
+		if (myTe instanceof Aero_ISideConfigurable) {
+			int mode = Aero_SideConfig.get(((Aero_ISideConfigurable) myTe).getSideConfig(), side, Aero_SideConfig.TYPE_GAS);
+			if (mode == Aero_SideConfig.MODE_NONE) return false;
 		}
 		TileEntity nTe = world.getBlockTileEntity(nx, ny, nz);
-		if (nTe instanceof Retronism_ISideConfigurable) {
-			int opp = Retronism_SideConfig.oppositeSide(side);
-			int mode = Retronism_SideConfig.get(((Retronism_ISideConfigurable) nTe).getSideConfig(), opp, Retronism_SideConfig.TYPE_GAS);
-			if (mode == Retronism_SideConfig.MODE_NONE) return false;
+		if (nTe instanceof Aero_ISideConfigurable) {
+			int opp = Aero_SideConfig.oppositeSide(side);
+			int mode = Aero_SideConfig.get(((Aero_ISideConfigurable) nTe).getSideConfig(), opp, Aero_SideConfig.TYPE_GAS);
+			if (mode == Aero_SideConfig.MODE_NONE) return false;
 		}
 		return true;
 	}
