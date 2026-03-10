@@ -9,7 +9,7 @@ public class AnimClipTest {
 	private static final float DELTA = 0.01f;
 
 	// Shared single-bone clip: fan rotates 0→360 Y, moves 0→2 Y over 1 second
-	private Aero_AnimClip fanClip;
+	private Aero_AnimationClip fanClip;
 
 	@Before
 	public void setUp() {
@@ -19,7 +19,7 @@ public class AnimClipTest {
 		float[][][] rotValues = { { {0f, 0f, 0f}, {0f, 360f, 0f} } };
 		float[][] posTimes = { {0f, 1f} };
 		float[][][] posValues = { { {0f, 0f, 0f}, {0f, 2f, 0f} } };
-		fanClip = new Aero_AnimClip("spin", true, 1.0f, bones, rotTimes, rotValues, posTimes, posValues);
+		fanClip = new Aero_AnimationClip("spin", true, 1.0f, bones, rotTimes, rotValues, posTimes, posValues);
 	}
 
 	// --- Field tests ---
@@ -187,7 +187,7 @@ public class AnimClipTest {
 		};
 		float[][] posTimes = { {0f}, {0f} };
 		float[][][] posValues = { { {0f, 0f, 0f} }, { {0f, 0f, 0f} } };
-		Aero_AnimClip clip = new Aero_AnimClip("walk", false, 1.0f, bones, rotTimes, rotValues, posTimes, posValues);
+		Aero_AnimationClip clip = new Aero_AnimationClip("walk", false, 1.0f, bones, rotTimes, rotValues, posTimes, posValues);
 
 		// Act
 		int armIdx = clip.indexOfBone("arm");
@@ -218,7 +218,7 @@ public class AnimClipTest {
 		float[][][] rotValues = { { {10f, 20f, 30f} } };
 		float[][] posTimes = { {0f} };
 		float[][][] posValues = { { {1f, 2f, 3f} } };
-		Aero_AnimClip clip = new Aero_AnimClip("idle", false, 1.0f, bones, rotTimes, rotValues, posTimes, posValues);
+		Aero_AnimationClip clip = new Aero_AnimationClip("idle", false, 1.0f, bones, rotTimes, rotValues, posTimes, posValues);
 
 		// Act: sample at various times — all should return the single keyframe
 		float[] rotBefore = clip.sampleRot(0, -1f);
@@ -258,7 +258,7 @@ public class AnimClipTest {
 		String[] bones = {"bone"};
 		float[][] rt = { {0f} };
 		float[][][] rv = { { {0f, 0f, 0f} } };
-		Aero_AnimClip clip = new Aero_AnimClip("once", false, 2.0f, bones, rt, rv, rt, rv);
+		Aero_AnimationClip clip = new Aero_AnimationClip("once", false, 2.0f, bones, rt, rv, rt, rv);
 
 		// Assert
 		assertEquals("once", clip.name);

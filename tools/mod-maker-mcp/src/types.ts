@@ -86,9 +86,53 @@ export interface MultiblockState {
   defaultShellBlock: string;
   guiComponents: GuiComponent[];
   model: BlockModel | null;
+  animConfig: AnimationConfig;
 }
 
 // Note: casingId is deprecated — use defaultShellBlock instead
+
+// -------------------------------------------------------------------------
+// Animation / Model types
+// -------------------------------------------------------------------------
+
+/** A single animation state mapping: stateId → clipName */
+export interface AnimStateMapping {
+  stateId: number;
+  label: string;       // human-readable label (e.g. "idle", "processing", "done")
+  clipName: string;    // clip name in the .anim.json
+}
+
+/** Full animation config for a machine model */
+export interface AnimationConfig {
+  /** Path to the imported .obj file (absolute) */
+  objPath: string | null;
+  /** Raw OBJ text content (for Three.js viewer) */
+  objContent: string | null;
+  /** Path to the imported .bbmodel file */
+  bbmodelPath: string | null;
+  /** Generated .anim.json data */
+  animJson: any | null;
+  /** Available clip names (extracted from .bbmodel) */
+  clipNames: string[];
+  /** Bone names found in the model */
+  boneNames: string[];
+  /** State → clip mappings configured by user */
+  stateMappings: AnimStateMapping[];
+}
+
+export function createDefaultAnimConfig(): AnimationConfig {
+  return {
+    objPath: null,
+    objContent: null,
+    bbmodelPath: null,
+    animJson: null,
+    clipNames: [],
+    boneNames: [],
+    stateMappings: [],
+  };
+}
+
+// -------------------------------------------------------------------------
 
 export interface GeneratedFile {
   name: string;

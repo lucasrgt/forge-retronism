@@ -3,7 +3,9 @@ import {
   PortMode, GuiComponent, GuiComponentType, SlotType, IoMode,
   GUI_COMP_DEFS, SerializedMultiblock, StructureLayer,
   blockRegistry, BlockDef, BlockModel, ModelElement,
+  AnimationConfig, AnimStateMapping, createDefaultAnimConfig,
 } from './types.js';
+import { parseBbmodel, toAeroAnimJson } from './bbmodel-parser.js';
 
 const GUI_W = 176;
 const GUI_H = 166;
@@ -22,6 +24,7 @@ export function createDefaultState(): MultiblockState {
     defaultShellBlock: 'iron_block',
     guiComponents: [],
     model: null,
+    animConfig: createDefaultAnimConfig(),
   };
 }
 
@@ -844,6 +847,60 @@ export function getModel(): BlockModel | null {
 
 export function clearModel(): void {
   state.model = null;
+  notifyChange();
+}
+
+// =========================================================================
+// ANIMATION
+// =========================================================================
+
+export function getAnimConfig(): AnimationConfig {
+  return state.animConfig;
+}
+
+export function importObj(filePath: string, content: string): void {
+  state.animConfig.objPath = filePath;
+  state.animConfig.objContent = content;
+  notifyChange();
+}
+
+export function importBbmodelAnim(filePath: string, content: string): { clipNames: string[]; boneNames: string[] } {
+  const bbmodel = JSON.parse(content);
+  const result = parseBbmodel(bbmodel);
+  const animJson = toAeroAnimJson(result);
+
+  state.animConfig.bbmodelPath = filePath;
+  state.animConfig.animJson = animJson;
+  state.animConfig.clipNames = result.clips.map(c => c.name);
+  state.animConfig.boneNames = result.boneNames;
+  notifyChange();
+
+  return { clipNames: state.animConfig.clipNames, boneNames: result.boneNames };
+}
+
+export function setAnimStateMapping(stateId: number, label: string, clipName: string): void {
+  const existing = state.animConfig.stateMappings.find(m => m.stateId === stateId);
+  if (existing) {
+    existing.label = label;
+    existing.clipName = clipName;
+  } else {
+    state.animConfig.stateMappings.push({ stateId, label, clipName });
+  }
+  // Keep sorted by stateId
+  state.animConfig.stateMappings.sort((a, b) => a.stateId - b.stateId);
+  notifyChange();
+}
+
+export function removeAnimStateMapping(stateId: number): boolean {
+  const idx = state.animConfig.stateMappings.findIndex(m => m.stateId === stateId);
+  if (idx === -1) return false;
+  state.animConfig.stateMappings.splice(idx, 1);
+  notifyChange();
+  return true;
+}
+
+export function clearAnimConfig(): void {
+  state.animConfig = createDefaultAnimConfig();
   notifyChange();
 }
 

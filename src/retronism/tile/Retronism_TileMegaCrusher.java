@@ -4,8 +4,8 @@ import net.minecraft.src.*;
 import retronism.*;
 import aero.machineapi.*;
 import retronism.recipe.*;
-import aero.modellib.Aero_AnimBundle;
-import aero.modellib.Aero_AnimationDef;
+import aero.modellib.Aero_AnimationBundle;
+import aero.modellib.Aero_AnimationDefinition;
 import aero.modellib.Aero_AnimationLoader;
 import aero.modellib.Aero_AnimationState;
 
@@ -28,8 +28,8 @@ public class Retronism_TileMegaCrusher extends TileEntity implements IInventory,
 	public static final int STATE_OFF = 0;
 	public static final int STATE_ON  = 1;
 
-	public static final Aero_AnimBundle   BUNDLE   = Aero_AnimationLoader.load("/models/MegaCrusher.anim.json");
-	public static final Aero_AnimationDef ANIM_DEF = new Aero_AnimationDef()
+	public static final Aero_AnimationBundle   BUNDLE   = Aero_AnimationLoader.load("/models/MegaCrusher.anim.json");
+	public static final Aero_AnimationDefinition ANIM_DEF = new Aero_AnimationDefinition()
 		.state(STATE_OFF, "idle")
 		.state(STATE_ON,  "working");
 

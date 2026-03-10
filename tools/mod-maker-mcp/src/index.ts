@@ -21,6 +21,7 @@ import {
   setPortType, setController,
   applyTemplate,
   importBlockbenchModel, getModel, clearModel,
+  importObj, importBbmodelAnim, setAnimStateMapping, removeAnimStateMapping, clearAnimConfig, getAnimConfig,
   setOnChangeListener,
 } from './state.js';
 import { generateAllFiles } from './codegen.js';
@@ -122,7 +123,7 @@ const server = new McpServer({
 // Read-only tools that don't require the Electron app to be open
 const READ_ONLY_TOOLS = new Set([
   'get_state', 'get_block_at', 'list_blocks_by_type', 'list_block_registry',
-  'list_projects', 'export_json', 'export_model_context',
+  'list_projects', 'export_json', 'export_model_context', 'get_anim_config',
 ]);
 
 // Wrap server.tool to auto-inject Electron connection guard on mutating tools
@@ -979,6 +980,164 @@ server.tool(
   async () => {
     clearModel();
     return { content: [{ type: 'text', text: 'Model cleared.' }] };
+  },
+);
+
+// ===========================================================================
+// ANIMATION / MODEL 3D
+// ===========================================================================
+
+// Tool: import_obj
+server.tool(
+  'import_obj',
+  'Import an OBJ model file for 3D visualization in the Model tab. The OBJ should be exported from Blockbench.',
+  {
+    filePath: z.string().describe('Absolute path to the .obj file exported from Blockbench'),
+  },
+  async (args) => {
+    try {
+      const content = fs.readFileSync(args.filePath, 'utf-8');
+      // Count vertices and faces for summary
+      const verts = (content.match(/^v /gm) || []).length;
+      const faces = (content.match(/^f /gm) || []).length;
+      const groups = (content.match(/^[og] /gm) || []).length;
+      importObj(args.filePath, content);
+      return { content: [{ type: 'text', text: `Imported OBJ: ${path.basename(args.filePath)}\nVertices: ${verts}, Faces: ${faces}, Groups: ${groups}\n\nThe model is now available in the Model tab for preview.` }] };
+    } catch (err: any) {
+      return { content: [{ type: 'text', text: `Error reading OBJ: ${err.message}` }] };
+    }
+  },
+);
+
+// Tool: import_bbmodel_anim
+server.tool(
+  'import_bbmodel_anim',
+  'Import animations from a Blockbench .bbmodel file. Extracts bone hierarchy, pivots, and animation clips, then generates a .anim.json compatible with AeroModelLib.',
+  {
+    filePath: z.string().describe('Absolute path to the .bbmodel file'),
+  },
+  async (args) => {
+    try {
+      const content = fs.readFileSync(args.filePath, 'utf-8');
+      const result = importBbmodelAnim(args.filePath, content);
+      const config = getAnimConfig();
+
+      let summary = `Imported animations from: ${path.basename(args.filePath)}\n`;
+      summary += `Bones found: ${result.boneNames.join(', ') || 'none'}\n`;
+      summary += `Clips found: ${result.clipNames.join(', ') || 'none'}\n`;
+
+      if (config.animJson?.animations) {
+        for (const [clipName, clip] of Object.entries(config.animJson.animations as Record<string, any>)) {
+          const boneCount = Object.keys(clip.bones || {}).length;
+          summary += `  - "${clipName}": ${clip.length}s, loop=${clip.loop}, ${boneCount} bones\n`;
+        }
+      }
+
+      summary += `\nUse set_anim_state to map machine states (idle, processing, etc.) to animation clips.`;
+      return { content: [{ type: 'text', text: summary }] };
+    } catch (err: any) {
+      return { content: [{ type: 'text', text: `Error parsing .bbmodel: ${err.message}` }] };
+    }
+  },
+);
+
+// Tool: set_anim_state
+server.tool(
+  'set_anim_state',
+  'Map a machine state ID to an animation clip. States define which animation plays for each machine state (e.g., 0=idle, 1=processing, 2=done).',
+  {
+    stateId: z.number().int().min(0).describe('State ID (0=off/idle by convention)'),
+    label: z.string().describe('Human-readable label (e.g. "idle", "processing", "done")'),
+    clipName: z.string().describe('Animation clip name from the imported .bbmodel'),
+  },
+  async (args) => {
+    const config = getAnimConfig();
+    if (config.clipNames.length === 0) {
+      return { content: [{ type: 'text', text: 'No animations imported yet. Use import_bbmodel_anim first.' }] };
+    }
+    if (!config.clipNames.includes(args.clipName)) {
+      return { content: [{ type: 'text', text: `Clip "${args.clipName}" not found. Available clips: ${config.clipNames.join(', ')}` }] };
+    }
+    setAnimStateMapping(args.stateId, args.label, args.clipName);
+    const mappings = getAnimConfig().stateMappings;
+    const summary = mappings.map(m => `  STATE_${m.label.toUpperCase()} (${m.stateId}) → "${m.clipName}"`).join('\n');
+    return { content: [{ type: 'text', text: `State mapping updated:\n${summary}` }] };
+  },
+);
+
+// Tool: remove_anim_state
+server.tool(
+  'remove_anim_state',
+  'Remove an animation state mapping by state ID.',
+  {
+    stateId: z.number().int().min(0).describe('State ID to remove'),
+  },
+  async (args) => {
+    const removed = removeAnimStateMapping(args.stateId);
+    if (!removed) {
+      return { content: [{ type: 'text', text: `No mapping found for stateId ${args.stateId}.` }] };
+    }
+    return { content: [{ type: 'text', text: `Removed state mapping for stateId ${args.stateId}.` }] };
+  },
+);
+
+// Tool: clear_anim
+server.tool(
+  'clear_anim',
+  'Clear all animation data (OBJ, .bbmodel, clips, state mappings).',
+  {},
+  async () => {
+    clearAnimConfig();
+    return { content: [{ type: 'text', text: 'Animation config cleared.' }] };
+  },
+);
+
+// Tool: get_anim_config
+server.tool(
+  'get_anim_config',
+  'Get the current animation configuration: imported files, available clips, and state mappings.',
+  {},
+  async () => {
+    const config = getAnimConfig();
+    const lines: string[] = [];
+    lines.push(`OBJ: ${config.objPath ? path.basename(config.objPath) : 'not imported'}`);
+    lines.push(`BBModel: ${config.bbmodelPath ? path.basename(config.bbmodelPath) : 'not imported'}`);
+    lines.push(`Bones: ${config.boneNames.join(', ') || 'none'}`);
+    lines.push(`Clips: ${config.clipNames.join(', ') || 'none'}`);
+    if (config.stateMappings.length > 0) {
+      lines.push(`State mappings:`);
+      for (const m of config.stateMappings) {
+        lines.push(`  STATE_${m.label.toUpperCase()} (${m.stateId}) → "${m.clipName}"`);
+      }
+    } else {
+      lines.push(`State mappings: none`);
+    }
+    return { content: [{ type: 'text', text: lines.join('\n') }] };
+  },
+);
+
+// Tool: export_anim_json
+server.tool(
+  'export_anim_json',
+  'Export the parsed animation data as a .anim.json file compatible with AeroModelLib.',
+  {
+    outputPath: z.string().optional().describe('Output path (default: src/retronism/assets/models/{name}.anim.json)'),
+  },
+  async (args) => {
+    const config = getAnimConfig();
+    if (!config.animJson) {
+      return { content: [{ type: 'text', text: 'No animation data. Import a .bbmodel first with import_bbmodel_anim.' }] };
+    }
+    const name = getState().name.toLowerCase().replace(/\s+/g, '_');
+    const outputPath = args.outputPath || path.resolve(import.meta.dirname, '..', '..', '..', 'src', 'retronism', 'assets', 'models', `${name}.anim.json`);
+    try {
+      const dir = path.dirname(outputPath);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(outputPath, JSON.stringify(config.animJson, null, 2), 'utf-8');
+      return { content: [{ type: 'text', text: `Exported .anim.json to: ${outputPath}` }] };
+    } catch (err: any) {
+      return { content: [{ type: 'text', text: `Error writing file: ${err.message}` }] };
+    }
   },
 );
 

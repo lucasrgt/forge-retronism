@@ -45,6 +45,23 @@ export interface HighlightCommand {
 
 export type ProjectType = 'single' | 'multiblock'
 
+// Animation types (matches MCP server)
+export interface AnimStateMapping {
+  stateId: number
+  label: string
+  clipName: string
+}
+
+export interface AnimationConfig {
+  objPath: string | null
+  objContent: string | null
+  bbmodelPath: string | null
+  animJson: any | null
+  clipNames: string[]
+  boneNames: string[]
+  stateMappings: AnimStateMapping[]
+}
+
 interface MultiblockStore {
   // Project type
   projectType: ProjectType
@@ -72,8 +89,11 @@ interface MultiblockStore {
   snapEnabled: boolean
   gridSize: number
 
+  // Animation
+  animConfig: AnimationConfig
+
   // UI
-  activeTab: 'structure' | 'gui'
+  activeTab: 'structure' | 'gui' | 'model'
   showBuildGuide: boolean
   mcpConnected: boolean
 
@@ -119,8 +139,11 @@ interface MultiblockStore {
   setSnapEnabled: (v: boolean) => void
   setGridSize: (v: number) => void
 
+  // Actions: animation
+  setAnimConfig: (config: AnimationConfig) => void
+
   // Actions: UI
-  setActiveTab: (tab: 'structure' | 'gui') => void
+  setActiveTab: (tab: 'structure' | 'gui' | 'model') => void
   setShowBuildGuide: (v: boolean) => void
   setMcpConnected: (v: boolean) => void
 
@@ -167,6 +190,10 @@ export const useStore = create<MultiblockStore>((set, get) => ({
   selectedCompIndex: -1,
   snapEnabled: true,
   gridSize: 9,
+  animConfig: {
+    objPath: null, objContent: null, bbmodelPath: null,
+    animJson: null, clipNames: [], boneNames: [], stateMappings: [],
+  },
   activeTab: 'structure',
   registryVersion: 0,
   pendingCamera: null,
@@ -320,6 +347,9 @@ export const useStore = create<MultiblockStore>((set, get) => ({
   setSelectedComp: (selectedCompIndex) => set({ selectedCompIndex }),
   setSnapEnabled: (snapEnabled) => set({ snapEnabled }),
   setGridSize: (gridSize) => set({ gridSize }),
+
+  // Animation
+  setAnimConfig: (animConfig) => set({ animConfig }),
 
   // UI
   setActiveTab: (activeTab) => set({ activeTab }),
@@ -543,5 +573,9 @@ export const useStore = create<MultiblockStore>((set, get) => ({
     selectedCompIndex: -1,
     selectedTool: 'iron_block',
     layerFilter: -1,
+    animConfig: {
+      objPath: null, objContent: null, bbmodelPath: null,
+      animJson: null, clipNames: [], boneNames: [], stateMappings: [],
+    },
   }),
 }))

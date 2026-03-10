@@ -5,16 +5,16 @@ import org.junit.Before;
 import static org.junit.Assert.*;
 
 /**
- * Tests for Aero_AnimationDef, Aero_AnimationState, and Aero_AnimBundle.
+ * Tests for Aero_AnimationDefinition, Aero_AnimationState, and Aero_AnimationBundle.
  * 25+ tests using the AAA pattern (Arrange, Act, Assert).
  */
 public class AnimationDefStateTest {
 
     // Shared test data
-    private Aero_AnimClip idleClip;
-    private Aero_AnimClip spinClip;
-    private Aero_AnimClip shortClip;
-    private Aero_AnimBundle bundle;
+    private Aero_AnimationClip idleClip;
+    private Aero_AnimationClip spinClip;
+    private Aero_AnimationClip shortClip;
+    private Aero_AnimationBundle bundle;
 
     private static final float TICK = 1f / 20f; // 0.05 seconds
     private static final float EPSILON = 0.0001f;
@@ -27,7 +27,7 @@ public class AnimationDefStateTest {
         float[][][] idleRotValues = { { {0f, 0f, 0f}, {0f, 0f, 0f} } };
         float[][] idlePosTimes = { {0f} };
         float[][][] idlePosValues = { { {0f, 0f, 0f} } };
-        idleClip = new Aero_AnimClip("idle", true, 2.0f,
+        idleClip = new Aero_AnimationClip("idle", true, 2.0f,
                 idleBones, idleRotTimes, idleRotValues, idlePosTimes, idlePosValues);
 
         // Spin clip: 1 second, looping, fan bone rotates 360 degrees
@@ -36,7 +36,7 @@ public class AnimationDefStateTest {
         float[][][] spinRotValues = { { {0f, 0f, 0f}, {0f, 360f, 0f} } };
         float[][] spinPosTimes = { {0f} };
         float[][][] spinPosValues = { { {0f, 0f, 0f} } };
-        spinClip = new Aero_AnimClip("spinning", true, 1.0f,
+        spinClip = new Aero_AnimationClip("spinning", true, 1.0f,
                 spinBones, spinRotTimes, spinRotValues, spinPosTimes, spinPosValues);
 
         // Short clip: 0.1 second (2 ticks), non-looping
@@ -45,7 +45,7 @@ public class AnimationDefStateTest {
         float[][][] shortRotValues = { { {0f, 0f, 0f}, {90f, 0f, 0f} } };
         float[][] shortPosTimes = { {0f} };
         float[][][] shortPosValues = { { {0f, 0f, 0f} } };
-        shortClip = new Aero_AnimClip("short", false, 0.1f,
+        shortClip = new Aero_AnimationClip("short", false, 0.1f,
                 shortBones, shortRotTimes, shortRotValues, shortPosTimes, shortPosValues);
 
         // Bundle with all clips
@@ -60,7 +60,7 @@ public class AnimationDefStateTest {
 
         java.util.HashMap childMap = new java.util.HashMap();
 
-        bundle = new Aero_AnimBundle(clips, pivots, childMap);
+        bundle = new Aero_AnimationBundle(clips, pivots, childMap);
     }
 
     // =======================================================================
@@ -70,10 +70,10 @@ public class AnimationDefStateTest {
     @Test
     public void testDefBuilderPatternReturnsThis() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef();
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition();
 
         // Act
-        Aero_AnimationDef returned = def.state(0, "idle");
+        Aero_AnimationDefinition returned = def.state(0, "idle");
 
         // Assert — builder returns the same instance
         assertSame(def, returned);
@@ -82,7 +82,7 @@ public class AnimationDefStateTest {
     @Test
     public void testDefBuilderChainMultiple() {
         // Arrange & Act — chain three calls
-        Aero_AnimationDef def = new Aero_AnimationDef()
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition()
                 .state(0, "idle")
                 .state(1, "spinning")
                 .state(2, "short");
@@ -96,7 +96,7 @@ public class AnimationDefStateTest {
     @Test
     public void testDefGetClipNameReturnsCorrectName() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
 
         // Act
         String name = def.getClipName(0);
@@ -108,7 +108,7 @@ public class AnimationDefStateTest {
     @Test
     public void testDefGetClipNameReturnsNullForUndefined() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
 
         // Act
         String name = def.getClipName(5);
@@ -120,7 +120,7 @@ public class AnimationDefStateTest {
     @Test
     public void testDefGetClipNameNegativeReturnsNull() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
 
         // Act
         String name = def.getClipName(-1);
@@ -132,7 +132,7 @@ public class AnimationDefStateTest {
     @Test
     public void testDefMultipleStatesRegistered() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef()
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition()
                 .state(0, "idle")
                 .state(1, "spinning")
                 .state(5, "short"); // sparse: skip IDs 2-4
@@ -149,7 +149,7 @@ public class AnimationDefStateTest {
     @Test
     public void testDefCreateStateReturnsNonNull() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
 
         // Act
         Aero_AnimationState state = def.createState(bundle);
@@ -161,7 +161,7 @@ public class AnimationDefStateTest {
     @Test
     public void testDefCreateStateLinksDefAndBundle() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
 
         // Act
         Aero_AnimationState state = def.createState(bundle);
@@ -178,7 +178,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateInitialStateIsZero() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
 
         // Act
         Aero_AnimationState state = def.createState(bundle);
@@ -190,7 +190,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateTickAdvancesTime() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
         Aero_AnimationState state = def.createState(bundle);
 
         // Act — one tick = 1/20 second
@@ -203,7 +203,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateMultipleTicksAccumulateTime() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
         Aero_AnimationState state = def.createState(bundle);
 
         // Act — 10 ticks = 0.5 seconds
@@ -218,7 +218,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateSetStateToDifferentClipResetsTime() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef()
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition()
                 .state(0, "idle")
                 .state(1, "spinning");
         Aero_AnimationState state = def.createState(bundle);
@@ -239,7 +239,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateSetStateToSameStateIsNoOp() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
         Aero_AnimationState state = def.createState(bundle);
 
         // Advance 5 ticks
@@ -258,7 +258,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateSetStateSameClipNamePreservesTime() {
         // Arrange — two states mapped to the same clip name
-        Aero_AnimationDef def = new Aero_AnimationDef()
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition()
                 .state(0, "idle")
                 .state(1, "idle"); // same clip as state 0
         Aero_AnimationState state = def.createState(bundle);
@@ -280,13 +280,13 @@ public class AnimationDefStateTest {
     @Test
     public void testStateGetCurrentClipReturnsCorrectClip() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef()
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition()
                 .state(0, "idle")
                 .state(1, "spinning");
         Aero_AnimationState state = def.createState(bundle);
 
         // Act
-        Aero_AnimClip clip = state.getCurrentClip();
+        Aero_AnimationClip clip = state.getCurrentClip();
 
         // Assert — state 0 maps to "idle" clip
         assertNotNull(clip);
@@ -296,14 +296,14 @@ public class AnimationDefStateTest {
     @Test
     public void testStateGetCurrentClipAfterStateChange() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef()
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition()
                 .state(0, "idle")
                 .state(1, "spinning");
         Aero_AnimationState state = def.createState(bundle);
 
         // Act
         state.setState(1);
-        Aero_AnimClip clip = state.getCurrentClip();
+        Aero_AnimationClip clip = state.getCurrentClip();
 
         // Assert
         assertNotNull(clip);
@@ -313,12 +313,12 @@ public class AnimationDefStateTest {
     @Test
     public void testStateGetCurrentClipReturnsNullForUndefinedState() {
         // Arrange — state 2 is not defined
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
         Aero_AnimationState state = def.createState(bundle);
 
         // Act — force currentState to undefined (bypass setState check)
         state.currentState = 99;
-        Aero_AnimClip clip = state.getCurrentClip();
+        Aero_AnimationClip clip = state.getCurrentClip();
 
         // Assert
         assertNull(clip);
@@ -327,7 +327,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateInterpolatedTimeAtZeroReturnsPrevTime() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
         Aero_AnimationState state = def.createState(bundle);
 
         // Tick twice so prevTime = TICK, currentTime = 2*TICK
@@ -344,7 +344,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateInterpolatedTimeAtOneReturnsCurrentTime() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
         Aero_AnimationState state = def.createState(bundle);
 
         state.tick();
@@ -360,7 +360,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateInterpolatedTimeAtHalfReturnsMidpoint() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
         Aero_AnimationState state = def.createState(bundle);
 
         state.tick();
@@ -376,7 +376,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateLoopWrapsAtClipLength() {
         // Arrange — spinning clip is 1.0 second long, looping
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "spinning");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "spinning");
         Aero_AnimationState state = def.createState(bundle);
 
         // Act — tick 21 times = 1.05 seconds, should wrap past 1.0
@@ -393,7 +393,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateNonLoopClampsAtClipLength() {
         // Arrange — short clip is 0.1 second (2 ticks), non-looping
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "short");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "short");
         Aero_AnimationState state = def.createState(bundle);
 
         // Act — tick 10 times (0.5 seconds), well past the 0.1s clip
@@ -409,7 +409,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateNbtRoundTrip() {
         // Arrange
-        Aero_AnimationDef def = new Aero_AnimationDef()
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition()
                 .state(0, "idle")
                 .state(1, "spinning");
         Aero_AnimationState state = def.createState(bundle);
@@ -439,7 +439,7 @@ public class AnimationDefStateTest {
     public void testStateNbtReadRestoresPrevTimeEqualsTime() {
         // Arrange — after readFromNBT, prevTime should equal playbackTime
         // so there is no jump on the first rendered frame
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
         Aero_AnimationState state = def.createState(bundle);
 
         // Tick a few times and save
@@ -463,7 +463,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateNbtAbsentKeysDefaultToZero() {
         // Arrange — empty NBT (simulates old save without animation data)
-        Aero_AnimationDef def = new Aero_AnimationDef().state(0, "idle");
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition().state(0, "idle");
         Aero_AnimationState state = def.createState(bundle);
 
         // Tick a few times first
@@ -483,7 +483,7 @@ public class AnimationDefStateTest {
     @Test
     public void testStateTickWithNoClipKeepsTimeAtZero() {
         // Arrange — state 0 has no clip defined
-        Aero_AnimationDef def = new Aero_AnimationDef(); // no states registered
+        Aero_AnimationDefinition def = new Aero_AnimationDefinition(); // no states registered
         Aero_AnimationState state = def.createState(bundle);
 
         // Act
@@ -503,7 +503,7 @@ public class AnimationDefStateTest {
         // Arrange — bundle set up in setUp()
 
         // Act
-        Aero_AnimClip clip = bundle.getClip("idle");
+        Aero_AnimationClip clip = bundle.getClip("idle");
 
         // Assert
         assertNotNull(clip);
@@ -515,7 +515,7 @@ public class AnimationDefStateTest {
         // Arrange — bundle set up in setUp()
 
         // Act
-        Aero_AnimClip clip = bundle.getClip("nonexistent");
+        Aero_AnimationClip clip = bundle.getClip("nonexistent");
 
         // Assert
         assertNull(clip);
@@ -526,7 +526,7 @@ public class AnimationDefStateTest {
         // Arrange — bundle set up in setUp()
 
         // Act
-        Aero_AnimClip clip = bundle.getClip(null);
+        Aero_AnimationClip clip = bundle.getClip(null);
 
         // Assert
         assertNull(clip);

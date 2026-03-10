@@ -3,13 +3,13 @@ package retronism.render;
 import net.minecraft.src.*;
 import retronism.Retronism_Registry;
 import retronism.tile.Retronism_TileMegaCrusher;
-import aero.modellib.Aero_Model;
-import aero.modellib.Aero_ModelLoader;
-import aero.modellib.Aero_ModelRenderer;
+import aero.modellib.Aero_JsonModel;
+import aero.modellib.Aero_JsonModelLoader;
+import aero.modellib.Aero_JsonModelRenderer;
 
 public class Retronism_RenderMegaCrusher implements Retronism_IBlockRenderer {
 
-    public static final Aero_Model MODEL = Aero_ModelLoader.load("/models/MegaCrusher.aero.json");
+    public static final Aero_JsonModel MODEL = Aero_JsonModelLoader.load("/models/MegaCrusher.aero.json");
 
     public boolean renderWorld(RenderBlocks renderer, IBlockAccess world, int x, int y, int z, Block block) {
         if (block == Retronism_Registry.megaCrusherCoreBlock) {
@@ -63,6 +63,6 @@ public class Retronism_RenderMegaCrusher implements Retronism_IBlockRenderer {
         int texID = ModLoader.getMinecraftInstance().renderEngine.getTexture("/block/retronism_megacrusher_hq.png");
         ModLoader.getMinecraftInstance().renderEngine.bindTexture(texID);
         
-        Aero_ModelRenderer.renderInventory(renderer, MODEL, metadata);
+        Aero_JsonModelRenderer.renderInventory(renderer, MODEL, metadata);
     }
 }

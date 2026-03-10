@@ -5,11 +5,13 @@ import { LeftPanel } from '@/components/left-panel'
 import { RightPanel } from '@/components/right-panel'
 import { StructureEditor } from '@/components/structure-editor'
 import { GuiBuilder } from '@/components/gui-builder'
+import { ModelEditor } from '@/components/model-editor'
 import { Tabs } from '@/components/ui/tabs'
 import { useStore, type SerializedMultiblock } from '@/hooks/use-store'
 
 const MULTIBLOCK_TABS = [
   { id: 'structure', label: '3D Structure' },
+  { id: 'model', label: 'Model' },
   { id: 'gui', label: 'GUI Builder' },
 ]
 const SINGLE_TABS = [
@@ -108,6 +110,7 @@ export default function App() {
           )}
           <div className="flex-1 flex flex-col overflow-hidden">
             {isMultiblock && activeTab === 'structure' && <StructureEditor />}
+            {isMultiblock && activeTab === 'model' && <ModelEditor />}
             {(!isMultiblock || activeTab === 'gui') && <GuiBuilder />}
           </div>
           <div className="flex items-center justify-between px-3 py-1.5 border-t border-border text-xs text-muted-foreground">

@@ -1,3 +1,6 @@
 [submodule "libraries/aero/modellib"]
 	path = libraries/aero/modellib
 	url = https://github.com/lucasrgt/aero-model-lib.git
+[submodule "libraries/aero/machineapi"]
+	path = libraries/aero/machineapi
+	url = https://github.com/lucasrgt/aero-machine-api.git
