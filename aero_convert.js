@@ -2,64 +2,126 @@ const fs = require('fs');
 const path = require('path');
 
 const inputPath = process.argv[2];
-const className = process.argv[3];
 
-if (!inputPath || !className) {
-    console.log("Uso: node aero_convert.js <arquivo.json> <NomeDaClasse>");
+if (!inputPath) {
+    console.log("Uso: node aero_convert.js <seu_modelo.bbmodel>");
     process.exit(1);
 }
 
-const data = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
-const elements = Array.isArray(data) ? data : (data.elements || []);
-const textureWidth = (data.textures && data.textures[0] && data.textures[0].width) || (data.resolution ? data.resolution.width : 128);
+const modelName = path.basename(inputPath, path.extname(inputPath));
+const bbData = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
 
-// Tweak Settings
-const tweaks = {
-    'pillar': { inflate: 0.005 },
-    'rail': { inflate: 0.002 },
-    'bracket': { inflate: 0.01, dy: -0.01 },
-    'base_platform': { dy: -0.01 }
+// 1. Extrair Pivots e Animações
+const animBundle = {
+    format_version: "1.0",
+    pivots: {},
+    animations: {}
 };
 
-let javaOutput = `package retronism.render;\n\nimport retronism.aero.Aero_Model;\n\n`;
-javaOutput += `public class ${className} {\n\n`;
-javaOutput += `    public static final Aero_Model MODEL = new Aero_Model("${className}", new float[][] {\n`;
-
-elements.forEach(el => {
-    let { from, to, faces, name } = el;
-    let inf = 0;
-    let dy = 0;
-    
-    // Auto-tweak by name
-    for (const key in tweaks) {
-        if (name.includes(key)) {
-            if (tweaks[key].inflate) inf = tweaks[key].inflate;
-            if (tweaks[key].dy) dy = tweaks[key].dy;
+// Recursivamente encontra todos os grupos e seus pivots
+function processOutliner(items) {
+    if (!items) return;
+    items.forEach(item => {
+        // Formato Generic (item.type === 'group')
+        if (item.type === 'group') {
+            if (item.name && item.origin) {
+                animBundle.pivots[item.name] = [item.origin[0], item.origin[1], item.origin[2]];
+            }
+            if (item.children) processOutliner(item.children);
+        } 
+        // Formato Bedrock (item é um UUID referenciando o array groups)
+        else if (typeof item === 'string' && bbData.groups) {
+            const group = bbData.groups.find(g => g.uuid === item);
+            if (group) {
+                animBundle.pivots[group.name] = [group.origin[0], group.origin[1], group.origin[2]];
+                if (group.children) processOutliner(group.children);
+            }
         }
-    }
-
-    const f = [
-        from[0] - inf, from[1] - inf + dy, from[2] - inf,
-        to[0] + inf, to[1] + inf + dy, to[2] + inf
-    ];
-
-    let line = `      {${f.map(n => n.toFixed(3) + 'F').join(', ')}, `;
-    
-    const faceOrder = ['down', 'up', 'north', 'south', 'west', 'east'];
-    faceOrder.forEach(faceName => {
-        const face = faces[faceName];
-        if (face && face.uv) {
-            line += `${face.uv.map(n => n.toFixed(1) + 'F').join(', ')}, `;
-        } else {
-            line += `-1F, -1F, -1F, -1F, `;
+        else if (item.uuid && bbData.groups) {
+             const group = bbData.groups.find(g => g.uuid === item.uuid);
+             if (group) {
+                 animBundle.pivots[group.name] = [group.origin[0], group.origin[1], group.origin[2]];
+                 if (item.children) processOutliner(item.children);
+             }
         }
     });
+}
 
-    javaOutput += `${line}}, // ${name}\n`;
-});
+// Também processar o array 'groups' diretamente caso o outliner esteja vazio ou em formato diferente
+if (bbData.groups) {
+    bbData.groups.forEach(group => {
+        if (group.name && group.origin) {
+            animBundle.pivots[group.name] = [group.origin[0], group.origin[1], group.origin[2]];
+        }
+    });
+}
 
-javaOutput += `    }, ${textureWidth}.0f, 16.0f);\n\n}`;
+if (bbData.outliner) {
+    processOutliner(bbData.outliner);
+}
 
-const outPath = `src/retronism/render/${className}.java`.replace(/\//g, path.sep);
-fs.writeFileSync(outPath, javaOutput);
-console.log(`Sucesso! Modelo Aero convertido para: ${outPath}`);
+// Mapeia as animações e seus keyframes
+if (bbData.animations) {
+    bbData.animations.forEach(anim => {
+        // Normaliza o nome da animação (ex: spin -> animation.spin ou working -> animation.working)
+        let aName = anim.name;
+        if (!aName.startsWith("animation.")) {
+            // Se o Java esperar 'spin', mas no BB for 'working', fazemos o mapeamento manual aqui se necessário
+            // Por enquanto, apenas garantimos o prefixo que a engine costuma usar
+            if (aName === "working") aName = "spin"; // Mapeamento específico para o MegaCrusher
+        }
+        
+        const animation = {
+            loop: anim.loop === 'loop' || anim.loop === true,
+            length: anim.length,
+            bones: {}
+        };
+
+        for (let boneId in anim.animators) {
+            const animator = anim.animators[boneId];
+            const boneName = animator.name; // Nome do grupo no Blockbench
+            const boneData = {};
+
+            if (animator.keyframes && animator.keyframes.length > 0) {
+                animator.keyframes.forEach(kf => {
+                    if (!boneData[kf.channel]) boneData[kf.channel] = {};
+                    
+                    try {
+                        const dataPoints = typeof kf.data_points === 'string' ? JSON.parse(kf.data_points) : kf.data_points;
+                        const val = dataPoints[0];
+                        
+                        // Captura X, Y, Z do keyframe
+                        let vx = parseFloat(val.x) || 0;
+                        let vy = parseFloat(val.y) || 0;
+                        let vz = parseFloat(val.z) || 0;
+                        
+                        boneData[kf.channel][kf.time] = [vx, vy, vz];
+                    } catch (e) {
+                        console.error(`Erro ao processar keyframe em ${boneName}:`, e);
+                    }
+                });
+            }
+            
+            if (Object.keys(boneData).length > 0) {
+                animation.bones[boneName] = boneData;
+            }
+        }
+        animBundle.animations[aName] = animation;
+    });
+}
+
+// 2. Salvar o arquivo de animação
+const assetsDir = path.join('src', 'retronism', 'assets', 'models');
+if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
+
+const outPath = path.join(assetsDir, `${modelName}.anim.json`);
+fs.writeFileSync(outPath, JSON.stringify(animBundle, null, 2));
+
+console.log(`\n🚀 Aero Workflow: Sincronização Concluída!`);
+console.log(`----------------------------------------`);
+console.log(`✅ Modelo lido: ${inputPath}`);
+console.log(`✅ Grupos exportados: ${Object.keys(animBundle.pivots).length}`);
+console.log(`✅ Animações geradas: ${Object.keys(animBundle.animations).join(', ')}`);
+console.log(`✅ Destino: ${outPath}`);
+console.log(`----------------------------------------`);
+console.log(`Agora exporte o OBJ no Blockbench e rode o jogo!`);

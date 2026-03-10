@@ -68,7 +68,16 @@
       "mcp__blockbench__remove_element",
       "mcp__blockbench__apply_texture",
       "mcp__blockbench__trigger_action",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "mcp__blockbench__risky_eval",
+      "mcp__blockbench__capture_app_screenshot",
+      "mcp__blockbench__place_mesh",
+      "mcp__blockbench__capture_screenshot",
+      "mcp__blockbench__list_textures",
+      "mcp__blockbench__bone_rigging",
+      "Bash(done)",
+      "mcp__blockbench__animation_timeline",
+      "mcp__blockbench__create_animation"
     ]
   }
 }
