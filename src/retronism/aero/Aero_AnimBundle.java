@@ -3,32 +3,40 @@ package retronism.aero;
 import java.util.Map;
 
 /**
- * Container com todos os dados de animação carregados de um arquivo .anim.json:
- *   - clips: Map<String, Aero_AnimClip>  — clips nomeados
- *   - pivots: Map<String, float[]>       — pivot de cada bone em block units (pixels / 16)
+ * Container with all animation data loaded from a .anim.json file:
+ *   - clips: Map<String, Aero_AnimClip>  — named clips
+ *   - pivots: Map<String, float[]>       — pivot of each bone in block units (pixels / 16)
  *
- * Instância imutável, segura para armazenar como campo static.
- * Criada por Aero_AnimationLoader.load().
+ * Immutable instance, safe to store as a static field.
+ * Created by Aero_AnimationLoader.load().
  */
 public class Aero_AnimBundle {
 
-    /** Map<String, Aero_AnimClip> — clips indexados por nome. */
+    /** Map<String, Aero_AnimClip> — clips indexed by name. */
     public final Map clips;
 
     /**
-     * Map<String, float[]> — pivot de cada bone em block units (pixels / 16).
-     * Ausente = pivot [0, 0, 0].
+     * Map<String, float[]> — pivot of each bone in block units (pixels / 16).
+     * Absent = pivot [0, 0, 0].
      */
     public final Map pivots;
 
-    Aero_AnimBundle(Map clips, Map pivots) {
-        this.clips  = clips;
-        this.pivots = pivots;
+    /**
+     * Map<String, String> — childName → parentBoneName.
+     * Maps child elements to the parent animated group (Blockbench hierarchy).
+     * E.g.: "shred_blade_L_0_0" → "shredder_L"
+     */
+    public final Map childMap;
+
+    Aero_AnimBundle(Map clips, Map pivots, Map childMap) {
+        this.clips    = clips;
+        this.pivots   = pivots;
+        this.childMap = childMap;
     }
 
     /**
-     * Retorna o clip pelo nome, ou null se não existir.
-     * Exemplo: bundle.getClip("spin")
+     * Returns the clip by name, or null if it doesn't exist.
+     * Example: bundle.getClip("spin")
      */
     public Aero_AnimClip getClip(String name) {
         if (name == null) return null;
@@ -36,8 +44,8 @@ public class Aero_AnimBundle {
     }
 
     /**
-     * Retorna o pivot do bone em block units, ou float[]{0,0,0} se não definido.
-     * Valores já divididos por 16 (converter pixels Blockbench → block units).
+     * Returns the bone pivot in block units, or float[]{0,0,0} if not defined.
+     * Values already divided by 16 (Blockbench pixels → block units).
      */
     public float[] getPivot(String boneName) {
         float[] p = (float[]) pivots.get(boneName);

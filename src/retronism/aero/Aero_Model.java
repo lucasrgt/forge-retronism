@@ -1,7 +1,7 @@
 package retronism.aero;
 
 /**
- * AeroModel API by AeroCoding.dev
+ * AeroModel API by lucasrgt - aerocoding.dev
  * Ultra-lightweight 3D model container for Minecraft Beta 1.7.3.
  */
 public class Aero_Model {
@@ -12,10 +12,10 @@ public class Aero_Model {
     public final float scale;
 
     /**
-     * @param name - Identificador do modelo
-     * @param elements - Array de peças [x1, y1, z1, x2, y2, z2, u1_down, v1_down, u2_down, v2_down, ...]
-     * @param textureSize - Tamanho da textura (ex: 128.0f)
-     * @param scale - Escala do modelo (ex: 16.0f para 1 bloco = 16 unidades)
+     * @param name - Model identifier
+     * @param elements - Array of parts [x1, y1, z1, x2, y2, z2, u1_down, v1_down, u2_down, v2_down, ...]
+     * @param textureSize - Texture size (e.g. 128.0f)
+     * @param scale - Model scale (e.g. 16.0f for 1 block = 16 units)
      */
     public Aero_Model(String name, float[][] elements, float textureSize, float scale) {
         this.name = name;

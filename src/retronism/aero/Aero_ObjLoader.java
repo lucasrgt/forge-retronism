@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * AeroMesh OBJ Loader by AeroCoding.dev
+ * AeroMesh OBJ Loader by lucasrgt - aerocoding.dev
  * Loads OBJ models from the classpath at runtime — no conversion pipeline needed.
  *
  * Usage:

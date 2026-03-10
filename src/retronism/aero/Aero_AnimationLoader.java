@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Carrega arquivos .anim.json e retorna um Aero_AnimBundle com cache.
+ * Loads .anim.json files and returns a cached Aero_AnimBundle.
  *
- * Formato .anim.json (inspirado no Bedrock Animation JSON do Blockbench):
+ * .anim.json format (inspired by Blockbench's Bedrock Animation JSON):
  * <pre>
  * {
  *   "format_version": "1.0",
@@ -36,14 +36,14 @@ import java.util.Map;
  * }
  * </pre>
  *
- * Pivots em pixels Blockbench — divididos por 16 no loader para block units.
- * Rotation em graus Euler [X, Y, Z]. Position em pixels (dividida por 16 no renderer).
+ * Pivots in Blockbench pixels — divided by 16 in the loader to get block units.
+ * Rotation in Euler degrees [X, Y, Z]. Position in pixels (divided by 16 in the renderer).
  */
 public class Aero_AnimationLoader {
 
     private static final Map cache = new HashMap();
 
-    /** Carrega e cacheia um .anim.json do classpath. */
+    /** Loads and caches a .anim.json from the classpath. */
     public static Aero_AnimBundle load(String resourcePath) {
         if (cache.containsKey(resourcePath)) {
             return (Aero_AnimBundle) cache.get(resourcePath);
@@ -82,7 +82,7 @@ public class Aero_AnimationLoader {
                 Map.Entry entry = (Map.Entry) it.next();
                 String boneName = (String) entry.getKey();
                 List arr = (List) entry.getValue();
-                // Divide por 16: pixels Blockbench → block units
+                // Divide by 16: Blockbench pixels → block units
                 pivotsOut.put(boneName, new float[]{
                     toFloat(arr.get(0)) / 16f,
                     toFloat(arr.get(1)) / 16f,
@@ -104,7 +104,18 @@ public class Aero_AnimationLoader {
             }
         }
 
-        return new Aero_AnimBundle(clipsOut, pivotsOut);
+        // --- ChildMap ---
+        Map childMapOut = new HashMap();
+        if (root.containsKey("childMap")) {
+            Map cmIn = (Map) root.get("childMap");
+            Iterator cmIt = cmIn.entrySet().iterator();
+            while (cmIt.hasNext()) {
+                Map.Entry cmEntry = (Map.Entry) cmIt.next();
+                childMapOut.put((String) cmEntry.getKey(), (String) cmEntry.getValue());
+            }
+        }
+
+        return new Aero_AnimBundle(clipsOut, pivotsOut, childMapOut);
     }
 
     private static Aero_AnimClip buildClip(String clipName, Map clipData) {
@@ -154,12 +165,12 @@ public class Aero_AnimationLoader {
     }
 
     /**
-     * Converte um mapa de keyframes {"time": [x,y,z]} em 4 arrays paralelos:
-     * result[0] = float[] tempos
+     * Converts a keyframe map {"time": [x,y,z]} into 4 parallel arrays:
+     * result[0] = float[] times
      * result[1] = float[] x-values
      * result[2] = float[] y-values
      * result[3] = float[] z-values
-     * Keyframes são ordenados por tempo crescente.
+     * Keyframes are sorted by ascending time.
      */
     private static float[][] parseKeyframes(Map kfMap) {
         List entries = new ArrayList();
@@ -190,7 +201,7 @@ public class Aero_AnimationLoader {
     }
 
     /**
-     * Constrói float[n][3] a partir do resultado de parseKeyframes.
+     * Builds float[n][3] from the result of parseKeyframes.
      * kf[0]=times, kf[1]=xs, kf[2]=ys, kf[3]=zs.
      */
     private static float[][] buildVec3Array(float[][] kf) {

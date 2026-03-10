@@ -3,21 +3,21 @@ package retronism.aero;
 import net.minecraft.src.TileEntity;
 
 /**
- * Interface para blocos que agem como Portos de uma Multiblock.
+ * Interface for blocks that act as Ports of a Multiblock.
  */
 public interface Aero_IPort {
     /**
-     * Retorna o TileEntity do Core desta multiblock.
+     * Returns the Core TileEntity of this multiblock.
      */
     TileEntity getCore();
 
     /**
-     * Define o Core desta multiblock.
+     * Sets the Core of this multiblock.
      */
     void setCore(TileEntity core);
 
     /**
-     * Tipo do porto (ex: "energy", "item", "fluid").
+     * Port type (e.g. "energy", "item", "fluid").
      */
     String getPortType();
 }

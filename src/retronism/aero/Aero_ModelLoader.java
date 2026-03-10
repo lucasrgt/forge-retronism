@@ -8,25 +8,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * AeroModel JSON Loader by AeroCoding.dev
- * Carrega modelos Blockbench diretamente em runtime — sem pipeline de conversão.
+ * AeroModel JSON Loader by lucasrgt - aerocoding.dev
+ * Loads Blockbench models directly at runtime — no conversion pipeline.
  *
- * Uso:
+ * Usage:
  *   Aero_Model model = Aero_ModelLoader.load("/models/my_machine.json");
  *
- * Coloque os JSONs em src/retronism/assets/models/ — o transpiler os injeta
- * no jar automaticamente. Exporte pelo Blockbench: File > Export > Export as JSON.
+ * Place JSONs in src/retronism/assets/models/ — the transpiler injects them
+ * into the jar automatically. Export from Blockbench: File > Export > Export as JSON.
  */
 public class Aero_ModelLoader {
 
     private static final Map cache = new HashMap();
 
-    /** Carrega e cacheia um modelo Blockbench do classpath. */
+    /** Loads and caches a Blockbench model from the classpath. */
     public static Aero_Model load(String resourcePath) {
         return load(resourcePath, resourcePath);
     }
 
-    /** Carrega e cacheia um modelo Blockbench do classpath com nome explícito. */
+    /** Loads and caches a Blockbench model from the classpath with an explicit name. */
     public static Aero_Model load(String resourcePath, String name) {
         if (cache.containsKey(resourcePath)) {
             return (Aero_Model) cache.get(resourcePath);
@@ -50,7 +50,7 @@ public class Aero_ModelLoader {
     }
 
     // -----------------------------------------------------------------------
-    // Conversão JSON → Aero_Model
+    // JSON → Aero_Model conversion
     // -----------------------------------------------------------------------
 
     private static Aero_Model fromJson(Object root, String name) {
@@ -68,7 +68,7 @@ public class Aero_ModelLoader {
             throw new RuntimeException("AeroModelLoader: no elements in " + name);
         }
 
-        // Filtrar apenas elementos com from+to (pula meshes e outros tipos do bbmodel)
+        // Filter only elements with from+to (skip meshes and other bbmodel types)
         List cubes = new ArrayList();
         for (int i = 0; i < elements.size(); i++) {
             Object e = elements.get(i);
@@ -105,7 +105,7 @@ public class Aero_ModelLoader {
                         continue;
                     }
                 }
-                // Face ausente ou sem UV — sentinela -1 (Aero_ModelRenderer pula)
+                // Missing face or no UV — sentinel -1 (Aero_ModelRenderer skips)
                 p[base] = p[base+1] = p[base+2] = p[base+3] = -1.0f;
             }
         }
@@ -122,8 +122,8 @@ public class Aero_ModelLoader {
     }
 
     // -----------------------------------------------------------------------
-    // Parser JSON recursive-descent mínimo
-    // pos[0] = índice atual na string
+    // Minimal recursive-descent JSON parser
+    // pos[0] = current index in the string
     // -----------------------------------------------------------------------
 
     private static Object parseJson(String s, int[] pos) {

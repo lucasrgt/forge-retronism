@@ -5,7 +5,7 @@ import retronism.tile.*;
 import retronism.gui.*;
 
 /**
- * AeroPort Block by AeroCoding.dev
+ * AeroPort Block by lucasrgt - aerocoding.dev
  * Facilita a interação com máquinas gigantes por meio de "portos" de conexão.
  */
 public class Retronism_BlockMultiblockPort extends BlockContainer {

@@ -1,12 +1,12 @@
 package retronism.aero;
 
 /**
- * Definição imutável de animação para um tipo de máquina.
- * Mapeia IDs de estado (int) para nomes de clips no Aero_AnimBundle.
+ * Immutable animation definition for a machine type.
+ * Maps state IDs (int) to clip names in the Aero_AnimBundle.
  *
- * Instância única por tipo de máquina — armazenar como campo static.
+ * Single instance per machine type — store as a static field.
  *
- * Uso:
+ * Usage:
  * <pre>
  *   public static final int STATE_OFF = 0;
  *   public static final int STATE_ON  = 1;
@@ -18,15 +18,15 @@ package retronism.aero;
  *       .state(STATE_OFF, "idle")
  *       .state(STATE_ON,  "spin");
  *
- *   // Por tile entity:
+ *   // Per tile entity:
  *   public final Aero_AnimationState animState = ANIM_DEF.createState(BUNDLE);
  * </pre>
  *
- * Convenção: STATE_OFF deve ser 0 (padrão quando NBT não tem chave "Anim_state").
+ * Convention: STATE_OFF should be 0 (default when NBT has no "Anim_state" key).
  */
 public class Aero_AnimationDef {
 
-    // Array esparso: stateClips[stateId] = nome do clip (null = sem animação)
+    // Sparse array: stateClips[stateId] = clip name (null = no animation)
     private String[] stateClips;
 
     private static final int INITIAL_CAPACITY = 4;
@@ -36,10 +36,10 @@ public class Aero_AnimationDef {
     }
 
     /**
-     * Associa um estado ao clip que deve ser tocado.
+     * Associates a state with the clip that should be played.
      *
-     * @param stateId   ID do estado (inteiro >= 0; STATE_OFF deve ser 0)
-     * @param clipName  nome do clip no .anim.json (e.g. "spin", "idle")
+     * @param stateId   state ID (integer >= 0; STATE_OFF should be 0)
+     * @param clipName  clip name in the .anim.json (e.g. "spin", "idle")
      */
     public Aero_AnimationDef state(int stateId, String clipName) {
         if (stateId < 0) throw new IllegalArgumentException("stateId must be >= 0");
@@ -54,7 +54,7 @@ public class Aero_AnimationDef {
     }
 
     /**
-     * Retorna o nome do clip associado ao estado, ou null se não definido.
+     * Returns the clip name associated with the state, or null if not defined.
      */
     public String getClipName(int stateId) {
         if (stateId < 0 || stateId >= stateClips.length) return null;
@@ -62,8 +62,8 @@ public class Aero_AnimationDef {
     }
 
     /**
-     * Cria um novo Aero_AnimationState para esta definição, ligado ao bundle.
-     * Chamar uma vez por tile entity, no campo de instância.
+     * Creates a new Aero_AnimationState for this definition, linked to the bundle.
+     * Call once per tile entity, in the instance field.
      */
     public Aero_AnimationState createState(Aero_AnimBundle bundle) {
         return new Aero_AnimationState(this, bundle);

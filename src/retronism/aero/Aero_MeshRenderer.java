@@ -4,7 +4,7 @@ import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 
 /**
- * AeroMesh Renderer by AeroCoding.dev
+ * AeroMesh Renderer by lucasrgt - aerocoding.dev
  * Renders OBJ models (Aero_MeshModel) using GL_TRIANGLES.
  *
  * Performance:
@@ -147,13 +147,13 @@ public class Aero_MeshRenderer {
     // -----------------------------------------------------------------------
 
     /**
-     * Renderiza um modelo completo com animação keyframe.
+     * Renders a complete model with keyframe animation.
      *
-     * Renderiza a geometria estática e, para cada grupo nomeado no modelo,
-     * busca os keyframes do clip ativo, interpola posição e rotação no tempo
-     * atual, e aplica o transform GL antes de desenhar o grupo.
+     * Renders static geometry and, for each named group in the model,
+     * fetches keyframes from the active clip, interpolates position and rotation
+     * at the current time, and applies the GL transform before drawing the group.
      *
-     * Uso (TileEntitySpecialRenderer):
+     * Usage (TileEntitySpecialRenderer):
      * <pre>
      *   Aero_MeshRenderer.renderAnimated(MODEL,
      *       Retronism_TileMyCrusher.BUNDLE,
@@ -163,13 +163,13 @@ public class Aero_MeshRenderer {
      *       brightness, partialTick);
      * </pre>
      *
-     * @param model       modelo OBJ com grupos nomeados
-     * @param bundle      dados de animação (.anim.json carregado)
-     * @param def         mapeamento estado→clip
-     * @param state       estado de playback por tile entity
-     * @param x,y,z       posição world-space (mesma origem de renderModel)
-     * @param brightness  brilho base (0.0–1.0)
-     * @param partialTick fração do tick (0.0–1.0) do TileEntitySpecialRenderer
+     * @param model       OBJ model with named groups
+     * @param bundle      animation data (loaded .anim.json)
+     * @param def         state→clip mapping
+     * @param state       per-tile-entity playback state
+     * @param x,y,z       world-space position (same origin as renderModel)
+     * @param brightness  base brightness (0.0-1.0)
+     * @param partialTick tick fraction (0.0-1.0) from TileEntitySpecialRenderer
      */
     public static void renderAnimated(Aero_MeshModel model,
                                        Aero_AnimBundle bundle,
@@ -177,10 +177,10 @@ public class Aero_MeshRenderer {
                                        Aero_AnimationState state,
                                        double x, double y, double z,
                                        float brightness, float partialTick) {
-        // 1. Geometria estática
+        // 1. Static geometry
         renderModel(model, x, y, z, 0, brightness);
 
-        // 2. Grupos nomeados com transforms do clip
+        // 2. Named groups with clip transforms
         Aero_AnimClip clip = state.getCurrentClip();
         float time = state.getInterpolatedTime(partialTick);
 
@@ -195,31 +195,52 @@ public class Aero_MeshRenderer {
             float[] pivot = bundle.getPivot(groupName);
             float px = pivot[0], py = pivot[1], pz = pivot[2];
 
-            // Rotation e position do clip (null = sem keyframe → valores neutros)
+            // Rotation and position from clip (null = no keyframe → neutral values)
             float rx = 0, ry = 0, rz = 0;
             float dx = 0, dy = 0, dz = 0;
 
             if (clip != null) {
                 int bi = clip.indexOfBone(groupName);
+                // Hierarchy: if the OBJ group has no direct bone, search via childMap or prefix
+                if (bi < 0) {
+                    // 1. Try childMap (explicit Blockbench hierarchy)
+                    String parentName = (String) bundle.childMap.get(groupName);
+                    if (parentName != null) {
+                        bi = clip.indexOfBone(parentName);
+                        // Walk up the hierarchy if the direct parent has no keyframes
+                        if (bi < 0) {
+                            String grandParent = (String) bundle.childMap.get(parentName);
+                            if (grandParent != null) bi = clip.indexOfBone(grandParent);
+                        }
+                    }
+                    // 2. Fallback: prefix
+                    if (bi < 0) bi = findParentBone(clip, groupName);
+
+                    if (bi >= 0) {
+                        // Use the parent bone's pivot, not the child group's
+                        float[] parentPivot = bundle.getPivot(clip.boneNames[bi]);
+                        px = parentPivot[0]; py = parentPivot[1]; pz = parentPivot[2];
+                    }
+                }
                 if (bi >= 0) {
                     float[] rot = clip.sampleRot(bi, time);
                     if (rot != null) { rx = rot[0]; ry = rot[1]; rz = rot[2]; }
 
                     float[] pos = clip.samplePos(bi, time);
-                    // Position em pixels → block units
+                    // Position in pixels → block units
                     if (pos != null) { dx = pos[0] / 16f; dy = pos[1] / 16f; dz = pos[2] / 16f; }
                 }
             }
 
             GL11.glPushMatrix();
             GL11.glTranslated(x, y, z);
-            // Mover ao pivot + offset animado
+            // Move to pivot + animated offset
             GL11.glTranslatef(px + dx, py + dy, pz + dz);
-            // Rotação Euler na ordem Z→Y→X (compatível Bedrock/GeckoLib)
+            // Euler rotation in Z→Y→X order (Bedrock/GeckoLib compatible)
             GL11.glRotatef(rz, 0f, 0f, 1f);
             GL11.glRotatef(ry, 0f, 1f, 0f);
             GL11.glRotatef(rx, 1f, 0f, 0f);
-            // Voltar do pivot
+            // Move back from pivot
             GL11.glTranslatef(-px, -py, -pz);
 
             GL11.glDisable(GL11.GL_CULL_FACE);
@@ -359,6 +380,24 @@ public class Aero_MeshRenderer {
             }
         }
         return result;
+    }
+
+    /**
+     * Finds a parent bone in the clip whose name is a prefix of groupName.
+     * E.g.: groupName="turbine_l_blade_0" → finds bone "turbine_l"
+     * Returns the index of the longest bone that is a prefix, or -1.
+     */
+    private static int findParentBone(Aero_AnimClip clip, String groupName) {
+        int bestIdx = -1;
+        int bestLen = 0;
+        for (int i = 0; i < clip.boneNames.length; i++) {
+            String bone = clip.boneNames[i];
+            if (groupName.startsWith(bone + "_") && bone.length() > bestLen) {
+                bestIdx = i;
+                bestLen = bone.length();
+            }
+        }
+        return bestIdx;
     }
 
     private static float lerp(float a, float b, float t) { return a + (b - a) * t; }

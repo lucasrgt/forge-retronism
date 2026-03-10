@@ -24,14 +24,14 @@ public class Retronism_TileMegaCrusher extends TileEntity implements IInventory,
 	private boolean isInvalidating = false;
 	private Random rand = new Random();
 
-	// --- Animação ---
+	// --- Animation ---
 	public static final int STATE_OFF = 0;
 	public static final int STATE_ON  = 1;
 
 	public static final Aero_AnimBundle   BUNDLE   = Aero_AnimationLoader.load("/models/MegaCrusher.anim.json");
 	public static final Aero_AnimationDef ANIM_DEF = new Aero_AnimationDef()
 		.state(STATE_OFF, "idle")
-		.state(STATE_ON,  "spin");
+		.state(STATE_ON,  "working");
 
 	public final Aero_AnimationState animState = ANIM_DEF.createState(BUNDLE);
 

@@ -1,25 +1,25 @@
 package retronism.aero;
 
 /**
- * Dados imutáveis de um clip de animação.
+ * Immutable data for an animation clip.
  *
- * Armazena keyframes de rotação e posição para cada bone (named group OBJ),
- * em arrays paralelos ordenados por tempo crescente.
+ * Stores rotation and position keyframes for each bone (OBJ named group),
+ * in parallel arrays sorted by ascending time.
  *
- * Unidades:
- *   - Tempo: segundos (float)
- *   - Rotation: graus Euler [X, Y, Z] — aplicados na ordem Z→Y→X (compatível Bedrock/GeckoLib)
- *   - Position: pixels Blockbench (divide /16 para block units no renderer)
+ * Units:
+ *   - Time: seconds (float)
+ *   - Rotation: Euler degrees [X, Y, Z] — applied in Z→Y→X order (Bedrock/GeckoLib compatible)
+ *   - Position: Blockbench pixels (divide by 16 for block units in the renderer)
  */
 public class Aero_AnimClip {
 
     public final String  name;
     public final boolean loop;
-    public final float   length;    // duração em segundos
+    public final float   length;    // duration in seconds
 
-    // Parallel arrays indexados por bone index (0-based, ordem de adição)
+    // Parallel arrays indexed by bone index (0-based, order of addition)
     final String[]    boneNames;
-    final float[][]   rotTimes;     // rotTimes[bi]    = float[] de timestamps (segundos)
+    final float[][]   rotTimes;     // rotTimes[bi]    = float[] of timestamps (seconds)
     final float[][][] rotValues;    // rotValues[bi][ki] = float[3] {rx, ry, rz}
     final float[][]   posTimes;
     final float[][][] posValues;    // posValues[bi][ki] = float[3] {px, py, pz}
@@ -38,7 +38,7 @@ public class Aero_AnimClip {
         this.posValues = posValues;
     }
 
-    /** Retorna o índice do bone pelo nome, ou -1 se não encontrado. */
+    /** Returns the bone index by name, or -1 if not found. */
     public int indexOfBone(String name) {
         for (int i = 0; i < boneNames.length; i++) {
             if (boneNames[i].equals(name)) return i;
@@ -47,8 +47,8 @@ public class Aero_AnimClip {
     }
 
     /**
-     * Amostra a rotação do bone em um dado tempo, com interpolação LINEAR.
-     * Retorna float[3] {rx, ry, rz} em graus, ou null se o bone não tem keyframes de rotação.
+     * Samples the bone rotation at a given time, with LINEAR interpolation.
+     * Returns float[3] {rx, ry, rz} in degrees, or null if the bone has no rotation keyframes.
      */
     public float[] sampleRot(int boneIdx, float time) {
         float[] times = rotTimes[boneIdx];
@@ -58,8 +58,8 @@ public class Aero_AnimClip {
     }
 
     /**
-     * Amostra a posição do bone em um dado tempo, com interpolação LINEAR.
-     * Retorna float[3] {px, py, pz} em pixels, ou null se o bone não tem keyframes de posição.
+     * Samples the bone position at a given time, with LINEAR interpolation.
+     * Returns float[3] {px, py, pz} in pixels, or null if the bone has no position keyframes.
      */
     public float[] samplePos(int boneIdx, float time) {
         float[] times = posTimes[boneIdx];
@@ -69,21 +69,21 @@ public class Aero_AnimClip {
     }
 
     // -----------------------------------------------------------------------
-    // Internos
+    // Internals
     // -----------------------------------------------------------------------
 
-    /** Interpolação LINEAR entre keyframes. Clamp fora dos limites. */
+    /** LINEAR interpolation between keyframes. Clamps outside bounds. */
     private static float[] sample(float[] times, float[][] vals, float time) {
         int n = times.length;
         if (n == 1) {
             return copy3(vals[0]);
         }
-        // Clamp antes do primeiro keyframe
+        // Clamp before the first keyframe
         if (time <= times[0]) return copy3(vals[0]);
-        // Clamp depois do último keyframe
+        // Clamp after the last keyframe
         if (time >= times[n - 1]) return copy3(vals[n - 1]);
 
-        // Busca binária do intervalo
+        // Binary search for the interval
         int lo = 0, hi = n - 1;
         while (hi - lo > 1) {
             int mid = (lo + hi) >>> 1;

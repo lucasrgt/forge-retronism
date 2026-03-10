@@ -3,37 +3,37 @@ package retronism.aero;
 import net.minecraft.src.NBTTagCompound;
 
 /**
- * Estado mutável de animação por tile entity.
+ * Mutable animation state per tile entity.
  *
- * Rastreia qual clip está tocando, o tempo de playback atual e anterior
- * (para interpolação partial-tick), e persiste via NBT.
+ * Tracks which clip is playing, current and previous playback time
+ * (for partial-tick interpolation), and persists via NBT.
  *
- * Ciclo de vida:
+ * Lifecycle:
  * <pre>
- *   // Campo da TileEntity:
+ *   // TileEntity field:
  *   public final Aero_AnimationState animState = ANIM_DEF.createState(BUNDLE);
  *
- *   // Em updateEntity() — tick() ANTES de setState():
+ *   // In updateEntity() — tick() BEFORE setState():
  *   animState.tick();
  *   animState.setState(isRunning ? STATE_ON : STATE_OFF);
  *
- *   // Em writeToNBT / readFromNBT:
+ *   // In writeToNBT / readFromNBT:
  *   animState.writeToNBT(nbt);
  *   animState.readFromNBT(nbt);
  * </pre>
  */
 public class Aero_AnimationState {
 
-    /** Estado atual (público para o renderer e lógica da máquina). */
+    /** Current state (public for the renderer and machine logic). */
     public int currentState;
 
     private final Aero_AnimationDef def;
     private final Aero_AnimBundle   bundle;
 
-    private float playbackTime;      // segundos, tempo atual no clip
-    private float prevPlaybackTime;  // segundos, tempo no tick anterior (para interpolação)
+    private float playbackTime;      // seconds, current time in clip
+    private float prevPlaybackTime;  // seconds, time at previous tick (for interpolation)
 
-    /** Construído por Aero_AnimationDef.createState(). */
+    /** Built by Aero_AnimationDef.createState(). */
     Aero_AnimationState(Aero_AnimationDef def, Aero_AnimBundle bundle) {
         this.def          = def;
         this.bundle       = bundle;
@@ -43,13 +43,13 @@ public class Aero_AnimationState {
     }
 
     // -----------------------------------------------------------------------
-    // Tick — chamar no início de updateEntity()
+    // Tick — call at the beginning of updateEntity()
     // -----------------------------------------------------------------------
 
     /**
-     * Avança o playback em 1 tick (1/20 segundo).
-     * Salva o tempo anterior para interpolação partial-tick.
-     * Deve ser chamado ANTES de setState() a cada tick.
+     * Advances playback by 1 tick (1/20 second).
+     * Saves the previous time for partial-tick interpolation.
+     * Must be called BEFORE setState() each tick.
      */
     public void tick() {
         prevPlaybackTime = playbackTime;
@@ -63,14 +63,14 @@ public class Aero_AnimationState {
         playbackTime += 1f / 20f;
 
         if (clip.loop) {
-            // Wrap no final do clip
+            // Wrap at the end of the clip
             if (playbackTime >= clip.length) {
                 playbackTime = playbackTime % clip.length;
-                // Corrige prevPlaybackTime para a interpolação não saltar
+                // Fix prevPlaybackTime so interpolation doesn't jump
                 if (prevPlaybackTime >= clip.length) prevPlaybackTime = prevPlaybackTime % clip.length;
             }
         } else {
-            // Clamp no final
+            // Clamp at the end
             if (playbackTime >= clip.length) {
                 playbackTime     = clip.length;
                 prevPlaybackTime = clip.length;
@@ -79,13 +79,13 @@ public class Aero_AnimationState {
     }
 
     // -----------------------------------------------------------------------
-    // Mudar estado
+    // Change state
     // -----------------------------------------------------------------------
 
     /**
-     * Muda o estado atual. Se o clip associado ao novo estado for diferente
-     * do clip atual, o playback é resetado para o início.
-     * Deve ser chamado APÓS tick().
+     * Changes the current state. If the clip associated with the new state differs
+     * from the current clip, playback is reset to the beginning.
+     * Must be called AFTER tick().
      */
     public void setState(int stateId) {
         if (stateId == currentState) return;
@@ -95,7 +95,7 @@ public class Aero_AnimationState {
 
         currentState = stateId;
 
-        // Reseta o tempo apenas se o clip mudar (ou se não havia clip antes)
+        // Reset time only if the clip changes (or if there was no clip before)
         boolean clipChanged = (newClip == null) ? (oldClip != null)
                                                 : !newClip.equals(oldClip);
         if (clipChanged) {
@@ -105,15 +105,15 @@ public class Aero_AnimationState {
     }
 
     // -----------------------------------------------------------------------
-    // Acesso pelo renderer
+    // Renderer access
     // -----------------------------------------------------------------------
 
     /**
-     * Retorna o tempo de playback interpolado para o frame atual.
-     * Lida com wrap de loop: quando playbackTime < prevPlaybackTime (cruzou o final),
-     * interpola corretamente sem saltar para trás.
+     * Returns the interpolated playback time for the current frame.
+     * Handles loop wrap: when playbackTime < prevPlaybackTime (crossed the end),
+     * interpolates correctly without jumping backwards.
      *
-     * @param partialTick  fração do tick (0.0–1.0) fornecida pelo TileEntitySpecialRenderer
+     * @param partialTick  tick fraction (0.0-1.0) provided by TileEntitySpecialRenderer
      */
     public float getInterpolatedTime(float partialTick) {
         Aero_AnimClip clip = getCurrentClip();
@@ -123,7 +123,7 @@ public class Aero_AnimationState {
         float prev = prevPlaybackTime;
 
         if (clip.loop && cur < prev) {
-            // Cruzou o boundary de loop — interpola "por cima" do wrap
+            // Crossed the loop boundary — interpolate "over" the wrap
             cur += clip.length;
             float t = prev + (cur - prev) * partialTick;
             return t % clip.length;
@@ -132,17 +132,17 @@ public class Aero_AnimationState {
         return prev + (cur - prev) * partialTick;
     }
 
-    /** Retorna o clip atualmente ativo, ou null se o estado não tiver clip definido. */
+    /** Returns the currently active clip, or null if the state has no clip defined. */
     public Aero_AnimClip getCurrentClip() {
         String clipName = def.getClipName(currentState);
         if (clipName == null) return null;
         return bundle.getClip(clipName);
     }
 
-    /** Expõe o bundle para o renderer acessar pivots e clips. */
+    /** Exposes the bundle for the renderer to access pivots and clips. */
     public Aero_AnimBundle getBundle() { return bundle; }
 
-    /** Expõe a def para o renderer acessar nomes de clips. */
+    /** Exposes the def for the renderer to access clip names. */
     public Aero_AnimationDef getDef() { return def; }
 
     // -----------------------------------------------------------------------
@@ -150,7 +150,7 @@ public class Aero_AnimationState {
     // -----------------------------------------------------------------------
 
     /**
-     * Persiste estado e tempo de playback.
+     * Persists state and playback time.
      * Keys: "Anim_state", "Anim_time"
      */
     public void writeToNBT(NBTTagCompound nbt) {
@@ -159,12 +159,12 @@ public class Aero_AnimationState {
     }
 
     /**
-     * Restaura estado e tempo do NBT.
-     * prevPlaybackTime = playbackTime para evitar artefato no primeiro frame após load.
-     * Se as keys estiverem ausentes (save antigo), usa defaults (state=0, time=0).
+     * Restores state and time from NBT.
+     * prevPlaybackTime = playbackTime to avoid artifacts on the first frame after load.
+     * If keys are absent (old save), uses defaults (state=0, time=0).
      */
     public void readFromNBT(NBTTagCompound nbt) {
-        currentState      = nbt.getInteger("Anim_state");   // 0 se ausente
+        currentState      = nbt.getInteger("Anim_state");   // 0 if absent
         playbackTime      = nbt.hasKey("Anim_time") ? nbt.getFloat("Anim_time") : 0f;
         prevPlaybackTime  = playbackTime;
     }

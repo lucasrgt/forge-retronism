@@ -4,7 +4,7 @@ import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 
 /**
- * AeroModel Renderer API by AeroCoding.dev
+ * AeroModel Renderer API by lucasrgt - aerocoding.dev
  * Handles high-performance rendering of Aero_Models.
  */
 public class Aero_ModelRenderer {
@@ -99,13 +99,13 @@ public class Aero_ModelRenderer {
     }
 
     /**
-     * Renderização de Miniatura no Inventário com a AeroModel API.
-     * Auto-escala o modelo para caber em 1x1.
+     * Inventory Thumbnail Rendering with the AeroModel API.
+     * Auto-scales the model to fit within 1x1.
      */
     public static void renderInventory(RenderBlocks rb, Aero_Model model, float metadata) {
         GL11.glPushMatrix();
         
-        // 1. Achar o centro e o tamanho real
+        // 1. Find the center and actual size
         float minX = 999, minY = 999, minZ = 999;
         float maxX = -999, maxY = -999, maxZ = -999;
         for (float[] p : model.elements) {
@@ -118,20 +118,20 @@ public class Aero_ModelRenderer {
         float sizeZ = (maxZ - minZ) / model.scale;
         float maxDim = Math.max(sizeX, Math.max(sizeY, sizeZ));
         
-        // 2. Centralização absoluta no ponto de rotação
+        // 2. Absolute centering at the rotation point
         float centerX = (minX + maxX) / 2.0F / model.scale;
         float centerY = (minY + maxY) / 2.0F / model.scale;
         float centerZ = (minZ + maxZ) / 2.0F / model.scale;
 
-        // 3. Ajuste de Escala e Rotação (Ordem: Scale -> Rotate -> Translate)
-        // Usamos 0.7 para garantir que as quinas rotacionadas não clippem o slot
+        // 3. Scale and Rotation adjustment (Order: Scale -> Rotate -> Translate)
+        // We use 0.7 to ensure rotated corners don't clip the slot
         float scale = 0.7F / maxDim;
         GL11.glScalef(scale, scale, scale);
         
         GL11.glRotatef(30.0F, 1.0F, 0.0F, 0.0F);
         GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
         
-        // Garante que a luz funcione mesmo com o modelo "espremido"
+        // Ensure lighting works even with the "squeezed" model
         GL11.glEnable(32826); // GL_RESCALE_NORMAL_EXT
         
         renderModel(model, -centerX, -centerY, -centerZ, 0, 1.0f);
