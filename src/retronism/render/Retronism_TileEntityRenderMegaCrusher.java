@@ -24,7 +24,7 @@ public class Retronism_TileEntityRenderMegaCrusher extends TileEntitySpecialRend
         double offsetZ = tile.originZ - tile.zCoord;
         
         // Bind high-res texture
-        bindTextureByName("/block/retronism_megacrusher_hq.png");
+        bindTextureByName("/models/retronism_megacrusher.png");
 
         // Reset GL color to avoid tinting from other renders
         org.lwjgl.opengl.GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);

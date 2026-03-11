@@ -56,6 +56,8 @@ export interface AnimationConfig {
   objPath: string | null
   objContent: string | null
   bbmodelPath: string | null
+  texturePath: string | null
+  textureDataUrl: string | null
   animJson: any | null
   clipNames: string[]
   boneNames: string[]
@@ -191,7 +193,7 @@ export const useStore = create<MultiblockStore>((set, get) => ({
   snapEnabled: true,
   gridSize: 9,
   animConfig: {
-    objPath: null, objContent: null, bbmodelPath: null,
+    objPath: null, objContent: null, bbmodelPath: null, texturePath: null, textureDataUrl: null,
     animJson: null, clipNames: [], boneNames: [], stateMappings: [],
   },
   activeTab: 'structure',
@@ -576,6 +578,7 @@ export const useStore = create<MultiblockStore>((set, get) => ({
     animConfig: {
       objPath: null, objContent: null, bbmodelPath: null,
       animJson: null, clipNames: [], boneNames: [], stateMappings: [],
+      texturePath: null, textureDataUrl: null,
     },
   }),
 }))

@@ -1,4 +1,4 @@
-import { DEFAULT_BLOCKS } from '../../../shared/block-defaults.js'
+import { DEFAULT_BLOCKS } from '@aero/shared/block-defaults'
 
 export type BlockType = string
 export type StructureType = 'machine' | 'tank' | 'reactor' | 'custom'

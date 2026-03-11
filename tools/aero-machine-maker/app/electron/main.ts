@@ -70,7 +70,7 @@ ipcMain.handle('read-file-base64', async (_event: any, filePath: string) => {
   catch { return null }
 })
 
-ipcMain.handle('get-project-root', () => path.resolve(__dirname, '..', '..', '..'))
+ipcMain.handle('get-project-root', () => path.resolve(__dirname, '..', '..', '..', '..'))
 
 // ---------------------------------------------------------------------------
 // MCP Live Sync — Electron IS the WebSocket server, MCP connects as client

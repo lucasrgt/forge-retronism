@@ -3,7 +3,54 @@ import * as THREE from 'three'
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 import { useStore, type AnimStateMapping } from '@/hooks/use-store'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+
+/**
+ * Apply Minecraft-style per-face brightness to a BufferGeometry via vertex colors.
+ *
+ * Minecraft Beta 1.7.3 face brightness multipliers (from RenderBlocks.java):
+ *   Top    (Y+) = 1.0
+ *   Bottom (Y-) = 0.5
+ *   East/West   (X±) = 0.8
+ *   North/South (Z±) = 0.6
+ *
+ * For arbitrary OBJ meshes, each vertex's brightness is determined by its face normal
+ * direction — we blend the axis-aligned multipliers based on the normal components.
+ */
+function applyMinecraftLighting(geometry: THREE.BufferGeometry) {
+  // Ensure normals exist
+  if (!geometry.attributes.normal) {
+    geometry.computeVertexNormals()
+  }
+
+  const normals = geometry.attributes.normal
+  const count = normals.count
+  const colors = new Float32Array(count * 3)
+
+  for (let i = 0; i < count; i++) {
+    const nx = normals.getX(i)
+    const ny = normals.getY(i)
+    const nz = normals.getZ(i)
+
+    // Minecraft multipliers per axis direction:
+    // Y+ = 1.0, Y- = 0.5, X± = 0.8, Z± = 0.6
+    // Blend by the absolute contribution of each axis component
+    const absX = Math.abs(nx)
+    const absY = Math.abs(ny)
+    const absZ = Math.abs(nz)
+    const sum = absX + absY + absZ || 1
+
+    const yBrightness = ny > 0 ? 1.0 : 0.5
+    const brightness = (absX / sum) * 0.8 + (absY / sum) * yBrightness + (absZ / sum) * 0.6
+
+    colors[i * 3] = brightness
+    colors[i * 3 + 1] = brightness
+    colors[i * 3 + 2] = brightness
+  }
+
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+}
 
 export function ModelEditor() {
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -22,13 +69,16 @@ export function ModelEditor() {
 
   // Animation playback
   const [selectedClip, setSelectedClip] = useState<string | null>(null)
+  const selectedClipRef = useRef<string | null>(null)
   const [playing, setPlaying] = useState(false)
   const playingRef = useRef(false)
   const clipTimeRef = useRef(0)
   const lastFrameRef = useRef(0)
 
-  // Bone group refs for animation
+  // Bone group refs for animation (keyed by BONE name, not element name)
   const boneGroupsRef = useRef<Map<string, THREE.Group>>(new Map())
+  // Element mesh refs (keyed by element/OBJ child name) — used to rebuild hierarchy
+  const elementMeshesRef = useRef<Map<string, THREE.Object3D>>(new Map())
 
   // -----------------------------------------------------------------------
   // Three.js setup
@@ -38,7 +88,7 @@ export function ModelEditor() {
     if (!container) return
 
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x1a1a2e)
+    scene.background = new THREE.Color(0x111111)
     sceneRef.current = scene
 
     const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.01, 100)
@@ -50,15 +100,11 @@ export function ModelEditor() {
     container.appendChild(renderer.domElement)
     rendererRef.current = renderer
 
-    // Lighting
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6)
-    scene.add(ambient)
-    const directional = new THREE.DirectionalLight(0xffffff, 0.8)
-    directional.position.set(3, 5, 3)
-    scene.add(directional)
+    // No dynamic lights — Minecraft-style face brightness is baked
+    // into vertex colors based on face normals (see applyMinecraftLighting)
 
     // Grid helper (1 block = 1 unit)
-    const grid = new THREE.GridHelper(4, 16, 0x444466, 0x333355)
+    const grid = new THREE.GridHelper(4, 16, 0x333333, 0x666666)
     scene.add(grid)
 
     // Axis helper
@@ -82,21 +128,23 @@ export function ModelEditor() {
       )
       camera.lookAt(o.target)
 
-      // Animation playback
-      if (playingRef.current && selectedClip && animConfig.animJson) {
-        const now = performance.now()
-        const dt = (now - lastFrameRef.current) / 1000
-        lastFrameRef.current = now
-
-        const clipData = animConfig.animJson.animations?.[selectedClip]
+      // Animation playback — read from refs/store to avoid stale closure
+      if (playingRef.current && selectedClipRef.current) {
+        const currentAnimConfig = useStore.getState().animConfig
+        const clipName = selectedClipRef.current
+        const clipData = currentAnimConfig.animJson?.animations?.[clipName]
         if (clipData) {
+          const now = performance.now()
+          const dt = (now - lastFrameRef.current) / 1000
+          lastFrameRef.current = now
+
           clipTimeRef.current += dt
           if (clipData.loop) {
             clipTimeRef.current = clipTimeRef.current % clipData.length
           } else {
             clipTimeRef.current = Math.min(clipTimeRef.current, clipData.length)
           }
-          applyAnimation(clipData, clipTimeRef.current)
+          applyAnimationFromStore(clipData, clipTimeRef.current)
         }
       }
 
@@ -124,16 +172,21 @@ export function ModelEditor() {
     }
   }, [])
 
+  // Keep selectedClipRef in sync with state
+  useEffect(() => {
+    selectedClipRef.current = selectedClip
+  }, [selectedClip])
+
   // -----------------------------------------------------------------------
-  // Apply animation keyframes to bone groups
+  // Apply animation keyframes to bone groups (reads from store, no stale closure)
   // -----------------------------------------------------------------------
-  const applyAnimation = useCallback((clipData: any, time: number) => {
-    const pivots = animConfig.animJson?.pivots || {}
+  function applyAnimationFromStore(clipData: any, time: number) {
+    const pivots = useStore.getState().animConfig.animJson?.pivots || {}
     for (const [boneName, boneData] of Object.entries(clipData.bones as Record<string, any>)) {
       const group = boneGroupsRef.current.get(boneName)
       if (!group) continue
 
-      // Rotation
+      // Rotation (Euler degrees → radians)
       if (boneData.rotation) {
         const rot = sampleKeyframes(boneData.rotation, time)
         if (rot) {
@@ -145,12 +198,11 @@ export function ModelEditor() {
         }
       }
 
-      // Position
+      // Position (Blockbench pixels → block units, added to pivot)
       if (boneData.position) {
         const pos = sampleKeyframes(boneData.position, time)
         if (pos) {
           const pivot = pivots[boneName] || [0, 0, 0]
-          // Position is in Blockbench pixels, divide by 16 for block units
           group.position.set(
             pivot[0] / 16 + pos[0] / 16,
             pivot[1] / 16 + pos[1] / 16,
@@ -158,11 +210,144 @@ export function ModelEditor() {
           )
         }
       }
+
+      // Scale (multipliers, 1.0 = original)
+      if (boneData.scale) {
+        const scl = sampleKeyframes(boneData.scale, time)
+        if (scl) {
+          group.scale.set(scl[0], scl[1], scl[2])
+        }
+      }
     }
-  }, [animConfig.animJson])
+  }
+
+  // -----------------------------------------------------------------------
+  // Build material (texture or plain) — shared between OBJ load and texture change
+  // -----------------------------------------------------------------------
+  const buildModelMaterial = useCallback((textureUrl: string | null): THREE.MeshBasicMaterial => {
+    if (textureUrl) {
+      const tex = new THREE.TextureLoader().load(textureUrl)
+      tex.magFilter = THREE.NearestFilter
+      tex.minFilter = THREE.NearestFilter
+      tex.colorSpace = THREE.SRGBColorSpace
+      return new THREE.MeshBasicMaterial({ map: tex, vertexColors: true, side: THREE.DoubleSide })
+    }
+    return new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: true, side: THREE.DoubleSide })
+  }, [])
+
+  // -----------------------------------------------------------------------
+  // Track model rebuild count so texture effect can re-apply after rebuild
+  // -----------------------------------------------------------------------
+  const [modelVersion, setModelVersion] = useState(0)
+
+  // -----------------------------------------------------------------------
+  // Build bone hierarchy from elements + childMap
+  // childMap maps element names → bone names (from bbmodel outliner)
+  // Without childMap, each element becomes its own "bone group"
+  // -----------------------------------------------------------------------
+  function buildBoneHierarchy(
+    wrapper: THREE.Group,
+    elements: Map<string, THREE.Object3D>,
+    childMap: Record<string, string> | null,
+    pivots: Record<string, [number, number, number]>,
+  ) {
+    boneGroupsRef.current.clear()
+
+    if (childMap && Object.keys(childMap).length > 0) {
+      // childMap contains BOTH element→bone AND bone→bone mappings
+      // (matching Aero_Convert.java behavior)
+
+      // 1. Collect all bone names (values in childMap that aren't elements)
+      const allBoneNames = new Set<string>()
+      for (const val of Object.values(childMap)) allBoneNames.add(val)
+      // Also add keys that are bones (have children of their own, i.e. appear as values)
+      for (const key of Object.keys(childMap)) {
+        if (allBoneNames.has(key)) allBoneNames.add(key)
+      }
+      // Add any key that maps to a bone (it's a bone or element)
+      // A key is a bone if it also appears as a value somewhere
+      // Let's just create groups for all unique bone names
+      for (const key of Object.keys(childMap)) {
+        // If this key is NOT an element mesh, it's a bone
+        if (!elements.has(key)) allBoneNames.add(key)
+      }
+
+      // 2. Create THREE.Group for each bone
+      for (const boneName of allBoneNames) {
+        const boneGroup = new THREE.Group()
+        boneGroup.name = `bone_${boneName}`
+        const pivot = pivots[boneName]
+        if (pivot) {
+          boneGroup.position.set(pivot[0] / 16, pivot[1] / 16, pivot[2] / 16)
+        }
+        boneGroupsRef.current.set(boneName, boneGroup)
+      }
+
+      // 3. Assign element meshes to their parent bone groups
+      const ungrouped: THREE.Object3D[] = []
+      for (const [elemName, mesh] of elements) {
+        const parentBone = childMap[elemName]
+        const parentGroup = parentBone ? boneGroupsRef.current.get(parentBone) : undefined
+        if (parentGroup) {
+          const pivot = pivots[parentBone]
+          if (pivot) {
+            mesh.position.set(-pivot[0] / 16, -pivot[1] / 16, -pivot[2] / 16)
+          }
+          parentGroup.add(mesh)
+        } else {
+          ungrouped.push(mesh)
+        }
+      }
+
+      // 4. Nest bone groups under parent bone groups (bone→bone hierarchy)
+      const topLevelBones: string[] = []
+      for (const boneName of allBoneNames) {
+        const parentBone = childMap[boneName]
+        const parentGroup = parentBone ? boneGroupsRef.current.get(parentBone) : undefined
+        if (parentGroup) {
+          // This bone is a child of another bone — nest it
+          const childGroup = boneGroupsRef.current.get(boneName)!
+          const parentPivot = pivots[parentBone]
+          if (parentPivot) {
+            // Offset child position relative to parent pivot
+            childGroup.position.set(
+              childGroup.position.x - parentPivot[0] / 16,
+              childGroup.position.y - parentPivot[1] / 16,
+              childGroup.position.z - parentPivot[2] / 16,
+            )
+          }
+          parentGroup.add(childGroup)
+        } else {
+          topLevelBones.push(boneName)
+        }
+      }
+
+      // 5. Add top-level bones and ungrouped elements to wrapper
+      for (const boneName of topLevelBones) {
+        const group = boneGroupsRef.current.get(boneName)!
+        wrapper.add(group)
+      }
+      for (const mesh of ungrouped) wrapper.add(mesh)
+    } else {
+      // No childMap — treat each OBJ child as its own bone group (fallback)
+      for (const [name, child] of elements) {
+        const boneGroup = new THREE.Group()
+        boneGroup.name = `bone_${name}`
+        const pivot = pivots[name]
+        if (pivot) {
+          boneGroup.position.set(pivot[0] / 16, pivot[1] / 16, pivot[2] / 16)
+          child.position.set(-pivot[0] / 16, -pivot[1] / 16, -pivot[2] / 16)
+        }
+        boneGroup.add(child)
+        wrapper.add(boneGroup)
+        boneGroupsRef.current.set(name, boneGroup)
+      }
+    }
+  }
 
   // -----------------------------------------------------------------------
   // Load OBJ model when objContent changes
+  // Only depends on objContent — reads childMap/pivots/texture from current state
   // -----------------------------------------------------------------------
   useEffect(() => {
     const scene = sceneRef.current
@@ -173,6 +358,7 @@ export function ModelEditor() {
       scene.remove(modelRef.current)
       modelRef.current = null
       boneGroupsRef.current.clear()
+      elementMeshesRef.current.clear()
     }
 
     if (!animConfig.objContent) return
@@ -180,59 +366,43 @@ export function ModelEditor() {
     const loader = new OBJLoader()
     const obj = loader.parse(animConfig.objContent)
 
-    // Apply default material
-    const material = new THREE.MeshStandardMaterial({
-      color: 0xcccccc,
-      roughness: 0.7,
-      metalness: 0.2,
-      side: THREE.DoubleSide,
-    })
+    // Apply Minecraft-style per-face lighting via vertex colors
+    const material = buildModelMaterial(animConfig.textureDataUrl ?? null)
     obj.traverse((child) => {
       if (child instanceof THREE.Mesh) {
+        applyMinecraftLighting(child.geometry)
         child.material = material
       }
     })
 
-    // Wrap named groups in Three.js Groups for animation
-    // OBJLoader creates children for each "o" / "g" directive
-    const wrapper = new THREE.Group()
-    const pivots = animConfig.animJson?.pivots || {}
-
-    // Collect children by name before reparenting
-    const namedChildren: { name: string; child: THREE.Object3D }[] = []
+    // Collect all named children (elements) from parsed OBJ
+    const elements = new Map<string, THREE.Object3D>()
+    const unnamed: THREE.Object3D[] = []
     for (const child of [...obj.children]) {
       if (child.name) {
-        namedChildren.push({ name: child.name, child })
+        obj.remove(child)
+        elements.set(child.name, child)
+      } else {
+        obj.remove(child)
+        unnamed.push(child)
       }
     }
+    elementMeshesRef.current = elements
 
-    // Create bone groups with pivots
-    for (const { name, child } of namedChildren) {
-      const boneGroup = new THREE.Group()
-      boneGroup.name = `bone_${name}`
+    // Build bone hierarchy
+    const wrapper = new THREE.Group()
+    const currentAnim = animConfig.animJson
+    buildBoneHierarchy(
+      wrapper,
+      elements,
+      currentAnim?.childMap || null,
+      currentAnim?.pivots || {},
+    )
 
-      // Set pivot point
-      const pivot = pivots[name]
-      if (pivot) {
-        boneGroup.position.set(pivot[0] / 16, pivot[1] / 16, pivot[2] / 16)
-        // Offset child geometry back by pivot so rotation happens around the pivot
-        child.position.set(-pivot[0] / 16, -pivot[1] / 16, -pivot[2] / 16)
-      }
+    // Add unnamed children directly
+    for (const child of unnamed) wrapper.add(child)
 
-      obj.remove(child)
-      boneGroup.add(child)
-      wrapper.add(boneGroup)
-      boneGroupsRef.current.set(name, boneGroup)
-    }
-
-    // Add remaining unnamed children directly
-    for (const child of [...obj.children]) {
-      obj.remove(child)
-      wrapper.add(child)
-    }
-
-    // Scale: Blockbench exports in pixels (16px = 1 block). OBJ from BB is already in block units.
-    // Center the model roughly
+    // Center the model
     const box = new THREE.Box3().setFromObject(wrapper)
     const center = box.getCenter(new THREE.Vector3())
     wrapper.position.sub(center)
@@ -240,7 +410,45 @@ export function ModelEditor() {
 
     scene.add(wrapper)
     modelRef.current = wrapper
-  }, [animConfig.objContent, animConfig.animJson])
+    setModelVersion(v => v + 1)
+  }, [animConfig.objContent])
+
+  // -----------------------------------------------------------------------
+  // Rebuild bone hierarchy when animJson changes (bbmodel imported after OBJ)
+  // Uses childMap to properly group OBJ elements under animation bones
+  // -----------------------------------------------------------------------
+  useEffect(() => {
+    const model = modelRef.current
+    if (!model || !animConfig.animJson) return
+    if (elementMeshesRef.current.size === 0) return
+
+    // Detach all current children from the wrapper
+    const children = [...model.children]
+    for (const child of children) model.remove(child)
+
+    // Rebuild bone hierarchy with the new childMap
+    buildBoneHierarchy(
+      model,
+      elementMeshesRef.current,
+      animConfig.animJson.childMap || null,
+      animConfig.animJson.pivots || {},
+    )
+  }, [animConfig.animJson])
+
+  // -----------------------------------------------------------------------
+  // Apply texture to model when textureDataUrl changes OR model is rebuilt
+  // -----------------------------------------------------------------------
+  useEffect(() => {
+    const model = modelRef.current
+    if (!model) return
+
+    const material = buildModelMaterial(animConfig.textureDataUrl ?? null)
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.material = material
+      }
+    })
+  }, [animConfig.textureDataUrl, modelVersion])
 
   // -----------------------------------------------------------------------
   // Mouse controls (orbit)
@@ -291,9 +499,10 @@ export function ModelEditor() {
   }, [playing, selectedClip])
 
   const resetBoneTransforms = useCallback(() => {
+    const pivots = useStore.getState().animConfig.animJson?.pivots || {}
     for (const [, group] of boneGroupsRef.current) {
       group.rotation.set(0, 0, 0)
-      const pivots = animConfig.animJson?.pivots || {}
+      group.scale.set(1, 1, 1)
       const boneName = group.name.replace('bone_', '')
       const pivot = pivots[boneName]
       if (pivot) {
@@ -302,7 +511,7 @@ export function ModelEditor() {
         group.position.set(0, 0, 0)
       }
     }
-  }, [animConfig.animJson])
+  }, [])
 
   // -----------------------------------------------------------------------
   // File import handlers
@@ -322,6 +531,23 @@ export function ModelEditor() {
     }
   }, [])
 
+  const handleImportTexture = useCallback(async () => {
+    const api = (window as any).api
+    if (!api) return
+    const filePath = await api.openDialog([{ name: 'Texture', extensions: ['png', 'jpg', 'jpeg'] }])
+    if (!filePath) return
+    const base64 = await api.readFileBase64(filePath)
+    if (base64) {
+      const ext = filePath.split('.').pop()?.toLowerCase() || 'png'
+      const mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/png'
+      useStore.getState().setAnimConfig({
+        ...useStore.getState().animConfig,
+        texturePath: filePath,
+        textureDataUrl: `data:${mime};base64,${base64}`,
+      })
+    }
+  }, [])
+
   const handleImportBbmodel = useCallback(async () => {
     const api = (window as any).api
     if (!api) return
@@ -335,13 +561,26 @@ export function ModelEditor() {
         const { parseBbmodel, toAeroAnimJson } = await import('./bbmodel-parser-client')
         const result = parseBbmodel(bbmodel)
         const animJson = toAeroAnimJson(result)
+        const clipNames = result.clips.map((c: any) => c.name)
+
+        // Auto-seed state mappings from clip names (one state per clip)
+        const currentConfig = useStore.getState().animConfig
+        const existingClips = new Set(currentConfig.stateMappings.map(m => m.clipName))
+        const newMappings = [...currentConfig.stateMappings]
+        let nextId = newMappings.length === 0 ? 0 : Math.max(...newMappings.map(m => m.stateId)) + 1
+        for (const name of clipNames) {
+          if (!existingClips.has(name)) {
+            newMappings.push({ stateId: nextId++, label: name, clipName: name })
+          }
+        }
 
         useStore.getState().setAnimConfig({
-          ...useStore.getState().animConfig,
+          ...currentConfig,
           bbmodelPath: filePath,
           animJson,
-          clipNames: result.clips.map((c: any) => c.name),
+          clipNames,
           boneNames: result.boneNames,
+          stateMappings: newMappings,
         })
       } catch (err) {
         console.error('Error parsing .bbmodel:', err)
@@ -350,22 +589,26 @@ export function ModelEditor() {
   }, [])
 
   // -----------------------------------------------------------------------
-  // State mapping UI
+  // State mapping — auto-seed from clip names on bbmodel import
   // -----------------------------------------------------------------------
-  const [newStateLabel, setNewStateLabel] = useState('')
-  const [newStateClip, setNewStateClip] = useState('')
+  const updateStateMapping = useCallback((stateId: number, field: 'label' | 'clipName', value: string) => {
+    const config = useStore.getState().animConfig
+    useStore.getState().setAnimConfig({
+      ...config,
+      stateMappings: config.stateMappings.map(m =>
+        m.stateId === stateId ? { ...m, [field]: value } : m,
+      ),
+    })
+  }, [])
 
   const addStateMapping = useCallback(() => {
-    if (!newStateLabel || !newStateClip) return
     const config = useStore.getState().animConfig
     const nextId = config.stateMappings.length === 0 ? 0 : Math.max(...config.stateMappings.map(m => m.stateId)) + 1
     useStore.getState().setAnimConfig({
       ...config,
-      stateMappings: [...config.stateMappings, { stateId: nextId, label: newStateLabel, clipName: newStateClip }].sort((a, b) => a.stateId - b.stateId),
+      stateMappings: [...config.stateMappings, { stateId: nextId, label: '', clipName: '' }],
     })
-    setNewStateLabel('')
-    setNewStateClip('')
-  }, [newStateLabel, newStateClip])
+  }, [])
 
   const removeStateMapping = useCallback((stateId: number) => {
     const config = useStore.getState().animConfig
@@ -375,11 +618,31 @@ export function ModelEditor() {
     })
   }, [])
 
+  // Play a specific clip by name (used by per-row play buttons)
+  const playClip = useCallback((clipName: string) => {
+    if (selectedClipRef.current === clipName && playingRef.current) {
+      // Stop if already playing this clip
+      setPlaying(false)
+      playingRef.current = false
+      setSelectedClip(null)
+      selectedClipRef.current = null
+      resetBoneTransforms()
+    } else {
+      setSelectedClip(clipName)
+      selectedClipRef.current = clipName
+      setPlaying(true)
+      playingRef.current = true
+      clipTimeRef.current = 0
+      lastFrameRef.current = performance.now()
+    }
+  }, [resetBoneTransforms])
+
   // -----------------------------------------------------------------------
   // Render
   // -----------------------------------------------------------------------
   const hasObj = !!animConfig.objContent
   const hasAnims = animConfig.clipNames.length > 0
+  const hasTexture = !!animConfig.textureDataUrl
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -394,125 +657,126 @@ export function ModelEditor() {
         onWheel={handleWheel}
       >
         {!hasObj && (
-          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-            <div className="text-center space-y-3">
-              <p className="text-lg">No model loaded</p>
-              <p className="text-sm">Import an OBJ file exported from Blockbench</p>
-              <Button onClick={handleImportObj} variant="outline" size="sm">Import OBJ</Button>
-            </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Card className="text-center max-w-xs">
+              <p className="text-lg font-medium text-foreground">No model loaded</p>
+              <p className="text-sm text-muted-foreground">Import an OBJ and its texture from Blockbench</p>
+              <div className="flex gap-2 mt-1">
+                <Button onClick={handleImportObj} variant="outline" className="flex-1">Import OBJ</Button>
+                <Button onClick={handleImportTexture} variant="outline" className="flex-1">Import Texture</Button>
+              </div>
+            </Card>
           </div>
         )}
       </div>
 
       {/* Right panel — animation config */}
-      <div className="w-72 border-l border-border bg-card overflow-y-auto p-3 space-y-4">
+      <div className="w-80 border-l border-border bg-card overflow-y-auto p-3 space-y-4">
         <h3 className="text-sm font-medium text-foreground">Model & Animation</h3>
 
-        {/* Import buttons */}
-        <div className="space-y-2">
-          <Button onClick={handleImportObj} variant="outline" size="sm" className="w-full">
-            {hasObj ? `OBJ: ${animConfig.objPath?.split(/[\\/]/).pop()}` : 'Import OBJ'}
-          </Button>
-          <Button onClick={handleImportBbmodel} variant="outline" size="sm" className="w-full">
+        {/* Import — Model */}
+        <div className="space-y-1.5">
+          <h4 className="text-xs text-muted-foreground">Model</h4>
+          <div className="flex gap-1.5">
+            <Button onClick={handleImportObj} variant="outline" className="flex-1 py-2 px-2 h-auto text-xs whitespace-normal text-left">
+              {hasObj ? animConfig.objPath?.split(/[\\/]/).pop() : 'Import OBJ'}
+            </Button>
+            <Button onClick={handleImportTexture} variant="outline" className="flex-1 py-2 px-2 h-auto text-xs whitespace-normal text-left">
+              {hasTexture ? animConfig.texturePath?.split(/[\\/]/).pop() : 'Texture (.png)'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Import — Animations */}
+        <div className="space-y-1.5">
+          <h4 className="text-xs text-muted-foreground">Animations</h4>
+          <Button onClick={handleImportBbmodel} variant="outline" className="w-full py-2 px-2 h-auto text-xs whitespace-normal text-left">
             {hasAnims ? `BBModel: ${animConfig.bbmodelPath?.split(/[\\/]/).pop()}` : 'Import Animations (.bbmodel)'}
           </Button>
         </div>
 
-        {/* Bones list */}
+        {/* Bones list (collapsible) */}
         {animConfig.boneNames.length > 0 && (
-          <div>
-            <h4 className="text-xs text-muted-foreground mb-1">Bones ({animConfig.boneNames.length})</h4>
-            <div className="text-xs space-y-0.5">
+          <details className="group">
+            <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground select-none">
+              Bones ({animConfig.boneNames.length})
+            </summary>
+            <div className="text-xs space-y-0.5 mt-1">
               {animConfig.boneNames.map((name) => (
                 <div key={name} className="px-2 py-0.5 bg-muted/50 rounded">{name}</div>
               ))}
             </div>
-          </div>
+          </details>
         )}
 
-        {/* Animation clips */}
+        {/* Animation States — unified clip + state mapping table */}
         {hasAnims && (
           <div>
-            <h4 className="text-xs text-muted-foreground mb-1">Animation Clips</h4>
+            <h4 className="text-xs text-muted-foreground mb-1">Animation States</h4>
+            <p className="text-xs text-muted-foreground mb-2">
+              Each row maps a machine state ID to a clip. These generate Java constants.
+            </p>
+
+            {/* Column headers */}
+            <div className="flex items-center gap-1 mb-1 text-[10px] text-muted-foreground uppercase tracking-wider">
+              <span className="w-8 text-center">ID</span>
+              <span className="flex-1">Label</span>
+              <span className="flex-1">Clip</span>
+              <span className="w-14 text-center">Preview</span>
+              <span className="w-5"></span>
+            </div>
+
+            {/* State mapping rows */}
             <div className="space-y-1">
-              {animConfig.clipNames.map((clipName) => {
-                const clipData = animConfig.animJson?.animations?.[clipName]
-                const isSelected = selectedClip === clipName
+              {animConfig.stateMappings.map((m) => {
+                const clipData = m.clipName ? animConfig.animJson?.animations?.[m.clipName] : null
+                const isPlaying = playing && selectedClip === m.clipName
                 return (
-                  <button
-                    key={clipName}
-                    className={`w-full text-left px-2 py-1 rounded text-xs ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted/50 hover:bg-muted'}`}
-                    onClick={() => {
-                      setSelectedClip(clipName)
-                      setPlaying(false)
-                      playingRef.current = false
-                      resetBoneTransforms()
-                    }}
-                  >
-                    <span className="font-medium">{clipName}</span>
-                    {clipData && (
-                      <span className="ml-2 opacity-70">
-                        {clipData.length}s {clipData.loop ? '🔁' : '▶'}
-                      </span>
-                    )}
-                  </button>
+                  <div key={m.stateId} className="flex items-center gap-1">
+                    <span className="w-8 text-center text-xs font-mono bg-muted/50 rounded py-1">{m.stateId}</span>
+                    <Input
+                      value={m.label}
+                      onChange={(e) => updateStateMapping(m.stateId, 'label', e.target.value)}
+                      placeholder="idle"
+                      className="flex-1 h-7 text-xs"
+                    />
+                    <select
+                      value={m.clipName}
+                      onChange={(e) => updateStateMapping(m.stateId, 'clipName', e.target.value)}
+                      className="flex-1 h-7 text-xs bg-background border border-border rounded px-1"
+                    >
+                      <option value="">--</option>
+                      {animConfig.clipNames.map((name) => (
+                        <option key={name} value={name}>{name}</option>
+                      ))}
+                    </select>
+                    <button
+                      className={`w-14 h-7 rounded border text-xs transition-colors ${
+                        isPlaying
+                          ? 'bg-primary/20 border-primary text-foreground'
+                          : 'border-border hover:bg-muted/50 text-muted-foreground hover:text-foreground'
+                      } ${!m.clipName ? 'opacity-30 pointer-events-none' : ''}`}
+                      onClick={() => m.clipName && playClip(m.clipName)}
+                      title={clipData ? `${clipData.length}s ${clipData.loop ? 'loop' : 'once'}` : ''}
+                    >
+                      {isPlaying ? 'Stop' : 'Play'}
+                    </button>
+                    <button
+                      className="w-5 h-7 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
+                      onClick={() => removeStateMapping(m.stateId)}
+                      title="Remove state"
+                    >
+                      x
+                    </button>
+                  </div>
                 )
               })}
             </div>
 
-            {/* Playback controls */}
-            {selectedClip && (
-              <div className="flex gap-2 mt-2">
-                <Button onClick={togglePlay} variant="outline" size="sm" className="flex-1">
-                  {playing ? '⏹ Stop' : '▶ Play'}
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* State mappings */}
-        {hasAnims && (
-          <div>
-            <h4 className="text-xs text-muted-foreground mb-1">State Mappings</h4>
-            <p className="text-xs text-muted-foreground mb-2">Map machine states to animation clips</p>
-
-            {/* Existing mappings */}
-            <div className="space-y-1 mb-2">
-              {animConfig.stateMappings.map((m) => (
-                <div key={m.stateId} className="flex items-center gap-1 text-xs">
-                  <span className="bg-muted/50 px-1.5 py-0.5 rounded font-mono">{m.stateId}</span>
-                  <span className="flex-1 truncate">{m.label}</span>
-                  <span className="text-muted-foreground">→</span>
-                  <span className="text-primary">{m.clipName}</span>
-                  <button
-                    className="text-destructive hover:text-destructive/80 px-1"
-                    onClick={() => removeStateMapping(m.stateId)}
-                  >×</button>
-                </div>
-              ))}
-            </div>
-
-            {/* Add new mapping */}
-            <div className="flex gap-1">
-              <Input
-                placeholder="Label"
-                value={newStateLabel}
-                onChange={(e) => setNewStateLabel(e.target.value)}
-                className="flex-1 h-7 text-xs"
-              />
-              <select
-                value={newStateClip}
-                onChange={(e) => setNewStateClip(e.target.value)}
-                className="h-7 text-xs bg-background border border-border rounded px-1"
-              >
-                <option value="">Clip</option>
-                {animConfig.clipNames.map((name) => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-              </select>
-              <Button onClick={addStateMapping} variant="outline" size="sm" className="h-7 px-2">+</Button>
-            </div>
+            {/* Add state button */}
+            <Button onClick={addStateMapping} variant="outline" size="sm" className="w-full mt-2 h-7 text-xs">
+              + Add State
+            </Button>
           </div>
         )}
 
@@ -530,9 +794,22 @@ export function ModelEditor() {
 // -------------------------------------------------------------------------
 // Keyframe sampling (linear interpolation, matches Aero_AnimationClip.sample)
 // -------------------------------------------------------------------------
-function sampleKeyframes(kfMap: Record<string, [number, number, number]>, time: number): [number, number, number] | null {
-  const entries = Object.entries(kfMap)
-    .map(([t, v]) => ({ time: parseFloat(t), value: v }))
+/**
+ * Samples keyframes with per-keyframe interpolation mode.
+ * Supports both legacy format { "0.0": [x,y,z] } and
+ * new format { "0.0": { "value": [x,y,z], "interp": "linear" } }
+ */
+function sampleKeyframes(kfMap: Record<string, any>, time: number): [number, number, number] | null {
+  type KfEntry = { time: number; value: [number, number, number]; interp: string }
+  const entries: KfEntry[] = Object.entries(kfMap)
+    .map(([t, v]) => {
+      if (Array.isArray(v)) {
+        // Legacy format
+        return { time: parseFloat(t), value: v as [number, number, number], interp: 'linear' }
+      }
+      // New format with { value, interp }
+      return { time: parseFloat(t), value: v.value as [number, number, number], interp: v.interp || 'linear' }
+    })
     .sort((a, b) => a.time - b.time)
 
   if (entries.length === 0) return null
@@ -550,11 +827,38 @@ function sampleKeyframes(kfMap: Record<string, [number, number, number]>, time: 
   const t1 = entries[hi].time
   const alpha = t1 > t0 ? (time - t0) / (t1 - t0) : 0
 
+  // Interp mode is on the destination keyframe (how to arrive)
+  const mode = entries[hi].interp
+
   const a = entries[lo].value
   const b = entries[hi].value
+
+  if (mode === 'step') {
+    return [...a]
+  }
+
+  if (mode === 'catmullrom') {
+    const p0 = lo > 0 ? entries[lo - 1].value : a
+    const p3 = hi < entries.length - 1 ? entries[hi + 1].value : b
+    return catmullRom(p0, a, b, p3, alpha)
+  }
+
+  // Linear (default)
   return [
     a[0] + (b[0] - a[0]) * alpha,
     a[1] + (b[1] - a[1]) * alpha,
     a[2] + (b[2] - a[2]) * alpha,
   ]
+}
+
+/** Catmull-Rom spline interpolation */
+function catmullRom(
+  p0: [number, number, number], p1: [number, number, number],
+  p2: [number, number, number], p3: [number, number, number],
+  t: number,
+): [number, number, number] {
+  const t2 = t * t, t3 = t2 * t
+  const cr = (a: number, b: number, c: number, d: number) =>
+    0.5 * ((2 * b) + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3)
+  return [cr(p0[0], p1[0], p2[0], p3[0]), cr(p0[1], p1[1], p2[1], p3[1]), cr(p0[2], p1[2], p2[2], p3[2])]
 }

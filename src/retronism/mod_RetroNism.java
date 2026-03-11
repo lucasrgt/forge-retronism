@@ -41,7 +41,7 @@ public class mod_Retronism extends BaseMod {
 		Retronism_Registry.machinePortBlock.texEnergy = ModLoader.addOverride("/terrain.png", "/block/retronism_port_energy.png");
 		Retronism_Registry.machinePortBlock.texFluid = ModLoader.addOverride("/terrain.png", "/block/retronism_port_fluid.png");
 		Retronism_Registry.machinePortBlock.texGas = ModLoader.addOverride("/terrain.png", "/block/retronism_port_gas.png");
-		texMegaCrusherModel = ModLoader.addOverride("/terrain.png", "/block/retronism_megacrusher_hq.png");
+		texMegaCrusherModel = ModLoader.addOverride("/terrain.png", "/models/retronism_megacrusher.png");
 
 		// Register blocks, tiles, names
 		Retronism_Registry.registerAll(this);

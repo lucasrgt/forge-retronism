@@ -155,8 +155,54 @@ export function getTileDataUrl(terrainIndex: number): string | null {
   return tile.toDataURL()
 }
 
-export function getBlockMaterial(type: string, selected = false, portType?: string): THREE.Material {
-  const key = `${type}_${portType || 'none'}_${selected ? 'sel' : 'n'}`
+/**
+ * Create a BoxGeometry with Minecraft-style per-face brightness baked into vertex colors.
+ *
+ * Minecraft Beta 1.7.3 face brightness multipliers (from RenderBlocks.java):
+ *   Top    (Y+) = 1.0
+ *   Bottom (Y-) = 0.5
+ *   East   (X+) = 0.8
+ *   West   (X-) = 0.8
+ *   South  (Z+) = 0.6
+ *   North  (Z-) = 0.6
+ *
+ * Three.js BoxGeometry face order: +X, -X, +Y, -Y, +Z, -Z
+ * Each face has 4 vertices (indexed).
+ */
+let _mcGeom: THREE.BoxGeometry | null = null
+export function getMinecraftBoxGeometry(): THREE.BoxGeometry {
+  if (_mcGeom) return _mcGeom
+
+  const geom = new THREE.BoxGeometry(0.92, 0.92, 0.92)
+
+  // Minecraft face brightness: [+X, -X, +Y, -Y, +Z, -Z]
+  const faceBrightness = [0.8, 0.8, 1.0, 0.5, 0.6, 0.6]
+
+  const count = geom.attributes.position.count // 24 (4 vertices × 6 faces)
+  const colors = new Float32Array(count * 3)
+
+  for (let face = 0; face < 6; face++) {
+    const b = faceBrightness[face]
+    for (let v = 0; v < 4; v++) {
+      const i = (face * 4 + v) * 3
+      colors[i] = b
+      colors[i + 1] = b
+      colors[i + 2] = b
+    }
+  }
+
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+  _mcGeom = geom
+  return geom
+}
+
+/**
+ * Get a block material using MeshBasicMaterial with vertexColors.
+ * No dynamic lights needed — face brightness comes from vertex colors
+ * (Minecraft-style per-face shading baked into the geometry).
+ */
+export function getBlockMaterial(type: string, portType?: string): THREE.Material {
+  const key = `${type}_${portType || 'none'}`
   if (materialCache.has(key)) return materialCache.get(key)!
 
   const blockDef = blockRegistry.get(type)
@@ -180,19 +226,19 @@ export function getBlockMaterial(type: string, selected = false, portType?: stri
 
   let mat: THREE.Material
   if (tileCanvas) {
-    mat = new THREE.MeshLambertMaterial({
+    mat = new THREE.MeshBasicMaterial({
       map: canvasToTexture(tileCanvas),
+      vertexColors: true,
       transparent: isGlass,
       opacity: isGlass ? 0.5 : 1.0,
-      emissive: selected ? 0x444444 : 0x000000,
     })
   } else {
     // Fallback: solid color (before textures load or if missing)
-    mat = new THREE.MeshLambertMaterial({
+    mat = new THREE.MeshBasicMaterial({
       color: getBlockInfo(type).color,
+      vertexColors: true,
       transparent: isGlass,
       opacity: isGlass ? 0.4 : 1.0,
-      emissive: selected ? 0x444444 : 0x000000,
     })
   }
 

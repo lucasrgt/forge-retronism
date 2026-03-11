@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import * as THREE from 'three'
 import { useStore } from '@/hooks/use-store'
 import { blockRegistry, type BlockEntry, type BlockCategory } from '@/core/types'
-import { loadTextures, isTexturesReady, getBlockMaterial, clearMaterialCache, getTileDataUrl } from '@/core/textures'
+import { loadTextures, isTexturesReady, getBlockMaterial, getMinecraftBoxGeometry, clearMaterialCache, getTileDataUrl } from '@/core/textures'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -48,11 +48,8 @@ export function StructureEditor() {
     renderer.setPixelRatio(window.devicePixelRatio)
     container.appendChild(renderer.domElement)
 
-    // Lights
-    scene.add(new THREE.AmbientLight(0x404050, 1.5))
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.0)
-    dirLight.position.set(5, 8, 5)
-    scene.add(dirLight)
+    // No dynamic lights needed — Minecraft-style face brightness is baked
+    // into vertex colors on the shared BoxGeometry (see textures.ts)
 
     // Ground grid (populated by dimensions effect)
     const gridGroup = new THREE.Group()
@@ -259,7 +256,6 @@ export function StructureEditor() {
         if (sc) {
           for (const [, mesh] of sc.meshes) {
             sc.scene.remove(mesh)
-            mesh.geometry.dispose()
           }
           sc.meshes.clear()
         }
@@ -311,16 +307,29 @@ export function StructureEditor() {
     mesh.add(overlay)
   }
 
+  // Selection overlay: bright wireframe outline (like Minecraft's block highlight)
+  function updateSelectionOverlay(mesh: THREE.Mesh, selected: boolean) {
+    const existing = mesh.children.find(c => c.userData.isSelectionOverlay)
+    if (existing) mesh.remove(existing)
+    if (!selected) return
+    const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(0.94, 0.94, 0.94))
+    const overlay = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff }))
+    overlay.userData.isSelectionOverlay = true
+    mesh.add(overlay)
+  }
+
   // Sync blocks to meshes
   useEffect(() => {
     const s = sceneRef.current
     if (!s) return
 
+    // Shared geometry with Minecraft face brightness vertex colors
+    const sharedGeom = getMinecraftBoxGeometry()
+
     // Remove old meshes
     for (const [key, mesh] of s.meshes) {
       if (!blocks.has(key)) {
         s.scene.remove(mesh)
-        mesh.geometry.dispose()
         ;(mesh.material as THREE.Material).dispose()
         s.meshes.delete(key)
       }
@@ -345,18 +354,19 @@ export function StructureEditor() {
       let mesh = s.meshes.get(key)
       const needsNewMaterial = mesh && (
         mesh.userData.blockType !== block.type ||
-        mesh.userData.selected !== isSelected ||
         mesh.userData.portType !== portType
       )
       const needsOverlayUpdate = mesh && (
         mesh.userData.portType !== portType ||
         mesh.userData.isCtrl !== isCtrl
       )
+      const needsSelectionUpdate = mesh && (
+        mesh.userData.selected !== isSelected
+      )
 
       if (!mesh) {
-        const geom = new THREE.BoxGeometry(0.92, 0.92, 0.92)
-        const mat = getBlockMaterial(block.type, isSelected, portType || undefined)
-        mesh = new THREE.Mesh(geom, mat)
+        const mat = getBlockMaterial(block.type, portType || undefined)
+        mesh = new THREE.Mesh(sharedGeom, mat)
         mesh.position.set(x, y, z)
         mesh.userData.key = key
         mesh.userData.blockType = block.type
@@ -367,18 +377,22 @@ export function StructureEditor() {
         s.meshes.set(key, mesh)
         updatePortOverlay(mesh, portType)
         updateControllerOverlay(mesh, isCtrl)
+        updateSelectionOverlay(mesh, isSelected)
       } else {
         mesh.visible = true
         if (needsNewMaterial) {
-          mesh.material = getBlockMaterial(block.type, isSelected, portType || undefined)
+          mesh.material = getBlockMaterial(block.type, portType || undefined)
           mesh.userData.blockType = block.type
-          mesh.userData.selected = isSelected
         }
         if (needsNewMaterial || needsOverlayUpdate) {
           mesh.userData.portType = portType
           mesh.userData.isCtrl = isCtrl
           updatePortOverlay(mesh, portType)
           updateControllerOverlay(mesh, isCtrl)
+        }
+        if (needsSelectionUpdate) {
+          mesh.userData.selected = isSelected
+          updateSelectionOverlay(mesh, isSelected)
         }
       }
     }
@@ -559,7 +573,7 @@ export function StructureEditor() {
                       className={`
                         flex items-center gap-1 px-1.5 py-0.5 rounded text-xs border transition-colors
                         ${selectedTool === def.id
-                          ? 'border-primary bg-primary/20 text-primary-foreground'
+                          ? 'border-primary bg-primary/20 text-foreground font-semibold'
                           : 'border-border hover:bg-muted/50 text-foreground'
                         }
                       `}

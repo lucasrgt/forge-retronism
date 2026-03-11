@@ -24,7 +24,6 @@ node_modules/
 tools/aero-machine-maker/mcp/dist/
 tools/aero-machine-maker/app/dist/
 tools/aero-machine-maker/app/dist-electron/
-tools/multiblock-designer/node_modules/
 
 # MCP config (local)
 .mcp.json

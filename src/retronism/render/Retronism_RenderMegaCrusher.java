@@ -60,7 +60,7 @@ public class Retronism_RenderMegaCrusher implements Retronism_IBlockRenderer {
 
     public void renderInventory(RenderBlocks renderer, Block block, int metadata) {
         // Forçar a textura HQ para o inventário
-        int texID = ModLoader.getMinecraftInstance().renderEngine.getTexture("/block/retronism_megacrusher_hq.png");
+        int texID = ModLoader.getMinecraftInstance().renderEngine.getTexture("/models/retronism_megacrusher.png");
         ModLoader.getMinecraftInstance().renderEngine.bindTexture(texID);
         
         Aero_InventoryRenderer.render(renderer, MODEL);

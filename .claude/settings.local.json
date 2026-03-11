@@ -84,7 +84,25 @@
       "Bash(ls libraries/aero/machineapi/*.java)",
       "Bash(xargs -I{} basename {})",
       "Bash(sed -i 's|cd tools/aero-machine-maker && npm run dev|cd tools/aero-machine-maker/app \\\\&\\\\& npm run dev|g' tools/aero-machine-maker/mcp/src/index.ts)",
-      "Bash(sed -i 's|tools/aero-machine-maker-mcp/\\\\.\\\\./\\\\.\\\\./|tools/aero-machine-maker/mcp/../../|g' tools/aero-machine-maker/mcp/src/index.ts)"
+      "Bash(sed -i 's|tools/aero-machine-maker-mcp/\\\\.\\\\./\\\\.\\\\./|tools/aero-machine-maker/mcp/../../|g' tools/aero-machine-maker/mcp/src/index.ts)",
+      "Bash(xargs grep:*)",
+      "Bash(npm install:*)",
+      "Bash(ls -la /c/Users/lucas/RetroNism/tools/aero-machine-maker/mcp/dist/gui-builder*)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(node -e \":*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm build:mcp)",
+      "Bash(ls /c/Users/lucas/RetroNism/tools/aero-machine-maker/node_modules/.pnpm/@modelcontextprotocol+sdk*/node_modules/zod)",
+      "Bash(pnpm --filter aero-machine-maker-mcp add zod)",
+      "Bash(pnpm --filter aero-machine-maker build)",
+      "Bash(pnpm build:*)",
+      "Read(//mnt/c/Users/lucas/**)",
+      "Bash(powershell.exe -Command 'ls C:\\\\Users\\\\lucas\\\\RetroNism\\\\tools\\\\aero-machine-maker')",
+      "Bash(powershell.exe -Command \"cd C:\\\\Users\\\\lucas\\\\RetroNism\\\\tools\\\\aero-machine-maker; pnpm build 2>&1\")",
+      "Bash(powershell.exe -Command \"cd C:\\\\Users\\\\lucas\\\\RetroNism; bash scripts/transpile.sh 2>&1\")",
+      "Bash(powershell.exe -Command \"cd C:\\\\Users\\\\lucas\\\\RetroNism\\\\mcp; echo ''build'' | java -jar RetroMCP-Java-CLI.jar 2>&1\")",
+      "Bash(powershell.exe -Command \"Get-Content ''C:\\\\Users\\\\lucas\\\\.claude\\\\projects\\\\C--Users-lucas-RetroNism\\\\728c8770-b5dc-4064-b8b2-43be01b31e32\\\\tool-results\\\\b665yrywq.txt'' | Select-String -Pattern ''error|Error|BUILD|Done|Finished|100%'' | Select-Object -Last 20\")"
     ]
   }
 }
