@@ -17,7 +17,7 @@ Think of it like a Voltron/Megazord: individual blocks = separate parts, formed 
 
 | Tool | Role |
 |------|------|
-| **Mod Maker MCP** (`retronism-mod-maker`) | Defines STRUCTURE: block layout, ports, IO types, processing logic. Knows nothing about visuals. |
+| **Aero Machine Maker MCP** (`aero-machine-maker`) | Defines STRUCTURE: block layout, ports, IO types, processing logic. Knows nothing about visuals. |
 | **Blockbench MCP** | Creates the VISUAL MODEL for the entire formed structure. |
 
 ## Pre-flight Check (MANDATORY - RUN FIRST)
@@ -113,10 +113,10 @@ The formed model IS the machine's visual identity — rushing it produces medioc
 
 ## Workflow — 5 Phases
 
-1. **MUST: Get machine context** — Call `mcp__retronism-mod-maker__export_model_context`. The `<modelSize>` tag gives the FULL structure dimensions in pixels (e.g., width="48" height="64" depth="48" for a 3x4x3). **Use these as your coordinate space.**
+1. **MUST: Get machine context** — Call `mcp__aero-machine-maker__export_model_context`. The `<modelSize>` tag gives the FULL structure dimensions in pixels (e.g., width="48" height="64" depth="48" for a 3x4x3). **Use these as your coordinate space.**
 2. **MUST: Create model in Blockbench** — Follow the Build Sequence below (Phases A→D).
 3. **MUST: Export from Blockbench** — Export the model as JSON.
-4. **MUST: Import into mod** — Call `mcp__retronism-mod-maker__import_model`.
+4. **MUST: Import into mod** — Call `mcp__aero-machine-maker__import_model`.
 5. **THEN: Generate the `FORMED_PARTS` Java array** from the Blockbench model elements.
 
 ---
@@ -812,7 +812,7 @@ Show the user screenshots from at least 3 angles (front-right, back-left, and to
 After passing all 3 quality gates AND receiving user approval:
 1. Save the Blockbench project
 2. Export as JSON and save to `src/retronism/assets/models/`
-3. Call `mcp__retronism-mod-maker__import_model` with the JSON
+3. Call `mcp__aero-machine-maker__import_model` with the JSON
 4. Generate the FORMED_PARTS array and render class (see Integration section below)
 
 ---

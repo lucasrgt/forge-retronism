@@ -80,7 +80,11 @@
       "mcp__blockbench__create_animation",
       "Bash(javac -source 1.8 -target 1.8 -cp \"mcp/minecraft/bin;tests/libs/junit-4.13.2.jar;tests/libs/hamcrest-core-1.3.jar\" -d tests/out tests/src/net/minecraft/src/AnimationDefStateTest.java)",
       "Bash(javac -source 1.8 -target 1.8 -cp \"mcp/minecraft/bin;tests/libs/junit-4.13.2.jar;tests/libs/hamcrest-core-1.3.jar\" -d tests/out tests/src/net/minecraft/src/PortRegistryTest.java)",
-      "Bash(javac -source 1.8 -target 1.8 -cp \"mcp/minecraft/bin;tests/libs/junit-4.13.2.jar;tests/libs/hamcrest-core-1.3.jar\" -d tests/out tests/src/net/minecraft/src/*Test.java)"
+      "Bash(javac -source 1.8 -target 1.8 -cp \"mcp/minecraft/bin;tests/libs/junit-4.13.2.jar;tests/libs/hamcrest-core-1.3.jar\" -d tests/out tests/src/net/minecraft/src/*Test.java)",
+      "Bash(ls libraries/aero/machineapi/*.java)",
+      "Bash(xargs -I{} basename {})",
+      "Bash(sed -i 's|cd tools/aero-machine-maker && npm run dev|cd tools/aero-machine-maker/app \\\\&\\\\& npm run dev|g' tools/aero-machine-maker/mcp/src/index.ts)",
+      "Bash(sed -i 's|tools/aero-machine-maker-mcp/\\\\.\\\\./\\\\.\\\\./|tools/aero-machine-maker/mcp/../../|g' tools/aero-machine-maker/mcp/src/index.ts)"
     ]
   }
 }

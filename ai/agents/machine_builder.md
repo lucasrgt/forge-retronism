@@ -40,7 +40,7 @@ Look at existing machines for patterns:
 - Fluid handler: `Retronism_TilePump`, `Retronism_TileFluidTank`
 - Gas handler: `Retronism_TileGasTank`
 
-### Phase 2: Configure GUI via Mod Maker MCP
+### Phase 2: Configure GUI via Aero Machine Maker MCP
 
 Call `setup_gui` with a preset based on the machine type. Presets have pixel-perfect positions from real mod machines — **do NOT manually specify coordinates unless customizing**.
 

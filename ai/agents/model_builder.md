@@ -108,10 +108,10 @@ Before building ANY machine, consult this section. Each machine type has mandato
 
 ## Workflow — 5 Phases
 
-1. **MUST: Get machine context** — Call `mcp__retronism-mod-maker__export_model_context` to receive XML metadata.
+1. **MUST: Get machine context** — Call `mcp__aero-machine-maker__export_model_context` to receive XML metadata.
 2. **MUST: Create model in Blockbench** — Follow the Build Sequence below (Phases A through D).
 3. **MUST: Export from Blockbench** — Use `trigger_action` with action `"export"` or save the project.
-4. **MUST: Import into mod** — Call `mcp__retronism-mod-maker__import_model` with the exported JSON.
+4. **MUST: Import into mod** — Call `mcp__aero-machine-maker__import_model` with the exported JSON.
 5. **THEN: Generate Java render code** — Derive the `PARTS` array FROM the imported model elements.
 
 The pipeline is: context → Blockbench MCP → export → import → Java code. Never skip steps.
@@ -588,7 +588,7 @@ Show the user screenshots from at least 3 angles (front-3/4, rear-3/4, and top o
 After passing all 3 quality gates AND receiving user approval:
 1. Save the Blockbench project
 2. Export as JSON and save to `src/retronism/assets/models/`
-3. Call `mcp__retronism-mod-maker__import_model` with the JSON
+3. Call `mcp__aero-machine-maker__import_model` with the JSON
 4. Generate the PARTS array and render class (see Integration section below)
 
 ---

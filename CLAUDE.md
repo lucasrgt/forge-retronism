@@ -76,7 +76,7 @@ When executing any machine/model pipeline, you MUST announce each phase with a n
 ```
 Use the phase names from the agent doc being followed. Example for multiblock_builder:
 ```
-[ETAPA 1: Design da Estrutura Multiblock (Mod Maker MCP)]
+[ETAPA 1: Design da Estrutura Multiblock (Aero Machine Maker MCP)]
 [ETAPA 2: Configuração da GUI]
 [ETAPA 3: Exportar Arquivos Base]
 [ETAPA 4: Criar Modelo 3D Formed (Blockbench)]
@@ -86,16 +86,16 @@ Use the phase names from the agent doc being followed. Example for multiblock_bu
 ```
 This is mandatory — NEVER skip the announcement. The user needs to track progress visually.
 
-## Mod Maker as Source of Truth
+## Aero Machine Maker as Source of Truth
 - Every multiblock machine MUST have its definition saved in `multiblocks/{Name}.json`
-- NEVER edit multiblock Java structure code (checkStructure, STRUCTURE array, etc) directly — always go through mod-maker MCP tools
+- NEVER edit multiblock Java structure code (checkStructure, STRUCTURE array, etc) directly — always go through aero-machine-maker MCP tools
 - When modifying an existing multiblock: `load_project` → make changes via MCP tools → `build_and_export`
 - The JSON in `multiblocks/` is the canonical definition — Java code is DERIVED from it
 - If the Java code and JSON disagree, the JSON wins
 - `export_to_mod` and `build_and_export` auto-save to `multiblocks/` before exporting
 
 ## MCP Servers Required
-- `retronism-mod-maker` — multiblock designer, GUI builder, code generator (configured in `.mcp.json`)
+- `aero-machine-maker` — multiblock designer, GUI builder, code generator (configured in `.mcp.json`)
 - `blockbench` — 3D model creation, texture painting, UV mapping (MUST be configured separately)
   - If Blockbench MCP is not available, STOP and ask the user to set it up before proceeding with modeling
   - Setup: Blockbench → File → Plugins → install "MCP Server" → start server → add to `.mcp.json`:

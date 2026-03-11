@@ -21,10 +21,10 @@ Examples: Mega Crusher (3×3×3), future machines like refineries, reactors, etc
 
 | Tool | Role | What It Defines |
 |------|------|----------------|
-| **Mod Maker MCP** (`retronism-mod-maker`) | Structure + Gameplay | Block layout (casing, controller, ports), IO types, processing logic, GUI layout |
+| **Aero Machine Maker MCP** (`aero-machine-maker`) | Structure + Gameplay | Block layout (casing, controller, ports), IO types, processing logic, GUI layout |
 | **Blockbench MCP** | Visual Representation | A single 3D model that visually replaces the ENTIRE formed structure |
 
-The mod-maker knows NOTHING about visuals. Blockbench knows NOTHING about gameplay.
+The aero-machine-maker knows NOTHING about visuals. Blockbench knows NOTHING about gameplay.
 
 ## Interactive Checkpoints (MANDATORY)
 
@@ -41,7 +41,7 @@ The user's creative vision matters more than speed. A machine built in 3 iterati
 
 ## Full Pipeline
 
-### Phase 1: Design the Multiblock Structure (Mod Maker MCP)
+### Phase 1: Design the Multiblock Structure (Aero Machine Maker MCP)
 
 0. **If modifying an existing machine**: Call `load_project` first to load its saved definition
 1. **`create_multiblock`** — Set name, dimensions, IO types, capacities, process time, block/casing IDs
@@ -87,7 +87,7 @@ Call `setup_gui` with a preset. Presets have pixel-perfect positions from real m
 After loading a preset, add extra components with the `components` parameter if needed.
 
 #### ⏸️ CHECKPOINT 2: GUI Review
-After setting up the GUI, show the user the current layout (describe or screenshot the mod-maker GUI builder).
+After setting up the GUI, show the user the current layout (describe or screenshot the aero-machine-maker GUI builder).
 - Ask: **"A GUI está boa? Quer mudar slots, adicionar tanks, reposicionar componentes?"**
 - Wait for user response. Iterate until satisfied.
 
@@ -243,6 +243,6 @@ Verify:
 - NEVER edit `mcp/minecraft/src/` directly — edit `src/retronism/` and transpile
 - NEVER skip GUI texture generation
 - NEVER register a block without tile entity and display name
-- NEVER edit multiblock structure/tile/container Java code directly — always go through mod-maker MCP tools
+- NEVER edit multiblock structure/tile/container Java code directly — always go through aero-machine-maker MCP tools
 - ALWAYS use `save_project` or `build_and_export` (auto-saves) to persist definitions to `multiblocks/`
 - The `multiblocks/{Name}.json` is the source of truth — Java code is derived from it

@@ -11,7 +11,7 @@ function createWindow() {
     height: 900,
     minWidth: 1200,
     minHeight: 700,
-    title: 'Retronism Mod Maker',
+    title: 'Aero Machine Maker',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
