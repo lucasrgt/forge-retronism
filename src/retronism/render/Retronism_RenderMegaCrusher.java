@@ -5,7 +5,7 @@ import retronism.Retronism_Registry;
 import retronism.tile.Retronism_TileMegaCrusher;
 import aero.modellib.Aero_JsonModel;
 import aero.modellib.Aero_JsonModelLoader;
-import aero.modellib.Aero_JsonModelRenderer;
+import aero.modellib.Aero_InventoryRenderer;
 
 public class Retronism_RenderMegaCrusher implements Retronism_IBlockRenderer {
 
@@ -63,6 +63,6 @@ public class Retronism_RenderMegaCrusher implements Retronism_IBlockRenderer {
         int texID = ModLoader.getMinecraftInstance().renderEngine.getTexture("/block/retronism_megacrusher_hq.png");
         ModLoader.getMinecraftInstance().renderEngine.bindTexture(texID);
         
-        Aero_JsonModelRenderer.renderInventory(renderer, MODEL, metadata);
+        Aero_InventoryRenderer.render(renderer, MODEL);
     }
 }
