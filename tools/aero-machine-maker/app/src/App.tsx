@@ -11,8 +11,8 @@ import { useStore, type SerializedMultiblock } from '@/hooks/use-store'
 
 const MULTIBLOCK_TABS = [
   { id: 'structure', label: '3D Structure' },
-  { id: 'model', label: 'Model' },
   { id: 'gui', label: 'GUI Builder' },
+  { id: 'model', label: 'Model' },
 ]
 const SINGLE_TABS = [
   { id: 'gui', label: 'GUI Builder' },
@@ -42,10 +42,16 @@ export default function App() {
       api.onMcpWsMessage((msg: { type: string; payload: any }) => {
         const store = useStore.getState()
         switch (msg.type) {
-          case 'state':
-            store.deserialize(msg.payload as SerializedMultiblock)
+          case 'state': {
+            const payload = msg.payload as SerializedMultiblock & { _mcpToolCall?: boolean }
+            // Only accept MCP state if it's an explicit tool call OR the app is empty
+            // This prevents MCP reconnect/sync from overwriting a user-loaded project
+            if (payload._mcpToolCall || store.blocks.size === 0) {
+              store.deserialize(payload)
+            }
             store.setMcpConnected(true)
             break
+          }
           case 'camera':
             store.setCameraCommand(msg.payload)
             break
@@ -53,7 +59,7 @@ export default function App() {
             store.setActiveTab(msg.payload.tab)
             break
           case 'select_block':
-            store.setSelectedBlock(msg.payload.key)
+            store.setSelectedBlocks([msg.payload.key])
             break
           case 'set_layer':
             store.setLayerFilter(msg.payload.layer)
@@ -93,6 +99,35 @@ export default function App() {
         }
       })
     }
+    // Load all dictionaries on startup (built-in library + project)
+    useStore.getState().loadAllDictionaries()
+  }, [])
+
+  // Keyboard shortcuts (Undo/Redo)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in an input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return
+      }
+
+      const isCtrl = e.ctrlKey || e.metaKey
+      if (isCtrl) {
+        if (e.key === 'z') {
+          e.preventDefault()
+          if (e.shiftKey) {
+            useStore.getState().redo()
+          } else {
+            useStore.getState().undo()
+          }
+        } else if (e.key === 'y') {
+          e.preventDefault()
+          useStore.getState().redo()
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   return (
@@ -115,7 +150,7 @@ export default function App() {
           </div>
           <div className="flex items-center justify-between px-3 py-1.5 border-t border-border text-xs text-muted-foreground">
             {isMultiblock ? (
-              <span>Click: select | Shift+click / Right-click: place | Alt+drag: orbit | Space+drag: pan | Scroll: zoom</span>
+              <span>Click: select | Right-click: place | Alt+drag: orbit | Space+drag: pan | Scroll: zoom</span>
             ) : (
               <span>Single block machine — configure GUI layout</span>
             )}

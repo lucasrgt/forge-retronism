@@ -14,8 +14,8 @@ const PORT_TYPES: { type: IOType; label: string; color: string }[] = [
 
 export function RightPanel() {
   const blocks = useStore((s) => s.blocks)
-  const selectedBlock = useStore((s) => s.selectedBlock)
-  const removeBlock = useStore((s) => s.removeBlock)
+  const selectedBlocks = useStore((s) => s.selectedBlocks)
+  const removeSelectedBlocks = useStore((s) => s.removeSelectedBlocks)
   const placeBlock = useStore((s) => s.placeBlock)
 
   // Count blocks by type
@@ -24,60 +24,78 @@ export function RightPanel() {
     counts[block.type] = (counts[block.type] || 0) + 1
   }
 
-  const selEntry = selectedBlock ? blocks.get(selectedBlock) : null
-  const selCoords = selectedBlock?.split(',').map(Number)
+  const isSingle = selectedBlocks.length === 1
+  const selKey = isSingle ? selectedBlocks[0] : null
+  const selEntry = selKey ? blocks.get(selKey) : null
+  const selCoords = selKey?.split(',').map(Number)
 
   return (
     <div className="w-56 bg-background border-l border-border overflow-y-auto p-3 space-y-3 shrink-0">
-      {selEntry && selCoords && (
+      {selectedBlocks.length > 0 && (
         <Card>
-          <CardTitle>Selected Block</CardTitle>
-          <p className="text-xs text-muted-foreground">
-            Position: <span className="text-foreground font-bold">{selectedBlock}</span>
-          </p>
-          <Label>Type</Label>
-          <Select
-            value={selEntry.type}
-            onChange={(e) => {
-              placeBlock(selCoords[0], selCoords[1], selCoords[2], e.target.value as any, selEntry.mode)
-            }}
-          >
-            {[...blockRegistry.values()].map((def) => (
-              <option key={def.id} value={def.id}>{def.label}</option>
-            ))}
-          </Select>
+          <CardTitle>{isSingle ? 'Selected Block' : `${selectedBlocks.length} Blocks Selected`}</CardTitle>
 
-          {/* Port type — hidden for controller blocks */}
-          {blockRegistry.get(selEntry.type)?.category !== 'controller' && (
+          {isSingle && selEntry && selCoords && (
             <>
-              <Label>Port</Label>
-              <div className="grid grid-cols-2 gap-1 text-xs">
-                <button
-                  onClick={() => useStore.getState().setPortType(selectedBlock!, null)}
-                  className={`px-1.5 py-1 rounded border transition-colors text-center ${
-                    !selEntry.portType ? 'border-primary bg-primary/20 text-primary' : 'border-border hover:bg-muted/50'
-                  }`}
-                >
-                  None
-                </button>
-                {PORT_TYPES.map(({ type, label, color }) => (
-                  <button
-                    key={type}
-                    onClick={() => useStore.getState().setPortType(selectedBlock!, type)}
-                    className={`px-1.5 py-1 rounded border transition-colors flex items-center justify-center gap-1 ${
-                      selEntry.portType === type ? 'border-primary bg-primary/20 text-primary' : 'border-border hover:bg-muted/50'
-                    }`}
-                  >
-                    <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                    {label}
-                  </button>
+              <p className="text-xs text-muted-foreground">
+                Position: <span className="text-foreground font-bold">{selKey}</span>
+              </p>
+              <Label>Type</Label>
+              <Select
+                value={selEntry.type}
+                onChange={(e) => {
+                  placeBlock(selCoords[0], selCoords[1], selCoords[2], e.target.value as any, selEntry.mode)
+                }}
+              >
+                {[...blockRegistry.values()].map((def) => (
+                  <option key={def.id} value={def.id}>{def.label}</option>
                 ))}
+              </Select>
+
+              <Label>Identity Role</Label>
+              <div className="grid grid-cols-1 gap-1 text-xs mb-2">
+                <Button
+                  variant={!selEntry.isController && !selEntry.portType ? 'secondary' : 'outline'}
+                  size="sm"
+                  onClick={() => useStore.getState().setBlockRole(selKey!, 'none')}
+                >
+                  Normal Block
+                </Button>
+                <Button
+                  variant={selEntry.isController ? 'secondary' : 'outline'}
+                  size="sm"
+                  onClick={() => useStore.getState().setBlockRole(selKey!, 'controller')}
+                >
+                  Machine Controller
+                </Button>
+                <Button
+                  variant={!!selEntry.portType ? 'secondary' : 'outline'}
+                  size="sm"
+                  onClick={() => useStore.getState().setBlockRole(selKey!, 'port')}
+                >
+                  I/O Port
+                </Button>
               </div>
 
-              {/* Default mode — shown when port is set */}
-              {selEntry.portType && (
+              {/* Port configuration — shown when port role is active */}
+              {!!selEntry.portType && (
                 <>
-                  <Label>Default Mode</Label>
+                  <Label>Port Type</Label>
+                  <div className="grid grid-cols-2 gap-1 text-xs">
+                    {PORT_TYPES.map(({ type, label, color }) => (
+                      <button
+                        key={type}
+                        onClick={() => useStore.getState().setBlockRole(selKey!, 'port', type)}
+                        className={`px-1.5 py-1 rounded border transition-colors flex items-center justify-center gap-1 ${selEntry.portType === type ? 'border-primary bg-primary/20 text-primary' : 'border-border hover:bg-muted/50'
+                          }`}
+                      >
+                        <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <Label className="mt-2">Default Mode</Label>
                   <Select
                     value={selEntry.mode}
                     onChange={(e) => {
@@ -93,11 +111,8 @@ export function RightPanel() {
             </>
           )}
 
-          <Button variant="destructive" size="sm" className="w-full" onClick={() => {
-            removeBlock(selCoords[0], selCoords[1], selCoords[2])
-            useStore.getState().setSelectedBlock(null)
-          }}>
-            Delete Block
+          <Button variant="destructive" size="sm" className="w-full mt-2" onClick={() => removeSelectedBlocks()}>
+            {isSingle ? 'Delete Block' : 'Delete Selection'}
           </Button>
         </Card>
       )}

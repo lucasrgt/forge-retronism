@@ -1,0 +1,296 @@
+{
+  "name": "HeavyCrusher",
+  "structType": "machine",
+  "dimensions": [
+    3,
+    3,
+    3
+  ],
+  "ioTypes": [
+    "energy",
+    "item"
+  ],
+  "capacity": {
+    "energy": 64000,
+    "fluid": 0,
+    "gas": 0
+  },
+  "processTime": 200,
+  "energyPerTick": 32,
+  "blockId": 213,
+  "defaultShellBlock": "machine_block",
+  "guiHeight": 196,
+  "structure": [
+    {
+      "layer": 0,
+      "pattern": [
+        [
+          "k",
+          "i",
+          "k"
+        ],
+        [
+          "i",
+          "i",
+          "i"
+        ],
+        [
+          "k",
+          "i",
+          "k"
+        ]
+      ]
+    },
+    {
+      "layer": 1,
+      "pattern": [
+        [
+          "i",
+          "i",
+          "i"
+        ],
+        [
+          "i",
+          "i",
+          "i"
+        ],
+        [
+          "i",
+          "l",
+          "i"
+        ]
+      ]
+    },
+    {
+      "layer": 2,
+      "pattern": [
+        [
+          "k",
+          "i",
+          "k"
+        ],
+        [
+          "i",
+          "i",
+          "i"
+        ],
+        [
+          "k",
+          "i",
+          "k"
+        ]
+      ]
+    }
+  ],
+  "legend": {
+    " ": "air",
+    "k": "advanced_machine_block",
+    "i": "machine_block",
+    "l": "heavy_crusher_controller"
+  },
+  "portModes": {
+    "1,0,1": "input_output",
+    "1,1,0": "input_output",
+    "0,1,1": "input_output",
+    "2,1,1": "input_output",
+    "1,2,1": "input_output"
+  },
+  "portTypes": {
+    "1,0,1": "energy",
+    "1,1,0": "energy",
+    "0,1,1": "item",
+    "2,1,1": "item",
+    "1,2,1": "item"
+  },
+  "guiComponents": [
+    {
+      "type": "energy_bar",
+      "x": 12,
+      "y": 20,
+      "w": 8,
+      "h": 80,
+      "slotType": null,
+      "ioMode": "display"
+    },
+    {
+      "type": "slot",
+      "x": 46,
+      "y": 20,
+      "w": 18,
+      "h": 18,
+      "slotType": "input",
+      "ioMode": "input"
+    },
+    {
+      "type": "slot",
+      "x": 81,
+      "y": 20,
+      "w": 18,
+      "h": 18,
+      "slotType": "input",
+      "ioMode": "input"
+    },
+    {
+      "type": "slot",
+      "x": 116,
+      "y": 20,
+      "w": 18,
+      "h": 18,
+      "slotType": "input",
+      "ioMode": "input"
+    },
+    {
+      "type": "slot",
+      "x": 151,
+      "y": 20,
+      "w": 18,
+      "h": 18,
+      "slotType": "input",
+      "ioMode": "input"
+    },
+    {
+      "type": "progress_arrow",
+      "x": 43,
+      "y": 41,
+      "w": 24,
+      "h": 17,
+      "slotType": null,
+      "ioMode": "display"
+    },
+    {
+      "type": "progress_arrow",
+      "x": 78,
+      "y": 41,
+      "w": 24,
+      "h": 17,
+      "slotType": null,
+      "ioMode": "display"
+    },
+    {
+      "type": "progress_arrow",
+      "x": 113,
+      "y": 41,
+      "w": 24,
+      "h": 17,
+      "slotType": null,
+      "ioMode": "display"
+    },
+    {
+      "type": "progress_arrow",
+      "x": 148,
+      "y": 41,
+      "w": 24,
+      "h": 17,
+      "slotType": null,
+      "ioMode": "display"
+    },
+    {
+      "type": "slot",
+      "x": 46,
+      "y": 62,
+      "w": 18,
+      "h": 18,
+      "slotType": "output",
+      "ioMode": "output"
+    },
+    {
+      "type": "slot",
+      "x": 81,
+      "y": 62,
+      "w": 18,
+      "h": 18,
+      "slotType": "output",
+      "ioMode": "output"
+    },
+    {
+      "type": "slot",
+      "x": 116,
+      "y": 62,
+      "w": 18,
+      "h": 18,
+      "slotType": "output",
+      "ioMode": "output"
+    },
+    {
+      "type": "slot",
+      "x": 151,
+      "y": 62,
+      "w": 18,
+      "h": 18,
+      "slotType": "output",
+      "ioMode": "output"
+    },
+    {
+      "type": "slot",
+      "x": 46,
+      "y": 82,
+      "w": 18,
+      "h": 18,
+      "slotType": "output",
+      "ioMode": "output"
+    },
+    {
+      "type": "slot",
+      "x": 81,
+      "y": 82,
+      "w": 18,
+      "h": 18,
+      "slotType": "output",
+      "ioMode": "output"
+    },
+    {
+      "type": "slot",
+      "x": 116,
+      "y": 82,
+      "w": 18,
+      "h": 18,
+      "slotType": "output",
+      "ioMode": "output"
+    },
+    {
+      "type": "slot",
+      "x": 151,
+      "y": 82,
+      "w": 18,
+      "h": 18,
+      "slotType": "output",
+      "ioMode": "output"
+    }
+  ],
+  "registry": [
+    {
+      "id": "machine_block",
+      "category": "mod",
+      "label": "Machine Block",
+      "color": 13158600,
+      "char": "i",
+      "builtIn": false
+    },
+    {
+      "id": "advanced_machine_block",
+      "category": "mod",
+      "label": "Advanced Machine Block",
+      "color": 11061464,
+      "char": "k",
+      "builtIn": false
+    },
+    {
+      "id": "heavy_crusher_controller",
+      "category": "mod",
+      "label": "Heavy Crusher Controller",
+      "color": 9072752,
+      "char": "l",
+      "builtIn": false
+    },
+    {
+      "id": "heavy_crusher_ctrl",
+      "category": "controller",
+      "label": "HeavyCrusher Controller",
+      "color": 6982250,
+      "char": "m",
+      "builtIn": false,
+      "mcId": 213,
+      "terrainIndex": 45
+    }
+  ]
+}

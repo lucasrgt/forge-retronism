@@ -1,6 +1,7 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { useStore } from '@/hooks/use-store'
-import { GUI_COMP_DEFS, type GuiComponentType, type GuiComponent } from '@/core/types'
+import { GUI_COMP_DEFS, type GuiComponentType, type GuiComponent, type ArrowDirection } from '@/core/types'
+import mcFontUrl from '@/assets/Monocraft.ttf?url'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -8,8 +9,8 @@ import { Card, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-const GUI_W = 176
-const GUI_H = 166
+const DEFAULT_GUI_W = 176
+const DEFAULT_GUI_H = 166
 const SCALE = 3
 
 const MC = {
@@ -165,6 +166,17 @@ export function GuiBuilder() {
   const selectedCompIndex = useStore((s) => s.selectedCompIndex)
   const snapEnabled = useStore((s) => s.snapEnabled)
   const gridSize = useStore((s) => s.gridSize)
+  const GUI_W = useStore((s) => s.guiWidth || DEFAULT_GUI_W)
+  const GUI_H = useStore((s) => s.guiHeight || DEFAULT_GUI_H)
+  const [fontReady, setFontReady] = useState(false)
+
+  useEffect(() => {
+    const face = new FontFace('Monocraft', `url(${mcFontUrl})`)
+    face.load().then(loaded => {
+      document.fonts.add(loaded)
+      setFontReady(true)
+    }).catch(() => setFontReady(true))
+  }, [])
 
   // --- Drawing helpers ---
   const render = useCallback(() => {
@@ -231,17 +243,20 @@ export function GuiBuilder() {
       hLine(sx, sy + sh - 1, sw, MC.WH); vLine(sx + sw - 1, sy, sh, MC.WH)
       fill(sx + 1, sy + 1, sw - 2, sh - 2, MC.SL); pixel(sx + sw - 1, sy, MC.SL)
     }
+    const invX = Math.floor((GUI_W - 162) / 2)  // 162 = 9 slots × 18px, centered
+    const invY = GUI_H - 83  // 83px from bottom edge
     for (let row = 0; row < 3; row++)
       for (let col = 0; col < 9; col++)
-        drawSlot(7 + col * 18, 83 + row * 18, 18, 18)
+        drawSlot(invX + col * 18, invY + row * 18, 18, 18)
     for (let col = 0; col < 9; col++)
-      drawSlot(7 + col * 18, 141, 18, 18)
+      drawSlot(invX + col * 18, invY + 58, 18, 18)
 
-    // Labels
-    ctx.fillStyle = '#555'
-    ctx.font = `${8 * s}px Consolas, monospace`
-    ctx.fillText('Title', 8 * s, 12 * s)
-    ctx.fillText('Inventory', 8 * s, (GUI_H - 96 + 6) * s)
+    // Labels (Minecraft font — use at multiples of 8 for crisp pixels)
+    ctx.fillStyle = '#404040'
+    ctx.font = `300 ${9 * s}px Monocraft, Consolas, monospace`
+    ctx.textBaseline = 'top'
+    ctx.fillText('Title', 8 * s, 6 * s)
+    ctx.fillText('Inventory', invX * s, (invY - 11) * s)
 
     // Components
     for (let i = 0; i < components.length; i++) {
@@ -271,14 +286,24 @@ export function GuiBuilder() {
             ctx.fillStyle = '#3fb'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText(ioLabel, comp.x * s, (comp.y - 4) * s) }
           break
         case 'progress_arrow': {
-          // Empty arrow (24x17) — pixel-exact from furnace.png (79,34)
-          // 0x8b = SL (139), background = c6 (198)
           const ax = comp.x, ay = comp.y
-          // Shaft: rows 7-9, cols 1-14
-          fill(ax + 1, ay + 7, 14, 3, MC.SL)
-          // Head triangle: col 15 starts at row 1, narrows 1px per row each side
-          for (let i = 0; i < 8; i++) vLine(ax + 15 + i, ay + 1 + i, 15 - i * 2, MC.SL)
-          ctx.fillStyle = '#ccc'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText('ARROW', (ax + 2) * s, (ay - 4) * s)
+          const dir = comp.direction || 'right'
+          if (dir === 'right') {
+            fill(ax + 1, ay + 7, 14, 3, MC.SL)
+            for (let i = 0; i < 8; i++) vLine(ax + 15 + i, ay + 1 + i, 15 - i * 2, MC.SL)
+          } else if (dir === 'left') {
+            fill(ax + 9, ay + 7, 14, 3, MC.SL)
+            for (let i = 0; i < 8; i++) vLine(ax + 8 - i, ay + 1 + i, 15 - i * 2, MC.SL)
+          } else if (dir === 'down') {
+            hLine(ax + 4, ay + 1, 3, MC.SL)
+            for (let r = 0; r < 14; r++) hLine(ax + 4, ay + 1 + r, 3, MC.SL)
+            for (let i = 0; i < 5; i++) hLine(ax + 1 + i, ay + 12 + i, 9 - i * 2, MC.SL)
+          } else {
+            for (let r = 0; r < 14; r++) hLine(ax + 4, ay + 3 + r, 3, MC.SL)
+            for (let i = 0; i < 5; i++) hLine(ax + 1 + i, ay + 4 - i, 9 - i * 2, MC.SL)
+          }
+          const dirLabel = dir === 'right' ? '→' : dir === 'left' ? '←' : dir === 'down' ? '↓' : '↑'
+          ctx.fillStyle = '#ccc'; ctx.font = `bold ${6 * s}px Consolas`; ctx.fillText(dirLabel, (ax + 2) * s, (ay - 4) * s)
           break
         }
         case 'flame': {
@@ -332,7 +357,7 @@ export function GuiBuilder() {
         ctx.setLineDash([])
       }
     }
-  }, [components, selectedCompIndex, snapEnabled, gridSize])
+  }, [components, selectedCompIndex, snapEnabled, gridSize, fontReady, GUI_W, GUI_H])
 
   useEffect(() => { render() }, [render])
 
@@ -343,9 +368,12 @@ export function GuiBuilder() {
 
     function toGui(e: MouseEvent) {
       const rect = canvas!.getBoundingClientRect()
+      const s = useStore.getState()
+      const gw = s.guiWidth || DEFAULT_GUI_W
+      const gh = s.guiHeight || DEFAULT_GUI_H
       const x = (e.clientX - rect.left) / SCALE
       const y = (e.clientY - rect.top) / SCALE
-      if (x < 0 || x >= GUI_W || y < 0 || y >= GUI_H) return null
+      if (x < 0 || x >= gw || y < 0 || y >= gh) return null
       return { x, y }
     }
 
@@ -378,9 +406,12 @@ export function GuiBuilder() {
       if (!comp) return
       const nx = snapVal(pos.x - dragging.current.offsetX)
       const ny = snapVal(pos.y - dragging.current.offsetY)
+      const s = useStore.getState()
+      const gw = s.guiWidth || DEFAULT_GUI_W
+      const gh = s.guiHeight || DEFAULT_GUI_H
       useStore.getState().updateGuiComponent(dragging.current.index, {
-        x: Math.max(3, Math.min(GUI_W - comp.w - 3, nx)),
-        y: Math.max(3, Math.min(GUI_H - comp.h - 3, ny)),
+        x: Math.max(3, Math.min(gw - comp.w - 3, nx)),
+        y: Math.max(3, Math.min(gh - comp.h - 3, ny)),
       })
     }
 
@@ -449,7 +480,16 @@ export function GuiBuilder() {
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center gap-1 text-[11px]">
+            <Label className="text-[11px] whitespace-nowrap">W</Label>
+            <Input type="number" className="w-14 h-7 text-[11px]" value={GUI_W} min={176} max={256} step={1}
+              onChange={(e) => useStore.getState().setGuiWidth(+e.target.value)} />
+            <Label className="text-[11px] whitespace-nowrap">H</Label>
+            <Input type="number" className="w-14 h-7 text-[11px]" value={GUI_H} min={166} max={256} step={1}
+              onChange={(e) => useStore.getState().setGuiHeight(+e.target.value)} />
+          </div>
+          <div className="w-px h-5 bg-border" />
           <Button variant="outline" size="sm" onClick={() => {
             const preset = (document.getElementById('gui-preset-sel') as HTMLSelectElement)?.value || 'processor'
             useStore.getState().loadGuiPreset(preset)
@@ -478,7 +518,7 @@ export function GuiBuilder() {
             ref={canvasRef}
             width={GUI_W * SCALE}
             height={GUI_H * SCALE}
-            style={{ width: GUI_W * SCALE, height: GUI_H * SCALE, imageRendering: 'pixelated' }}
+            style={{ width: GUI_W * SCALE, height: GUI_H * SCALE, imageRendering: 'pixelated', fontSmooth: 'never', WebkitFontSmoothing: 'none' } as React.CSSProperties}
             className="border border-border cursor-crosshair"
           />
         </div>
@@ -488,9 +528,9 @@ export function GuiBuilder() {
             <CardTitle>Component</CardTitle>
             <p className="text-xs">Type: <span className="font-bold text-foreground">{selectedDef.label}</span></p>
             <div className="flex gap-1.5">
-              <div><Label>X</Label><Input type="number" value={selectedComp.x} min={0} max={175}
+              <div><Label>X</Label><Input type="number" value={selectedComp.x} min={0} max={GUI_W - 1}
                 onChange={(e) => useStore.getState().updateGuiComponent(selectedCompIndex, { x: +e.target.value })} /></div>
-              <div><Label>Y</Label><Input type="number" value={selectedComp.y} min={0} max={165}
+              <div><Label>Y</Label><Input type="number" value={selectedComp.y} min={0} max={GUI_H - 1}
                 onChange={(e) => useStore.getState().updateGuiComponent(selectedCompIndex, { y: +e.target.value })} /></div>
             </div>
             {selectedDef.resizable && (
@@ -509,6 +549,27 @@ export function GuiBuilder() {
                   <option value="input">Input</option>
                   <option value="output">Output</option>
                   <option value="fuel">Fuel</option>
+                </Select>
+              </>
+            )}
+            {selectedComp.type === 'progress_arrow' && (
+              <>
+                <Label>Direction</Label>
+                <Select value={selectedComp.direction || 'right'}
+                  onChange={(e) => {
+                    const dir = e.target.value as ArrowDirection
+                    const isVertical = dir === 'up' || dir === 'down'
+                    const wasVertical = (selectedComp.direction || 'right') === 'up' || (selectedComp.direction || 'right') === 'down'
+                    if (isVertical !== wasVertical) {
+                      useStore.getState().updateGuiComponent(selectedCompIndex, { direction: dir, w: selectedComp.h, h: selectedComp.w })
+                    } else {
+                      useStore.getState().updateGuiComponent(selectedCompIndex, { direction: dir })
+                    }
+                  }}>
+                  <option value="right">Right →</option>
+                  <option value="left">Left ←</option>
+                  <option value="down">Down ↓</option>
+                  <option value="up">Up ↑</option>
                 </Select>
               </>
             )}

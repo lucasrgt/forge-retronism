@@ -72,6 +72,22 @@ ipcMain.handle('read-file-base64', async (_event: any, filePath: string) => {
 
 ipcMain.handle('get-project-root', () => path.resolve(__dirname, '..', '..', '..', '..'))
 
+ipcMain.handle('list-directory', async (_event: any, dirPath: string) => {
+  try {
+    if (!fs.existsSync(dirPath)) return []
+    return fs.readdirSync(dirPath).filter((f: string) => !f.startsWith('.'))
+  } catch { return [] }
+})
+
+
+ipcMain.handle('select-directory', async (_event: any, { defaultPath }: any) => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    defaultPath: defaultPath || undefined,
+    properties: ['openDirectory', 'createDirectory'],
+  })
+  return result.canceled ? null : result.filePaths[0]
+})
+
 // ---------------------------------------------------------------------------
 // MCP Live Sync — Electron IS the WebSocket server, MCP connects as client
 // ---------------------------------------------------------------------------

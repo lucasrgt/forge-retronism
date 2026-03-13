@@ -1,0 +1,109 @@
+{
+    "mod_id": "retronism",
+    "mod_name": "RetroNism",
+    "base_package": "retronism",
+    "main_class": "mod_Retronism",
+    "flatten_classes": false,
+    "blocks": {
+        "infrastructure": {
+            "cable": {
+                "var": "Retronism_Registry.cableBlock",
+                "label": "Retronism Cable",
+                "color": "0xe8c840"
+            },
+            "fluid_pipe": {
+                "var": "Retronism_Registry.fluidPipeBlock",
+                "label": "Fluid Pipe",
+                "color": "0x4488dd"
+            },
+            "gas_pipe": {
+                "var": "Retronism_Registry.gasPipeBlock",
+                "label": "Gas Pipe",
+                "color": "0xaabbcc"
+            },
+            "item_pipe": {
+                "var": "Retronism_Registry.itemPipeBlock",
+                "label": "Item Pipe",
+                "color": "0xe87830"
+            },
+            "mega_pipe": {
+                "var": "Retronism_Registry.megaPipeBlock",
+                "label": "Mega Pipe",
+                "color": "0x8855cc"
+            }
+        },
+        "machines": {
+            "crusher": {
+                "var": "Retronism_Registry.crusherBlock",
+                "label": "Crusher",
+                "color": "0x7a8a9a"
+            },
+            "generator": {
+                "var": "Retronism_Registry.generatorBlock",
+                "label": "Generator",
+                "color": "0xcc6633"
+            },
+            "pump": {
+                "var": "Retronism_Registry.pumpBlock",
+                "label": "Water Pump",
+                "color": "0x3388bb"
+            },
+            "electrolysis": {
+                "var": "Retronism_Registry.electrolysisBlock",
+                "label": "Electrolysis Machine",
+                "color": "0x55bbaa"
+            }
+        },
+        "storage": {
+            "fluid_tank": {
+                "var": "Retronism_Registry.fluidTankBlock",
+                "label": "Fluid Tank",
+                "color": "0x2266aa"
+            },
+            "gas_tank": {
+                "var": "Retronism_Registry.gasTankBlock",
+                "label": "Gas Tank",
+                "color": "0x99aabb"
+            }
+        },
+        "multiblock": {
+            "mega_crusher_core": {
+                "var": "Retronism_Registry.megaCrusherCoreBlock",
+                "label": "Mega Crusher Controller",
+                "color": "0xcc3333"
+            },
+            "mega_crusher_port": {
+                "var": "Retronism_Registry.megaCrusherPortBlock",
+                "label": "Mega Crusher Port",
+                "color": "0x339933"
+            },
+            "machine_port": {
+                "var": "Retronism_Registry.machinePortBlock",
+                "label": "Basic Machine Port",
+                "color": "0x6699cc"
+            }
+        }
+    },
+    "items": {
+        "iron_dust": {
+            "var": "Retronism_Registry.ironDust",
+            "label": "Iron Dust"
+        },
+        "gold_dust": {
+            "var": "Retronism_Registry.goldDust",
+            "label": "Gold Dust"
+        },
+        "diamond_dust": {
+            "var": "Retronism_Registry.diamondDust",
+            "label": "Diamond Dust"
+        },
+        "gas_cell_empty": {
+            "var": "Retronism_Registry.gasCellEmpty",
+            "label": "Empty Gas Cell"
+        },
+        "wrench": {
+            "var": "Retronism_Registry.wrench",
+            "label": "Retronism Wrench"
+        }
+    }
+}

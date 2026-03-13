@@ -7,7 +7,9 @@ contextBridge.exposeInMainWorld('api', {
   readFile: (filePath: string) => ipcRenderer.invoke('read-file', filePath),
   readFileBase64: (filePath: string) => ipcRenderer.invoke('read-file-base64', filePath),
   getProjectRoot: () => ipcRenderer.invoke('get-project-root'),
+  listDirectory: (dirPath: string) => ipcRenderer.invoke('list-directory', dirPath),
   exportToMod: (files: any[]) => ipcRenderer.invoke('export-to-mod', { files }),
+  selectDirectory: (defaultPath?: string) => ipcRenderer.invoke('select-directory', { defaultPath }),
   getMcpSyncState: () => ipcRenderer.invoke('get-mcp-sync-state'),
   // Legacy — kept for backward compat but no longer used
   onMcpStateUpdate: (callback: (data: string) => void) => {

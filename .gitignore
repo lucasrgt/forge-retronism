@@ -1,5 +1,5 @@
 # RetroMCP ecosystem (decompiled MC, binaries, build output)
-mcp/
+/mcp/
 
 # Internal context doc
 RETRONISM_CONTEXT.md
@@ -27,3 +27,4 @@ tools/aero-machine-maker/app/dist-electron/
 
 # MCP config (local)
 .mcp.json
+IC2_Heavy_Machinery/

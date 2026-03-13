@@ -2,9 +2,11 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import * as THREE from 'three'
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 import { useStore, type AnimStateMapping } from '@/hooks/use-store'
+import { getBlockInfo, blockRegistry } from '@/core/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { toast } from 'sonner'
 
 /**
  * Apply Minecraft-style per-face brightness to a BufferGeometry via vertex colors.
@@ -50,6 +52,101 @@ function applyMinecraftLighting(geometry: THREE.BufferGeometry) {
   }
 
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+}
+
+function generateModelContext(): string {
+  const s = useStore.getState()
+  const { w, h, d } = s.dimensions
+
+  // Block counts and port info
+  const counts: Record<string, number> = {}
+  const portDetails: { blockId: string; pos: string; mode: string; portType?: string }[] = []
+  for (const [key, block] of s.blocks) {
+    counts[block.type] = (counts[block.type] || 0) + 1
+    if (block.portType) {
+      portDetails.push({ blockId: block.type, pos: key, mode: block.mode, portType: block.portType })
+    }
+  }
+
+  // Block palette
+  const usedBlocks = new Set<string>()
+  for (const [, block] of s.blocks) usedBlocks.add(block.type)
+  const palette = [...usedBlocks].map(id => {
+    const def = blockRegistry.get(id)
+    if (!def) return ''
+    return `  <block id="${id}" category="${def.category}" color="#${def.color.toString(16).padStart(6, '0')}" label="${def.label}"${def.portType ? ` portType="${def.portType}"` : ''} count="${counts[id] || 0}" />`
+  }).filter(Boolean)
+
+  // Structure layers
+  let layerGrid = ''
+  for (let y = 0; y < h; y++) {
+    layerGrid += `  <layer y="${y}">\n`
+    for (let z = 0; z < d; z++) {
+      let row = '    '
+      for (let x = 0; x < w; x++) {
+        const block = s.blocks.get(`${x},${y},${z}`)
+        row += block ? (getBlockInfo(block.type)?.char || '?') : '.'
+      }
+      layerGrid += row + '\n'
+    }
+    layerGrid += '  </layer>\n'
+  }
+
+  const portXml = portDetails.map(p =>
+    `  <port type="${p.portType}" blockId="${p.blockId}" position="${p.pos}" mode="${p.mode}" />`
+  ).join('\n')
+
+  return `# ${s.name} — Multiblock Model Context
+
+> Auto-generated metadata for Blockbench MCP model creation.
+
+<machine>
+  <name>${s.name}</name>
+  <type>${s.structType}</type>
+  <dimensions width="${w}" height="${h}" depth="${d}" />
+  <blockSize>16</blockSize>
+  <modelSize width="${w * 16}" height="${h * 16}" depth="${d * 16}" unit="pixels" />
+</machine>
+
+<io types="${s.ioTypes.join(', ')}">
+  <energy capacity="${s.capacity.energy}" perTick="${s.energyPerTick}" />
+  <fluid capacity="${s.capacity.fluid}" />
+  <gas capacity="${s.capacity.gas}" />
+  <processTime ticks="${s.processTime}" />
+</io>
+
+<palette>
+${palette.join('\n')}
+</palette>
+
+<structure totalBlocks="${s.blocks.size}">
+${layerGrid}</structure>
+
+<ports count="${portDetails.length}">
+${portXml}
+</ports>
+
+<gui components="${s.guiComponents.length}">
+${s.guiComponents.map((c, i) => `  <component index="${i}" type="${c.type}" x="${c.x}" y="${c.y}" w="${c.w}" h="${c.h}"${c.slotType ? ` slotType="${c.slotType}"` : ''} ioMode="${c.ioMode}" />`).join('\n')}
+</gui>
+
+## Notes for Blockbench
+
+### For multiblock structures:
+- The Blockbench model represents the ENTIRE FORMED STRUCTURE, not just the controller block
+- Use the \`<modelSize>\` dimensions above as the Blockbench canvas size (e.g., 48x64x48 pixels for a 3x3x4 structure)
+- Design as one unified industrial machine — NOT a collection of separate casing blocks
+- When the multiblock forms in-game, casing blocks become invisible and this model renders at the controller's position
+
+### For single-block machines:
+- Coordinates range 0-16 per axis (one block = 16 pixels)
+- 8-15 elements for visual richness
+
+### Render system (both types):
+- Uses \`setBlockBounds\` + \`renderStandardBlock\` (axis-aligned boxes only, no rotations)
+- Texture is a single 16x16 atlas referenced by all faces
+- Each element maps to a \`float[] {fromX, fromY, fromZ, toX, toY, toZ}\` in the Java PARTS array
+`
 }
 
 export function ModelEditor() {
@@ -658,12 +755,37 @@ export function ModelEditor() {
       >
         {!hasObj && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Card className="text-center max-w-xs">
+            <Card className="text-center max-w-sm space-y-3">
               <p className="text-lg font-medium text-foreground">No model loaded</p>
-              <p className="text-sm text-muted-foreground">Import an OBJ and its texture from Blockbench</p>
-              <div className="flex gap-2 mt-1">
-                <Button onClick={handleImportObj} variant="outline" className="flex-1">Import OBJ</Button>
-                <Button onClick={handleImportTexture} variant="outline" className="flex-1">Import Texture</Button>
+              <p className="text-sm text-muted-foreground">Import an OBJ model from Blockbench</p>
+              <Button onClick={handleImportObj} variant="outline" className="w-full">Import OBJ</Button>
+              <div className="border-t border-border pt-3">
+                <p className="text-xs text-muted-foreground mb-1.5">Using AI or Blockbench MCP to create the model?</p>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="text-xs"
+                  onClick={async () => {
+                    const md = generateModelContext()
+                    try {
+                      await navigator.clipboard.writeText(md)
+                      toast.success('Model context copied to clipboard — paste it into your AI chat')
+                    } catch {
+                      const api = (window as any).api
+                      if (api) {
+                        const filePath = await api.saveDialog(`${useStore.getState().name}_context.md`, [
+                          { name: 'Markdown', extensions: ['md'] },
+                        ])
+                        if (filePath) {
+                          await api.saveFile(filePath, md)
+                          toast.success(`Saved to ${filePath}`)
+                        }
+                      }
+                    }
+                  }}
+                >
+                  Export Structure Context
+                </Button>
               </div>
             </Card>
           </div>
@@ -672,7 +794,36 @@ export function ModelEditor() {
 
       {/* Right panel — animation config */}
       <div className="w-80 border-l border-border bg-card overflow-y-auto p-3 space-y-4">
-        <h3 className="text-sm font-medium text-foreground">Model & Animation</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-foreground">Model & Animation</h3>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-6 text-[10px] px-2"
+            onClick={async () => {
+              const md = generateModelContext()
+              const api = (window as any).api
+              // Try clipboard first
+              try {
+                await navigator.clipboard.writeText(md)
+                toast.success('Model context copied to clipboard')
+              } catch {
+                // Fallback: save to file
+                if (api) {
+                  const filePath = await api.saveDialog(`${useStore.getState().name}_context.md`, [
+                    { name: 'Markdown', extensions: ['md'] },
+                  ])
+                  if (filePath) {
+                    await api.saveFile(filePath, md)
+                    toast.success(`Saved to ${filePath}`)
+                  }
+                }
+              }
+            }}
+          >
+            Export Structure Context
+          </Button>
+        </div>
 
         {/* Import — Model */}
         <div className="space-y-1.5">

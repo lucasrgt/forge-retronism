@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import * as THREE from 'three'
 import { useStore } from '@/hooks/use-store'
-import { blockRegistry, type BlockEntry, type BlockCategory } from '@/core/types'
-import { loadTextures, isTexturesReady, getBlockMaterial, getMinecraftBoxGeometry, clearMaterialCache, getTileDataUrl } from '@/core/textures'
+import { blockRegistry, type BlockDef, type BlockCategory } from '@/core/types'
+import { loadTextures, isTexturesReady, getBlockMaterial, getMinecraftBoxGeometry, clearMaterialCache, getTileDataUrl, getBlockTextureDataUrl } from '@/core/textures'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,10 +29,11 @@ export function StructureEditor() {
   const blocks = useStore((s) => s.blocks)
   const dimensions = useStore((s) => s.dimensions)
   const selectedTool = useStore((s) => s.selectedTool)
-  const selectedBlock = useStore((s) => s.selectedBlock)
+  const selectedBlocks = useStore((s) => s.selectedBlocks)
   const layerFilter = useStore((s) => s.layerFilter)
   const pendingCamera = useStore((s) => s.pendingCamera)
   const pendingHighlight = useStore((s) => s.pendingHighlight)
+  const registryVersion = useStore((s) => s.registryVersion)
 
   // Initialize Three.js
   useEffect(() => {
@@ -73,14 +74,14 @@ export function StructureEditor() {
     // Keyboard: space for pan mode
     const canvas = renderer.domElement
     canvas.tabIndex = 0
+    canvas.style.outline = 'none'
+    canvas.style.userSelect = 'none'
     function onKeyDown(e: KeyboardEvent) {
       if (e.code === 'Space') { spaceDown = true; e.preventDefault() }
-      if (e.code === 'Delete') {
+      if (e.code === 'Delete' || e.code === 'Backspace') {
         const s = useStore.getState()
-        if (s.selectedBlock) {
-          const [x, y, z] = s.selectedBlock.split(',').map(Number) as [number, number, number]
-          s.removeBlock(x, y, z)
-          s.setSelectedBlock(null)
+        if (s.selectedBlocks.length > 0) {
+          s.removeSelectedBlocks()
         }
       }
     }
@@ -125,10 +126,13 @@ export function StructureEditor() {
       updateCamera()
     })
     canvas.addEventListener('mouseup', () => { orbitState.dragging = false; orbitState.panning = false })
+    let wheelLocked = false
     canvas.addEventListener('wheel', (e) => {
+      e.preventDefault()
+      if (wheelLocked) return
       orbitState.radius = Math.max(3, Math.min(30, orbitState.radius + e.deltaY * 0.01))
       updateCamera()
-    })
+    }, { passive: false })
 
     // Raycast helper
     const raycaster = new THREE.Raycaster()
@@ -164,43 +168,32 @@ export function StructureEditor() {
       return raycaster.intersectObject(groundPlane)
     }
 
-    // Left-click: select existing block, or place on face if clicking empty adjacent
+    // Left-click: select existing block only (no placement)
     canvas.addEventListener('click', (e) => {
       if (e.altKey || spaceDown) return
       const hits = raycastBlocks(e)
+      const store = useStore.getState()
+
       if (hits.length > 0) {
         const hit = hits[0]
         const key = hit.object.userData.key as string
-        const store = useStore.getState()
+
         if (e.shiftKey) {
-          // Shift+click: place block on adjacent face
-          const normal = hit.face?.normal
-          if (normal) {
-            const pos = key.split(',').map(Number)
-            const nx = pos[0] + Math.round(normal.x)
-            const ny = pos[1] + Math.round(normal.y)
-            const nz = pos[2] + Math.round(normal.z)
-            const { w, h, d } = store.dimensions
-            if (nx >= 0 && nx < w && ny >= 0 && ny < h && nz >= 0 && nz < d) {
-              store.placeBlock(nx, ny, nz, store.selectedTool)
-            }
+          // Add/remove from multi-selection
+          const current = store.selectedBlocks
+          if (current.includes(key)) {
+            store.setSelectedBlocks(current.filter(k => k !== key))
+          } else {
+            store.setSelectedBlocks([...current, key])
           }
         } else {
-          // Click: select block
-          store.setSelectedBlock(key)
+          // Normal click: replace selection
+          store.setSelectedBlocks([key])
         }
       } else {
-        // Click on empty space: place block on ground plane (y=0)
-        const groundHits = raycastGround(e)
-        if (groundHits.length > 0) {
-          const point = groundHits[0].point
-          const bx = Math.round(point.x)
-          const bz = Math.round(point.z)
-          const store = useStore.getState()
-          const { w, h, d } = store.dimensions
-          if (bx >= 0 && bx < w && bz >= 0 && bz < d) {
-            store.placeBlock(bx, 0, bz, store.selectedTool)
-          }
+        // Click on empty space: deselect everything unless holding shift
+        if (!e.shiftKey) {
+          store.setSelectedBlocks([])
         }
       }
     })
@@ -241,7 +234,7 @@ export function StructureEditor() {
     })
 
     const animId = requestAnimationFrame(function animate() {
-      sceneRef.current!.animId = requestAnimationFrame(animate)
+      if (sceneRef.current) sceneRef.current.animId = requestAnimationFrame(animate)
       renderer.render(scene, camera)
     })
 
@@ -250,6 +243,7 @@ export function StructureEditor() {
     // Load real block textures from terrain.png + custom assets
     loadTextures().then((ok) => {
       if (ok) {
+        setTexturesReady(true)
         clearMaterialCache()
         // Remove all existing meshes so they get recreated with textured materials
         const sc = sceneRef.current
@@ -264,12 +258,14 @@ export function StructureEditor() {
       }
     })
 
-    // Handle resize
+    // Handle resize — lock wheel briefly to prevent zoom glitches from layout shifts
     const resizeObs = new ResizeObserver(() => {
       if (!container) return
       camera.aspect = container.clientWidth / container.clientHeight
       camera.updateProjectionMatrix()
       renderer.setSize(container.clientWidth, container.clientHeight)
+      wheelLocked = true
+      setTimeout(() => { wheelLocked = false }, 150)
     })
     resizeObs.observe(container)
 
@@ -318,10 +314,14 @@ export function StructureEditor() {
     mesh.add(overlay)
   }
 
+
   // Sync blocks to meshes
   useEffect(() => {
     const s = sceneRef.current
     if (!s) return
+
+    // Clear material cache when registry changes to ensure new textures are picked up
+    clearMaterialCache()
 
     // Shared geometry with Minecraft face brightness vertex colors
     const sharedGeom = getMinecraftBoxGeometry()
@@ -330,7 +330,7 @@ export function StructureEditor() {
     for (const [key, mesh] of s.meshes) {
       if (!blocks.has(key)) {
         s.scene.remove(mesh)
-        ;(mesh.material as THREE.Material).dispose()
+          ; (mesh.material as THREE.Material).dispose()
         s.meshes.delete(key)
       }
     }
@@ -347,15 +347,14 @@ export function StructureEditor() {
         continue
       }
 
-      const isSelected = key === selectedBlock
+      const isSelected = selectedBlocks.includes(key)
       const portType = block.portType || null
-      const blockDef = blockRegistry.get(block.type)
-      const isCtrl = blockDef?.category === 'controller'
+      const isCtrl = block.isController || false
       let mesh = s.meshes.get(key)
-      const needsNewMaterial = mesh && (
-        mesh.userData.blockType !== block.type ||
-        mesh.userData.portType !== portType
-      )
+
+      // We always recreate materials when registryVersion changes because of the clearMaterialCache() above
+      const needsNewMaterial = !mesh || mesh.userData.blockType !== block.type || mesh.userData.portType !== portType || true
+
       const needsOverlayUpdate = mesh && (
         mesh.userData.portType !== portType ||
         mesh.userData.isCtrl !== isCtrl
@@ -380,11 +379,11 @@ export function StructureEditor() {
         updateSelectionOverlay(mesh, isSelected)
       } else {
         mesh.visible = true
-        if (needsNewMaterial) {
-          mesh.material = getBlockMaterial(block.type, portType || undefined)
-          mesh.userData.blockType = block.type
-        }
-        if (needsNewMaterial || needsOverlayUpdate) {
+        // If registry changed, we might need a refresh anyway
+        mesh.material = getBlockMaterial(block.type, portType || undefined)
+        mesh.userData.blockType = block.type
+
+        if (needsOverlayUpdate) {
           mesh.userData.portType = portType
           mesh.userData.isCtrl = isCtrl
           updatePortOverlay(mesh, portType)
@@ -396,7 +395,7 @@ export function StructureEditor() {
         }
       }
     }
-  }, [blocks, selectedBlock, layerFilter])
+  }, [blocks, selectedBlocks, layerFilter, registryVersion])
 
   // Handle camera commands from MCP WebSocket
   useEffect(() => {
@@ -495,35 +494,60 @@ export function StructureEditor() {
 
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [addBlockOpen, setAddBlockOpen] = useState(false)
-  const registryVersion = useStore((s) => s.registryVersion)
+  const [texturesReady, setTexturesReady] = useState(isTexturesReady())
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set(['vanilla']))
 
   // Organize blocks by category (reactive to registryVersion)
   const mergedCategories = useMemo(() => {
-    const cats: Record<string, (typeof blockRegistry extends Map<string, infer V> ? V : never)[]> = {}
+    const cats: Record<string, BlockDef[]> = {}
     for (const def of blockRegistry.values()) {
-      const cat = def.category
-      if (!cats[cat]) cats[cat] = []
-      cats[cat].push(def)
+      let catKey = def.category as string
+      if (catKey === 'mod' && def.modId) {
+        catKey = `mod:${def.modId}`
+      }
+      if (!cats[catKey]) cats[catKey] = []
+      cats[catKey].push(def)
+    }
+    // Sort blocks alphabetically within each category
+    for (const key of Object.keys(cats)) {
+      cats[key].sort((a, b) => a.label.localeCompare(b.label))
     }
     return cats
   }, [registryVersion])
 
   const categoryLabels: Record<string, string> = {
-    controller: 'Controller',
-    port: 'Port',
-    mod: 'Mod',
     vanilla: 'Vanilla',
     custom: 'Custom',
   }
 
-  const categoryOrder = ['controller', 'port', 'mod', 'vanilla', 'custom']
+  const categoryOrder = useMemo(() => {
+    const keys = Object.keys(mergedCategories)
+    const mods = keys.filter(k => k.startsWith('mod:')).sort()
+    const tailOrder = ['vanilla', 'custom']
+    return [...mods, ...tailOrder].filter(k => keys.includes(k))
+  }, [mergedCategories])
 
   const selectedDef = blockRegistry.get(selectedTool)
 
+  // Detect mixed mod blocks in the structure
+  const mixedModWarning = useMemo(() => {
+    const modIds = new Set<string>()
+    for (const entry of blocks.values()) {
+      const def = blockRegistry.get(entry.type)
+      if (def?.modId) modIds.add(def.modId)
+    }
+    if (modIds.size < 2) return null
+    const names = [...modIds].map(id => {
+      const def = [...blockRegistry.values()].find(d => d.modId === id)
+      return def?.modName || id.toUpperCase()
+    })
+    return names
+  }, [blocks])
+
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden relative">
       {/* Compact toolbar: selected block + palette toggle + layer slider */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-background border-b border-border gap-2">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-background border-b border-border gap-2 z-30 relative">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setPaletteOpen(!paletteOpen)}
@@ -550,39 +574,61 @@ export function StructureEditor() {
         </div>
       </div>
 
-      {/* Block palette dropdown */}
+      {/* Block palette dropdown — absolute overlay to avoid resizing the canvas */}
       {paletteOpen && (
-        <div className="bg-background border-b border-border px-3 py-2 max-h-72 overflow-auto">
+        <div className="absolute left-0 right-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border px-3 py-2 max-h-80 overflow-auto shadow-lg" style={{ top: '34px' }}>
           {categoryOrder.map((cat) => {
             const defs = mergedCategories[cat]
             if (!defs || defs.length === 0) return null
+            const isMod = cat.startsWith('mod:')
+            const isCollapsible = isMod || cat === 'vanilla'
+            const isCollapsed = collapsedSections.has(cat)
+            const label = isMod
+              ? `${defs[0].modName || cat.split(':')[1].toUpperCase()} (${defs.length})`
+              : `${categoryLabels[cat] || cat} (${defs.length})`
+
+            const toggleCollapse = () => {
+              setCollapsedSections(prev => {
+                const next = new Set(prev)
+                if (next.has(cat)) next.delete(cat)
+                else next.add(cat)
+                return next
+              })
+            }
+
             return (
-              <div key={cat} className="mb-2">
-                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-1">
-                  {categoryLabels[cat] || cat}
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {defs.map((def) => (
-                    <button
-                      key={def.id}
-                      title={`${def.label} (ID: ${def.mcId ?? '?'})`}
-                      onClick={() => {
-                        useStore.getState().setSelectedTool(def.id)
-                        setPaletteOpen(false)
-                      }}
-                      className={`
-                        flex items-center gap-1 px-1.5 py-0.5 rounded text-xs border transition-colors
-                        ${selectedTool === def.id
-                          ? 'border-primary bg-primary/20 text-foreground font-semibold'
-                          : 'border-border hover:bg-muted/50 text-foreground'
-                        }
-                      `}
-                    >
-                      <BlockIcon def={def} size={16} />
-                      <span className="max-w-[80px] truncate">{def.label}</span>
-                    </button>
-                  ))}
-                </div>
+              <div key={cat} className="mb-1.5">
+                <button
+                  onClick={isCollapsible ? toggleCollapse : undefined}
+                  className={`flex items-center gap-1 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-1 ${isCollapsible ? 'cursor-pointer hover:text-foreground' : ''}`}
+                >
+                  {isCollapsible && <span className="text-[8px]">{isCollapsed ? '\u25B6' : '\u25BC'}</span>}
+                  {label}
+                </button>
+                {!isCollapsed && (
+                  <div className="flex flex-wrap gap-1">
+                    {defs.map((def) => (
+                      <button
+                        key={def.id}
+                        title={`${def.label}${def.mcId ? ` (ID: ${def.mcId})` : ''}`}
+                        onClick={() => {
+                          useStore.getState().setSelectedTool(def.id)
+                          setPaletteOpen(false)
+                        }}
+                        className={`
+                          flex items-center gap-1 px-1.5 py-0.5 rounded text-xs border transition-colors
+                          ${selectedTool === def.id
+                            ? 'border-primary bg-primary/20 text-foreground font-semibold'
+                            : 'border-border hover:bg-muted/50 text-foreground'
+                          }
+                        `}
+                      >
+                        <BlockIcon def={def} size={16} />
+                        <span className="max-w-[80px] truncate">{def.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )
           })}
@@ -598,8 +644,18 @@ export function StructureEditor() {
         </div>
       )}
 
+      {/* Mixed-mod warning banner */}
+      {mixedModWarning && (
+        <div className="px-3 py-1.5 bg-yellow-900/40 border-b border-yellow-700/50 flex items-center gap-2 text-xs text-yellow-300">
+          <span>⚠</span>
+          <span>
+            Mixing blocks from different mods ({mixedModWarning.join(' + ')}) — cross-mod compatibility is not guaranteed.
+          </span>
+        </div>
+      )}
+
       {/* Three.js viewport */}
-      <div ref={containerRef} className="flex-1 min-h-0 bg-[#111] cursor-crosshair" />
+      <div ref={containerRef} className="flex-1 min-h-0 bg-[#111] cursor-crosshair select-none" style={{ outline: 'none' }} />
 
       {/* Build Guide collapsible */}
       <BuildGuideDropdown />
@@ -607,11 +663,11 @@ export function StructureEditor() {
   )
 }
 
-function BlockIcon({ def, size = 16 }: { def?: { color: number; terrainIndex?: number; id: string }; size?: number }) {
+function BlockIcon({ def, size = 16 }: { def?: { color: number; terrainIndex?: number; texturePath?: string; id: string }; size?: number }) {
   if (!def) return <span className="inline-block rounded-sm border border-white/20" style={{ width: size, height: size, background: '#ff00ff' }} />
 
-  // Try terrain texture icon
-  const dataUrl = def.terrainIndex !== undefined ? getTileDataUrl(def.terrainIndex) : null
+  // Use unified texture lookup: custom texture > terrain tile > null
+  const dataUrl = getBlockTextureDataUrl(def.id)
   if (dataUrl) {
     return <img src={dataUrl} width={size} height={size} className="rounded-sm border border-white/10" style={{ imageRendering: 'pixelated' }} />
   }
@@ -638,7 +694,7 @@ function nextAvailableChar(): string {
 function AddBlockForm({ onDone }: { onDone: () => void }) {
   const [id, setId] = useState('')
   const [label, setLabel] = useState('')
-  const [category, setCategory] = useState<BlockCategory>('controller')
+  const [category, setCategory] = useState<BlockCategory>('mod')
   const [color, setColor] = useState('#6a8a6a')
   const [mcId, setMcId] = useState(213)
   const registerBlock = useStore((s) => s.registerBlock)
@@ -682,7 +738,6 @@ function AddBlockForm({ onDone }: { onDone: () => void }) {
         <div className="flex-1">
           <Label>Category</Label>
           <Select value={category} onChange={(e) => setCategory(e.target.value as BlockCategory)}>
-            <option value="controller">Controller</option>
             <option value="mod">Mod</option>
             <option value="custom">Custom</option>
           </Select>
